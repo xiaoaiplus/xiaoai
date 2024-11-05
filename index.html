@@ -1,4 +1,4 @@
-
+以下是再次优化后的代码，希望能更好地适配手机分辨率：
  
 <!DOCTYPE html>
 <html lang="en">
@@ -15,45 +15,43 @@
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f2f2f2;
-    }
+      background-color: #f2f2f    }
 
     #phone {
-      width: 90%;
+      width: 95%;
       max-width: 600px;
       margin: 0 auto;
       background-color: #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      border-radius: 10px;
+      padding: 10px;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: #333;
       text-align: center;
     }
 
   .theme {
-     : 20px;
-      padding: 15px;
+      margin-top: 15px;
+      padding: 10px;
       background-color: #f9f9f9;
-      border: 1px solid #e0e0e0;  /* 内嵌边框 */
-      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       display: none; 
     }
 
   .theme h2 {
-      font-size: 1.5rem;
-      color: #4CAF50; 
-      margin-bottom: 10px;
+      font-size: 1.3rem;
+      color: #4CAF50;
+      margin-bottom: 8px;
     }
 
   .theme p {
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: #777;
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
    #videoTheme {
@@ -61,43 +59,40 @@
     }
 
    #videoTheme h2 {
-      font-size: 1.5rem;
-      color: #4CAF50; 
-      margin-bottom: 10px;
+      font-size: 1.3rem;
+      color: #4CAF50;
+      margin-bottom: 8px;
     }
 
    #videoTheme video {
       width: 100%;
-      border-radius: 10px;
+      border-radius: 8px;
     }
 
     #passwordInput {
-      padding: 10px;
-      font-size: 1rem;
+      padding: 8px;
+      font-size: 0.9rem;
       border: 1px solid #4CAF50; 
     }
 
     button {
-      padding: 10px 20px;
-      background-color: #4CAF50; 
-      color: #fff; 
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: #fff;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 0.9rem;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 480px) {  /* 针对较小屏幕进一步调整 */
       h1 {
         font-size: 1.5rem;
       }
 
       #phone {
         width: 100%;
-        padding: 15px;
-      }
-
-    .theme {
-        padding: 10px;
+       : 8px;
       }
 
     .theme h2 {
@@ -105,11 +100,21 @@
       }
 
     .theme p {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
       }
 
      #videoTheme h2 {
         font-size: 1.2rem;
+      }
+
+     #passwordInput {
+        padding: 6px;
+        font-size: 0.8rem;
+      }
+
+     button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -185,4 +190,3 @@
 
 </html>
  
- 
