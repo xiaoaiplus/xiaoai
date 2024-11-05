@@ -1,4 +1,5 @@
- 
+
+  
 <!DOCTYPE html>
 <html>
 
@@ -7,17 +8,20 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      background-color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    #passwordForm {
-      background-color: #fff;
+    #bookCover {
+      background-color: #999;
       padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      max-width: 80%;
-      margin: 0 auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       text-align: center;
+      max-width: 80%;
     }
 
     #passwordInput {
@@ -37,19 +41,27 @@
       cursor: pointer;
     }
 
-    #videoPlayer {
+    #bookContent {
       display: none;
-      width: 100%;
-      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      max-width: 80%;
+      text-align: left;
     }
 
     @media (min-width: 768px) {
-      #passwordForm {
+      #bookCover {
         max-width: 50%;
       }
 
       #passwordInput {
         width: 50%;
+      }
+
+      #bookContent {
+        max-width: 50%;
       }
     }
   </style>
@@ -57,9 +69,9 @@
   <script>
     function checkPassword() {
       var password = document.getElementById("passwordInput").value;
-      if (password === "xiaoai") {
-        document.getElementById("videoPlayer").style.display = "block";
-        document.getElementById("passwordForm").style.display = "none";
+      if (password === "secret_password") {
+        document.getElementById("bookContent").style.display = "block";
+        document.getElementById("bookCover").style.display = "none";
       } else {
         alert("密码错误，请重新输入！");
       }
@@ -68,19 +80,18 @@
 </head>
 
 <body>
-
-  <form id="passwordForm">
-    <h2>请输入密码观看视频</h2>
+  <div id="bookCover">
+    <h2>神秘秘籍</h2>
     <input type="password" id="passwordInput">
-    <input type="button" value="提交" onclick="checkPassword()">
-  </form>
+    <input type="button" value="验证" onclick="checkPassword()">
+  </div>
 
-  <video id="videoPlayer" controls>
-    <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
-    您的浏览器不支持 HTML5 视频。
-  </video>
-
+  <div id="bookContent">
+    <h3>秘籍内容</h3>
+    <p>这里填写您书里的详细内容🚀🚀🚀🚀🚀🚀。</p>
+  </div>
 </body>
 
 </html>
  
+ 
