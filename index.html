@@ -32,6 +32,32 @@
       color: #333;
     }
 
+  .theme {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      display: none; 
+    }
+
+  .theme h2 {
+      font-size: 1.5rem;
+      color: #555;
+    }
+
+  .theme p {
+      font-size: 1rem;
+      color: #777;
+    }
+
+   #videoTheme {
+      display: none; 
+    }
+
+   #videoTheme video {
+      width: 100%; 
+    }
+
     @media (max-width: 768px) {
       h1 {
         font-size: 1.5rem;
@@ -39,6 +65,14 @@
 
       #phone {
         width: 100%;
+      }
+
+    .theme h2 {
+        font-size: 1.2rem;
+      }
+
+    .theme p {
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -49,9 +83,66 @@
   <div id="phone">
     <div class="screen">
       <h1>逍遥梦里逍遥游</h1>
-      <!-- 此处添加您的具体内容 -->
+
+      <input type="password" id="passwordInput" placeholder="请输入密码">
+      <button onclick="checkPassword()">验证</button>
+
+      <div class="theme" id="theme1">
+        <h2>主题一：探索自然</h2>
+        <p>大自然充满了无尽的奥秘和美丽，从雄伟的山脉到广袤的森林，每一处都值得我们去探索和欣赏。</p>
+      </div>
+
+      <div class="theme" id="theme2">
+        <h2>主题二：科技创新</h2>
+        <p>科技的进步不断改变着我们的生活，带来更多的便利和可能性。</p>
+      </div>
+
+      <div class="theme" id="theme3">
+        <h2>主题三：艺术之美</h2>
+        <p>艺术以各种形式展现，无论是绘画、音乐还是文学，都能触动我们的心灵。</p>
+      </div>
+
+      <div class="theme" id="theme4">
+        <h2>主题四：健康生活</h2>
+        <p>关注健康，合理饮食、适量运动，让我们拥有更美好的生活品质。</p>
+      </div>
+
+      <div class="theme" id="theme5">
+        <h2>主题五：历史文化</h2>
+        <p>了解历史和文化，传承人类的智慧和精神财富。</p>
+      </div>
+
+      <div class="theme" id="theme6">
+        <h2>主题六：心灵成长</h2>
+        <p>在生活的旅程中，不断反思和学习，实现心灵的成长与升华。</p>
+      </div>
+
+      <div id="videoTheme">
+        <h2>主题七：精彩视频</h2>
+        <video controls>
+          <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
+          您的浏览器不支持 video 标签。
+        </video>
+      </div>
     </div>
   </div>
+
+  <script>
+    function checkPassword() {
+      var password = document.getElementById('passwordInput').value;
+      if (password === 'xiaoai') {  // 将 'your_password' 替换为您实际的密码
+        document.getElementById('theme1').style.display = 'block';
+        document.getElementById('theme2').style.display = 'block';
+        document.getElementById('theme3').style.display = 'block';
+        document.getElementById('theme4').style.display = 'block';
+        document.getElementById('theme5').style.display = 'block';
+        document.getElementById('theme6').style.display = 'block';
+        document.getElementById('videoTheme').style.display = 'block';
+      } else {
+        alert('密码错误，请重新输入');
+      }
+    }
+  </script>
 
 </body>
 
