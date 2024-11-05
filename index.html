@@ -1,8 +1,9 @@
-
+ 
 <!DOCTYPE html>
 <html>
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,13 +15,13 @@
       padding: 20px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 300px;
+      max-width: 80%;
       margin: 0 auto;
       text-align: center;
     }
 
     #passwordInput {
-      width: 200px;
+      width: 70%;
       padding: 10px;
       margin-bottom: 10px;
       border: 1px solid #ccc;
@@ -38,14 +39,25 @@
 
     #videoPlayer {
       display: none;
+      width: 100%;
       margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      #passwordForm {
+        max-width: 50%;
+      }
+
+      #passwordInput {
+        width: 50%;
+      }
     }
   </style>
 
   <script>
     function checkPassword() {
       var password = document.getElementById("passwordInput").value;
-      if (password === "your_password") {
+      if (password === "xiaoai") {
         document.getElementById("videoPlayer").style.display = "block";
         document.getElementById("passwordForm").style.display = "none";
       } else {
@@ -57,13 +69,13 @@
 
 <body>
 
-  <form id="xiaoai">
+  <form id="passwordForm">
     <h2>请输入密码观看视频</h2>
     <input type="password" id="passwordInput">
     <input type="button" value="提交" onclick="checkPassword()">
   </form>
 
-  <video id="videoPlayer" width="640" height="480" controls>
+  <video id="videoPlayer" controls>
     <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
     您的浏览器不支持 HTML5 视频。
   </video>
@@ -72,4 +84,3 @@
 
 </html>
  
- 
