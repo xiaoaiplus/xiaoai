@@ -1,164 +1,176 @@
-
-  
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我本菜鸟</title>
+  <meta charset="UTF-8">
+  <title>我本菜鸟 - 知行合一</title>
+
+  <link rel="stylesheet" href="/xiaoai/reset.min.css">
+
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=DM+Serif+Display&amp;family=Poppins:wght@400;500;600;700&amp;display=swap'>
+
+  <link rel="stylesheet" href="/xiaoai/style.css">
+
   <style>
-    body {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
-    }
-
-    main {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-   .password-input-container {
-      display: flex;
-      align-items: center;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 10px;
-      margin-bottom: 20px;
-    }
-
-    input[type="password"] {
-      flex: 1;
+    /* 新增样式：密码输入框样式 */
+    #passwordInput {
       padding: 10px;
       font-size: 16px;
-      border: none;
-      outline: none;
     }
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #ff6600;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-
-   .chapter-container {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-   .chapter-container h2 {
-      font-size: 1.8rem;
-      color: #333;
-      margin-top: 0;
-    }
-
-   .chapter-container p {
-      font-size: 1.2rem;
-      color: #666;
-      line-height: 1.5;
-    }
-
-    #videoPlayer {
-      width: 100%;
-      height: auto;
-    }
-
-   .video-button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #ff6600;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    /* 新增样式：错误提示样式 */
+  .error {
+      color: red;
     }
   </style>
 </head>
 
 <body>
-  <main>
-    <h1>书页封面</h1>
-    <div class="password-input-container">
-      <input type="password" id="passwordInput" placeholder="请输入密码">
-      <button onclick="checkPassword()">验证</button>
-    </div>
-    <div class="chapter-container">
-      <h2>第一章</h2>
-      <p>U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=
-      </p>
-    </div>
-    <div class="chapter-container">
-      <h2>第二章</h2>
-      <p>U2FsdGVkX1+o2lPRu8jxnHEIbLNN4vWBaKrgX5RH1zFECcNo2JZF0vq8v20T8X+B/WWpn2/fwiN0rTZ7Sr80O8iet1Bam0S9+3dSH2X9NpuVHY4GR/yz3/ChGLQJrSpr3EXgKpUvC03RajLnvTRxXfWM8d4WFKuGKIAjG3a32Byf6VmTQT4jjdpL4jhnHgva4Rm6RQzPgMMiSqTfg7d90OS4cf9z1X2e/Y40uqnXJ1k1MjLX9Jgq9oKgEC0CzafZcnm9Kl2kszEhsEyaIaIAYeBsd2A3AVjuPwYSEBZm78fiqUweOaL0+zTJ8dJspTaeAf7sgfJHEi+8W/GVschzDYFQxfhMbMalP8Kyss+6XoMnpCbj5iiomblVTkktzqqYWzeHf+uB2Tcf1d5pYscaFb+uOJmn4PMQOq5nFUZLvcT8wFM2ya5YRnvsK1XyRIm7zkahtEH6+ucRlASsBmXUCkYlFxnNyXl1CMd0WvlsK6eKSS1TXlhSNMFf6QqdKoUjqq3RjDvId3DF2ONVxyurpC1eP6fY7TLmckCaofP7csKkr3FOvLj/6rKRjVLhtwLGDnQqcKrO1LNkPNStacLWxZI2jlcKFU/SHU97d+IOeiLc+2lMP6v8FXOWEg39B+jZMzoigZuOz0SlpRxqL8JL3NWFMI3mWLRS1pi0r86k4U16fKvHOUDKicdhIxXL501owYJNNtQgR3WWnPXoKj0krdyxJGA5BggpN6PDd0d3dr8R5VYa9YKmYuAOB9cgb30JwDYLBHkVzeWLK/GKptvzF1UzdP9oy38z3LVnzFE2KUxZ9rP1oYLaTsRucWXGWEG0hdLRgXnplL2UhWXNvO4HdGdPyaldOcxzcVSOk0bqZXEZKnuFt05Yyw4KOw0N18yT6phnCDUxbYQBwTnxXDdqDU6RgpoQOPQkZsJk9eNbPm0ljkdi1gqt8ojr/RKzywFPqLB2LXQm5+zghCQaEihC8EStyKqc13MzlIfbPJtEr2rlfqA2o2cnAjcNbrhcH9vasxghnl0WkwwzVXjD7ygqt7Amaz7SSbcO/sM6xfXt8jf8WoO2AJg7ufIhziwX+5HBRksf7s+dZHJ0woEXylxKm9p+FEq/p2NxEU2zgMIBcqKHDgp9v2vQOfEsSiZhcG4R/cYpbWGqp3p0r9gSDZdHMw==
-                 </p>
-    </div>
-    <div class="chapter-container">
-      <h2>第三章</h2>
-      <p>U2FsdGVkX187Q+8ON1+Y/tiDuNUUNUQL+THycv0K6Yt3cOHU+0r1bvvQ2df+th3hkDIKAxsnt9cAYTwwLSAmgs/X/xhpZT2Wz3YDCGnpB8VRQ6nzfJwKhSOf7LcrrGB72DrxL1nm8jDF5q0nwnTSrpqssfSjFFFnS/uVunDpbYzUW/LCUkz/tb7kjiGFc4S4QmgH6mY6TamdIXnzaTwepts0Uj7RdWtzlmOqpm3huc4cCwFM2lx8lO207X2AM0ual4KBd0TL8qksqD3Cai2G+K2NZmG110IcMzxBMHPFW4mc57qW1Vl3qRFp/RhJbIr2OzLJY7jqVXmdF4BKaw4LBY2lHTIw0oK/jeOuscXiG4NhRDJD/lBdQflJ4mWbEgEV
-                 </p>
-    </div>
-    <div class="chapter-container">
-      <h2>第四章</h2>
-      <p>U2FsdGVkX19KbP5Zv6f77GyrxW5ULIY2dLSFGcdSGyVnlfJLrdo1yI902lsWyRoBYVU0doP26Zc3YIVpThWRuLQ8ZfzoSv2fZoYISM5mni6VVLfQMOHxL3p/4+Wt/4Zwo7UUcBBph/RAhDFcBWkY2qupNQtXvn1PUPV8bB6SAgnKSjzd3UTbCnQT3ryF+xO5bdFU9tzRLWqIlAavVdxU93tBqsVORYCk7acufFAp9EnjLqaIh9INIG04O4oBVQAX3MPzvXXLXWmF+n1Tb3ksSPEeyZmUBiCK6E9dbZbN0AcIduVY9DLGyWTU/OFCZuj5nOJhmwvsjVwXIvOkphrYNSMyH6Ur30VBWHjx1MgRBCAeZPudIC6/4KN/2m5iiNTwwObMmu0509uyoWuJMd7a0HObVo6BkV0PknsOiBDsSuS0KB7hy1T8gg7PCWukqj0olIfdsEqfQ7E+tdxB6dP2QStgMsdF6Z4lu1UFZ6NFbBLNtqpNIDDEdgz46hg+HBHr4qmfP408EoQhPfkKkNGYWP/GbZrcZK4ga4itXoulv2rXL0EShXi9GlIfAS0QZFxzlbpMz78+hGIi0WhlG+Tx+FdoGZvTfUXU66Cg9P4oY22ybg5SKSAzbisDM9AnRfzVhuGxLYYS4JD7m6jZ941EYw==
-  </p>
-    </div>
-    <div class="chapter-container">
-      <h2>第五章</h2>
-      <p>U2FsdGVkX1+hBZyuYyTtdTbVQzQRjnu13gBwvClUkROpU/T1fnfM+MjUTkrzEza4g4noipMY4Eu1f+z7oPxYSgx0CUhYAYl2I/TQu+lh2eJmXYIQXzm48ZgjYyUQB0VSfPlt6KtVYgCY2KGTpubEFlntOSnv42ZEa32FfQEKAkvkO46G+yTypVcA1ISxKOcw5tv+Tc1FGJX8XOq1wSnVWoEyRkiuyuVcdJZJeQxSpbtNqTSJcywi0owFVfD1gMLh4LEH/PMLbcugmheEZVaK+hTTzXeKBKgJ0Eh10+Fh8z0ovVCztLR9Tp9drZB3VTJc4jHBu0m4bsQJGmgCQK7y+Dzu512V5xgF9kjcCkW4drmMxs+yeRDPf+uexcJoviK4/l5uyMV3ZzuBK4+5RqepKdarZER+gS8WNTnRCbgkE/VEoiPTPXqHky3eGwlbT53IZUVThtUcAqJpI0t12QLRpwLrtGod0p3+BRvPI9eN+y323rnt7AZTK8vjjjMlG0iGseWc3imJW0EgZHM3Qt5QCmxiOE5RBzTGpwzOLj3UeP5gfqiF/SUMg12NmpkEDgWiT+xdKQMTiLjOJ54OIXJVekXDuy43ZKoUptRtCKPFQDpjG7/fIGyUiBmIVLVCoyQ/1QcMe5IUrS2dyGVXC7T4QeUuK89dZgCDERPUbtx6jG9/XO9/fFwA145M7FUJev1zXIn9i1OaCmK7BBMhTMbHIzmYbOeYedZrmtorQiWwpr1KgwQ2z95NqJ1aVeHipnWZcezgIu3KsFESbvooyrhX3jKUPEzqBrNsFDeepYSrbWB62FgExH++aZRUZ9k8+PXhSuTY9K+rsy0+cWQu/OK3B2t7PDed06oIPJGe+CQPcAKh/ciWnxKqDGbeRtl8nkvMYKN6hlC+jVZ0+l7zH+TuKBE/No1ikiLxrFo3TBir2FxfYw7iTYIxaGZ852hJtPrtLMp3CvFhZHa5XGKeps/bOwZ6UCgAtb9CkNb79e5uH2qjn9Mfg2b87kb0tNYIMy/NLpqQnI+q3L2LTxYItdJE0i0YINiSQ/73vb4EkKRr7btT8UglCUVVxXaETR51ktMOk2MXUnKSUqwduorKWrC6PwJtwpeIvhG7XznHyZjSjSQc07cQ88aja2iaUQeu8c8/0Nka8+lQaGE+FdY/oNWdxjlTfcx3iEiUoLj3pdmZNYOmQiaIfmqTeT+e+emD1QHRPy+DOCL0qr6i+C1ivnjRDcAipzUgsm5OdQEVdmifo7OOg3BrN64/N8KHFJBcey4SJHPUYeO1ZdVlRKh4qph+j4jHJX+vjlbExEmI2UIsFzepJS/Ye9t3E8sN6X3aWk7sDLv9mUuvd50vmUm2bdMWBVmFLDm6s3zFsImBtEPbKdWeaQwM3s+p5/kUW1bAVY4dRrfucNKvc3YgxlEgPYJ3Fdv8qI5tYW+PmfEJvMk7UDioOhmuoXv/HeQM74BeOOXK0W7Y+uvMXYlLxOhpHA9dalnveeIs5mDN5tJZlY/y1BCfsdgls2LGt8v4+tHsKIek
-                            </p>
-    </div>
-    <div class="chapter-container">
-      <h2>第六章</h2>
-      <p>U2FsdGVkX1+mqq8fqBmbWObbY042PMl/fqv7UCsxAX/0IaAgcx/zWHv2CHOUXLukWTFYYahjBZoyeL2r/+VbOcw4Hvgl0nWvTeSuaiVYKO5/VPz8XUhmfPwi2JYIg+WbWLF/0UE69O9Vep8cAhjSaoR/MC0WzINtBOyC8U9Q2B9ZtzqOTyfUz3GA42Ksrt7Q/SL8y6UPxuo71HNoHXfdPUW48cfIfRlLXlVvFXYINJpS3l1IM/w+nF5uC/qEU/RTQyFdOlEvBtg7m1kPgVVay7tUzE6dLDfXXdKR4zWnchLFPKBSfjFQPCG72dQg3TBHm9SDTEZyJL5Q53JiTsHpeo/qihl4zeO/aftOWtCY0QJOsrbm1ZRH5g81x2CRhRJck6DcL2sgWVBsljqfHGckbH5AMRLbv0K8yiHi7gxQO0W+0BKjeM3Ng8y+AFWUHLUxmFEzv10zhKs7/JnaGb8duk8q/14obO+RcAokYft+9YA=
- </p>
-    </div>
-    <button class="video-button" onclick="playVideo()">播放视频</button>
-    <video id="videoPlayer" controls>
-      <source src="your_video.mp4" type="video/mp4">
-      您的浏览器不支持视频标签。
-    </video>
 
-    <script>
-      // 假设正确密码是 "xiaoai"
-      const correctPassword = "xiaoai";
+  <div id="phone">
+    <div class="screen">
+      <h1>逍遥梦里逍遥游</h1>
+      <div class="empty">
+        <svg viewBox="0 0 48 48">
+          <path d="M47.3296 9.02336C46.9238 8.85514 46.4566 8.94821 46.1461 9.25869L26.2748 29.13C26.1703 29.2345 26.0916 29.3551 26.0386 29.4836C25.9866 29.6094 25.9576 29.7471 25.9567 29.8914C25.9567 29.892 25.9567 29.8925 25.9567 29.8929C25.9567 29.8932 25.9567 29.8933 25.9567 29.8934C25.9567 29.8938 25.9567 29.8941 25.9567 29.8946C25.9567 29.8949 25.9567 29.8951 25.9567 29.8954C25.9567 29.8958 25.9567 29.8959 25.9567 29.8962C25.9567 29.8967 25.9567 29.8973 25.9567 29.8979C25.9567 37.2506 19.975 43.2324 12.6223 43.2324C6.85987 43.2324 2.17195 38.5443 2.17195 32.7821C2.17195 28.2919 5.82494 24.639 10.315 24.639C13.7874 24.639 16.6122 27.4639 16.6122 30.9362C16.6122 33.5944 14.4497 35.7569 11.7916 35.7569C9.78483 35.7569 8.15229 34.1242 8.15229 32.1175C8.15229 30.6319 9.36098 29.4232 10.8466 29.4232C11.4463 29.4232 11.9326 28.9371 11.9326 28.3373C11.9326 27.7375 11.4463 27.2513 10.8466 27.2513C8.16337 27.2513 5.98034 29.4343 5.98034 32.1175C5.98034 35.3219 8.58722 37.9288 11.7916 37.9288C13.6865 37.9288 15.4077 37.1712 16.6683 35.943C16.6915 35.9233 16.7141 35.9026 16.736 35.8808L36.6075 16.0094C37.9281 14.6887 38.6555 12.9328 38.6555 11.065C38.6555 6.39509 34.8563 2.5957 30.1864 2.5957C27.4311 2.5957 24.8408 3.66864 22.8925 5.61688L3.02118 25.4882C2.99522 25.5142 2.97079 25.5412 2.94798 25.569C1.12539 27.4303 0 29.9774 0 32.7821C0 39.7421 5.66237 45.4043 12.6223 45.4043C16.8781 45.4043 20.7386 43.6813 23.5432 40.8958C23.5763 40.8697 23.6081 40.8415 23.6385 40.811L43.4582 20.9913C46.387 18.0626 48 14.1685 48 10.0267C48 9.58741 47.7353 9.19147 47.3296 9.02336ZM24.4283 7.15266C25.9663 5.61471 28.0111 4.76765 30.1862 4.76765C33.6586 4.76765 36.4835 7.59259 36.4835 11.065C36.4835 12.3526 35.9821 13.5632 35.0715 14.4737L18.7826 30.7627C18.6899 26.1724 14.9271 22.4669 10.315 22.4669C9.88181 22.4669 9.45426 22.4939 9.03497 22.546L24.4283 7.15266ZM41.9225 19.4555L27.6501 33.7279C27.9264 32.6444 28.0883 31.5148 28.1221 30.3545L45.5033 12.9732C44.9566 15.4096 43.7313 17.6467 41.9225 19.4555Z" fill="currentColor">
+          </svg>
+          <span>No more letters</span>
+        </div>
+        <div class="content">
+          <div class="entries" style="height: 4000px;">
 
-      function checkPassword() {
-        const inputPassword = document.getElementById("passwordInput").value;
-        if (inputPassword === correctPassword) {
-          alert("密码正确，欢迎访问！");
-        } else {
-          alert("密码错误，请重新输入！");
-        }
-      }
+            <article>
+              <div class="compact"></div>
+              <div class="inner">
+                <div class="info">
+                  <strong>10 月. 18nd, 2024</strong>
+                  <small>The year is almost over</small>
+                </div>
+                <div class="text">
+                  <p>Dear People,</p>
 
-      function playVideo() {
-        var video = document.getElementById("videoPlayer");
-        video.play();
-      }
-    </script>
-  </main>
-</body>
+                  <p>
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <textarea style="width:100%;border:1px solid #ff0000;">
+111111
 
-</html>
- 
+</textarea>
+                </div>
+              </div>
+            </article>
+
+            <article>
+              <div class="compact"></div>
+              <div class="inner">
+                <div class="info">
+                  <strong>D10. 15nd, 2024</strong>
+                  <small>The year is almost over</small>
+                </div>
+                <div class="text">
+                  <p>Dear People,</p>
+
+                  <p>
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <textarea style="width:100%;border:1px solid #ff0000;">
+2222
+
+</textarea>
+                </div>
+              </div>
+            </article>
+
+            <article>
+              <div class="compact"></div>
+              <div class="inner">
+                <div class="info">
+                  <strong>December 28nd, 2024</strong>
+                  <small>The year is almost over</small>
+                </div>
+                <div class="text">
+                  <p>Dear People,</p>
+
+                  <p>
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <textarea style="width:100%;border:1px solid #ff0000;">
+33333
+</textarea>
+                </div>
+              </div>
+            </article>
+            <article>
+              <div class="compact"></div>
+              <div class="inner">
+                <div class="info">
+                  <strong>December 28nd, 2024</strong>
+                  <small>Merry christmas</small>
+                </div>
+                <div class="text">
+                  <p>Dear People,</p>
+                  <textarea style="width:100%;border:1px solid #ff0000;">
+4444
+
+</textarea>
+                </div>
+              </div>
+            </article>
+            <article>
+              <div class="compact"></div>
+              <div class="inner">
+                <div class="info">
+                  <strong>January 1st, 2024</strong>
+                  <small>Happy new year</small>
+                </div>
+                <div class="text">
+                  <p>Dear People,</p>
+                  <textarea style="width:100%;border:1px solid #ff0000;">
+555555
+
+</textarea>
+                </div>
+              </div>
+            </article>
+
+            <article>
+              <div class="compact"></div>
+              <div class="inner">
+                <div class="info">
+                  <strong>January 1st, 2024</strong>
+                  <small>Happy new year</small>
+                </div>
+                <div class="text">
+                  <p>Dear People,</p>
+                  <textarea style="width:100%;border:1px solid #ff0000;">
+66666
+
+</textarea>
+
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="time">11:30</div>
+    <svg class="battery" viewBox="0 0 25 12">
+      <rect opacity="0.35" x="0.5" y="0.833374" width="21" height="10.3333" rx="2.16667" fill="none" stroke="currentColor" />
+      <path opacity="0.4" d="M23 4V8C23.8047 7.66122 24.328 6.87313 24.328 6C24.328 5.12687 23.8047 4.33878 23 4" fill="currentColor" />
+      <rect x="2" y="2.33337" width="18" height="7.33333" rx="1.33333" fill="currentColor" />
+    </svg>
+    <svg class="wifi" viewBox="0 0 16 12">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M8.33045 2.60802C10.5463 2.60811 12.6775 3.45955 14.2835 4.98635C14.4044 5.10422 14.5977 5.10274 14.7168 4.98302L15.8728 3.81635C15.9331 3.75563 15.9667 3.67338 15.9662 3.58779C15.9657 3.50221 15.9311 3.42036 15.8701 3.36035C11.655 -0.679198 5.00522 -0.679198 0.79012 3.36035C0.729062 3.42032 0.694418 3.50215 0.693855 3.58773C0.693292 3.67331 0.726856 3.75558 0.78712 3.81635L1.94345 4.98302C1.94345 4.98302 2.06248 5.10292 2.25593 5.10441 2.37679 4.98635C3.98294 3.45945 6.11434 2.60801 8.33045 2.60802ZM8.33045 6.40368C9.54794 6.40361 10.722 6.85614 11.6245 7.67335C11.7465 7.78933 11.9388 7.78682 12.0578 7.66768L13.2125 6.50102C13.2733 6.43982 13.307 6.3568 13.3061 6.27054C13.3052 6.18427 13.2698 6.10196 13.2078 6.04202C10.4596 3.48563 6.20365 3.48563 3.45545 6.04202C3.39338 6.10196 3.35796 6.18432 3.35714 6.27061C3.35633 6.3569 3.39019 6.43991 3.45112 6.50102L4.60545 7.66768C4.72444 7.78682 4.91672 7.78933 5.03879 7.67335C5.94066 6.85668 7.11377 6.40419 8.33045 6.40368ZM10.6434 8.9575C10.6452 9.04401 10.6112 9.12741 10.5495 9.18802L8.55212 11.2037C8.49357 11.2629 8.41374 11.2963 8.33045 11.2963C8.24716 11.2963 8.16734 11.2629 8.10879 11.2037L6.11112 9.18802C6.04941 9.12736 6.01546 9.04394 6.01729 8.95743C6.01912 8.87092 6.05657 8.789 6.12079 8.73102C7.39636 7.65213 9.26455 7.65213 10.5401 8.73102C10.6043 8.78905 10.6417 8.87099 10.6434 8.9575Z" fill="currentColor" />
+
+
+
  
+
+<script>
+  function checkPassword() {
+    var password = document.getElementById('passwordInput').value;
+    if (password === 'xiaoai') {
+      document.getElementById('message').innerHTML = '密码正确，欢迎访问！';
+    } else {
+      document.getElementById('message').innerHTML = '密码错误，请重新输入';
+    }
+  }
+</script>
