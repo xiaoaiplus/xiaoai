@@ -1,5 +1,5 @@
 
-  
+ 
 <!DOCTYPE html>
 <html>
 
@@ -42,13 +42,7 @@
     }
 
     #bookContent {
-      display: none;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       max-width: 80%;
-      text-align: left;
     }
 
     #bookContent article {
@@ -91,6 +85,16 @@
         alert("密码错误，请重新输入！");
       }
     }
+
+    // 新增折叠功能函数
+    function toggleFold(articleId) {
+      var article = document.getElementById(articleId);
+      if (article.style.display === "none") {
+        article.style.display = "block";
+      } else {
+        article.style.display = "none";
+      }
+    }
   </script>
 </head>
 
@@ -102,112 +106,75 @@
   </div>
 
   <div id="bookContent">
-    <h3>秘籍内容</h3>
-    <article>
+    <h3 onclick="toggleFold('article1')">U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ= （点击折叠/展开）</h3>
+    <article id="article1">
       <div class="compact"></div>
       <div class="inner">
         <div class="info">
-          <strong>10 月. 18nd, 2024</strong>
-          <small>The year is almost over</small>
         </div>
         <div class="text">
-          <p>Dear People,</p>
-          <textarea style="width:100%;border:1px solid #ff0000;">
-U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=
-                 
-</textarea>
         </div>
       </div>
     </article>
 
-    <article>
+    <h3 onclick="toggleFold('article2')">U2FsdGVkX1+o2lPRu8jxnHEIbLNN4vWBaKrgX5RH1zFECcNo2JZF0vq8v20T8X+B/WWpn2/fwiN0rTZ7Sr80O8iet1Bam0S9+3dSH2X9NpuVHY4GR/yz3/ChGLQJrSpr3EXgKpUvC03RajLnvTRxXfWM8d4WFKuGKIAjG3a32Byf6VmTQT4jjdpL4jhnHgva4Rm6RQzPgMMiSqTfg7d90OS4cf9z1X2e/Y40uqnXJ1k1MjLX9Jgq9oKgEC0CzafZcnm9Kl2kszEhsEyaIaIAYeBsd2A3AVjuPwYSEBZm78fiqUweOaL0+zTJ8dJspTaeAf7sgfJHEi+8W/GVschzDYFQxfhMbMalP8Kyss+6XoMnpCbj5iiomblVTkktzqqYWzeHf+uB2Tcf1d5pYscaFb+uOJmn4PMQOq5nFUZLvcT8wFM2ya5YRnvsK1XyRIm7zkahtEH6+ucRlASsBmXUCkYlFxnNyXl1CMd0WvlsK6eKSS1TXlhSNMFf6QqdKoUjqq3RjDvId3DF2ONVxyurpC1eP6fY7TLmckCaofP7csKkr3FOvLj/6rKRjVLhtwLGDnQqcKrO1LNkPNStacLWxZI2jlcKFU/SHU97d+IOeiLc+2lMP6v8FXOWEg39B+jZMzoigZuOz0SlpRxqL8JL3NWFMI3mWLRS1pi0r86k4U16fKvHOUDKicdhIxXL501owYJNNtQgR3WWnPXoKj0krdyxJGA5BggpN6PDd0d3dr8R5VYa9YKmYuAOB9cgb30JwDYLBHkVzeWLK/GKptvzF1UzdP9oy38z3LVnzFE2KUxZ9rP1oYLaTsRucWXGWEG0hdLRgXnplL2UhWXNvO4HdGdPyaldOcxzcVSOk0bqZXEZKnuFt05Yyw4KOw0N18yT6phnCDUxbYQBwTnxXDdqDU6RgpoQOPQkZsJk9eNbPm0ljkdi1gqt8ojr/RKzywFPqLB2LXQm5+zghCQaEihC8EStyKqc13MzlIfbPJtEr2rlfqA2o2cnAjcNbrhcH9vasxghnl0WkwwzVXjD7ygqt7Amaz7SSbcO/sM6xfXt8jf8WoO2AJg7ufIhziwX+5HBRksf7s+dZHJ0woEXylxKm9p+FEq/p2NxEU2zgMIBcqKHDgp9v2vQOfEsSiZhcG4R/cYpbWGqp3p0r9gSDZdHMw== （点击折叠/展开）</h3>
+    <article id="article2">
       <div class="compact"></div>
       <div class="inner">
         <div class="info">
-          <strong>D10. 15nd, 2024</strong>
-          <small>The year is almost over</small>
         </div>
         <div class="text">
-          <p>Dear People,</p>
-          <textarea style="width:100%;border:1px solid #ff0000;">
-U2FsdGVkX1+o2lPRu8jxnHEIbLNN4vWBaKrgX5RH1zFECcNo2JZF0vq8v20T8X+B/WWpn2/fwiN0rTZ7Sr80O8iet1Bam0S9+3dSH2X9NpuVHY4GR/yz3/ChGLQJrSpr3EXgKpUvC03RajLnvTRxXfWM8d4WFKuGKIAjG3a32Byf6VmTQT4jjdpL4jhnHgva4Rm6RQzPgMMiSqTfg7d90OS4cf9z1X2e/Y40uqnXJ1k1MjLX9Jgq9oKgEC0CzafZcnm9Kl2kszEhsEyaIaIAYeBsd2A3AVjuPwYSEBZm78fiqUweOaL0+zTJ8dJspTaeAf7sgfJHEi+8W/GVschzDYFQxfhMbMalP8Kyss+6XoMnpCbj5iiomblVTkktzqqYWzeHf+uB2Tcf1d5pYscaFb+uOJmn4PMQOq5nFUZLvcT8wFM2ya5YRnvsK1XyRIm7zkahtEH6+ucRlASsBmXUCkYlFxnNyXl1CMd0WvlsK6eKSS1TXlhSNMFf6QqdKoUjqq3RjDvId3DF2ONVxyurpC1eP6fY7TLmckCaofP7csKkr3FOvLj/6rKRjVLhtwLGDnQqcKrO1LNkPNStacLWxZI2jlcKFU/SHU97d+IOeiLc+2lMP6v8FXOWEg39B+jZMzoigZuOz0SlpRxqL8JL3NWFMI3mWLRS1pi0r86k4U16fKvHOUDKicdhIxXL501owYJNNtQgR3WWnPXoKj0krdyxJGA5BggpN6PDd0d3dr8R5VYa9YKmYuAOB9cgb30JwDYLBHkVzeWLK/GKptvzF1UzdP9oy38z3LVnzFE2KUxZ9rP1oYLaTsRucWXGWEG0hdLRgXnplL2UhWXNvO4HdGdPyaldOcxzcVSOk0bqZXEZKnuFt05Yyw4KOw0N18yT6phnCDUxbYQBwTnxXDdqDU6RgpoQOPQkZsJk9eNbPm0ljkdi1gqt8ojr/RKzywFPqLB2LXQm5+zghCQaEihC8EStyKqc13MzlIfbPJtEr2rlfqA2o2cnAjcNbrhcH9vasxghnl0WkwwzVXjD7ygqt7Amaz7SSbcO/sM6xfXt8jf8WoO2AJg7ufIhziwX+5HBRksf7s+dZHJ0woEXylxKm9p+FEq/p2NxEU2zgMIBcqKHDgp9v2vQOfEsSiZhcG4R/cYpbWGqp3p0r9gSDZdHMw==
-                 
-</textarea>
         </div>
       </div>
     </article>
 
-    <article>
+    <h3 onclick="toggleFold('article3')">U2FsdGVkX187Q+8ON1+Y/tiDuNUUNUQL+THycv0K6Yt3cOHU+0r1bvvQ2df+th3hkDIKAxsnt9cAYTwwLSAmgs/X/xhpZT2Wz3YDCGnpB8VRQ6nzfJwKhSOf7LcrrGB72DrxL1nm8jDF5q0nwnTSrpqssfSjFFFnS/uVunDpbYzUW/LCUkz/tb7kjiGFc4S4QmgH6mY6TamdIXnzaTwepts0Uj7RdWtzlmOqpm3huc4cCwFM2lx8lO207X2AM0ual4KBd0TL8qksqD3Cai2G+K2NZmG110IcMzxBMHPFW4mc57qW1Vl3qRFp/RhJbIr2OzLJY7jqVXmdF4BKaw4LBY2lHTIw0oK/jeOuscXiG4NhRDJD/lBdQflJ4mWbEgEV （点击折叠/展开）</h3>
+    <article id="article3">
       <div class="compact"></div>
       <div class="inner">
         <div class="info">
-          <strong>December 28nd, 2024</strong>
-          <small>The year is almost over</small>
         </div>
         <div class="text">
-          <p>Dear People,</p>
-          <textarea style="width:100%;border:1px solid #ff0000;">
-U2FsdGVkX187Q+8ON1+Y/tiDuNUUNUQL+THycv0K6Yt3cOHU+0r1bvvQ2df+th3hkDIKAxsnt9cAYTwwLSAmgs/X/xhpZT2Wz3YDCGnpB8VRQ6nzfJwKhSOf7LcrrGB72DrxL1nm8jDF5q0nwnTSrpqssfSjFFFnS/uVunDpbYzUW/LCUkz/tb7kjiGFc4S4QmgH6mY6TamdIXnzaTwepts0Uj7RdWtzlmOqpm3huc4cCwFM2lx8lO207X2AM0ual4KBd0TL8qksqD3Cai2G+K2NZmG110IcMzxBMHPFW4mc57qW1Vl3qRFp/RhJbIr2OzLJY7jqVXmdF4BKaw4LBY2lHTIw0oK/jeOuscXiG4NhRDJD/lBdQflJ4mWbEgEV
-                 
-</textarea>
         </div>
       </div>
     </article>
 
-    <article>
+    <h3 onclick="toggleFold('article4')">U2FsdGVkX19KbP5Zv6f77GyrxW5ULIY2dLSFGcdSGyVnlfJLrdo1yI902lsWyRoBYVU0doP26Zc3YIVpThWRuLQ8ZfzoSv2fZoYISM5mni6VVLfQMOHxL3p/4+Wt/4Zwo7UUcBBph/RAhDFcBWkY2qupNQtXvn1PUPV8bB6SAgnKSjzd3UTbCnQT3ryF+xO5bdFU9tzRLWqIlAavVdxU93tBqsVORYCk7acufFAp9EnjLqaIh9INIG04O4oBVQAX3MPzvXXLXWmF+n1Tb3ksSPEeyZmUBiCK6E9dbZbN0AcIduVY9DLGyWTU/OFCZuj5nOJhmwvsjVwXIvOkphrYNSMyH6Ur30VBWHjx1MgRBCAeZPudIC6/4KN/2m5iiNTwwObMmu0509uyoWuJMd7a0HObVo6BkV0PknsOiBDsSuS0KB7hy1T8gg7PCWukqj0olIfdsEqfQ7E+tdxB6dP2QStgMsdF6Z4lu1UFZ6NFbBLNtqpNIDDEdgz46hg+HBHr4qmfP408EoQhPfkKkNGYWP/GbZrcZK4ga4itXoulv2rXL0EShXi9GlIfAS0QZFxzlbpMz78+hGIi0WhlG+Tx+FdoGZvTfUXU66Cg9P4oY22ybg5SKSAzbisDM9AnRfzVhuGxLYYS4JD7m6jZ941EYw== （点击折叠/展开）</h3>
+    <article id="article4">
       <div class="compact"></div>
       <div class="inner">
         <div class="info">
-          <strong>December 28nd, 2024</strong>
-          <small>Merry christmas</small>
         </div>
         <div class="text">
-          <p>Dear People,</p>
-          <textarea style="width:100%;border:1px solid #ff0000;">
-U2FsdGVkX19KbP5Zv6f77GyrxW5ULIY2dLSFGcdSGyVnlfJLrdo1yI902lsWyRoBYVU0doP26Zc3YIVpThWRuLQ8ZfzoSv2fZoYISM5mni6VVLfQMOHxL3p/4+Wt/4Zwo7UUcBBph/RAhDFcBWkY2qupNQtXvn1PUPV8bB6SAgnKSjzd3UTbCnQT3ryF+xO5bdFU9tzRLWqIlAavVdxU93tBqsVORYCk7acufFAp9EnjLqaIh9INIG04O4oBVQAX3MPzvXXLXWmF+n1Tb3ksSPEeyZmUBiCK6E9dbZbN0AcIduVY9DLGyWTU/OFCZuj5nOJhmwvsjVwXIvOkphrYNSMyH6Ur30VBWHjx1MgRBCAeZPudIC6/4KN/2m5iiNTwwObMmu0509uyoWuJMd7a0HObVo6BkV0PknsOiBDsSuS0KB7hy1T8gg7PCWukqj0olIfdsEqfQ7E+tdxB6dP2QStgMsdF6Z4lu1UFZ6NFbBLNtqpNIDDEdgz46hg+HBHr4qmfP408EoQhPfkKkNGYWP/GbZrcZK4ga4itXoulv2rXL0EShXi9GlIfAS0QZFxzlbpMz78+hGIi0WhlG+Tx+FdoGZvTfUXU66Cg9P4oY22ybg5SKSAzbisDM9AnRfzVhuGxLYYS4JD7m6jZ941EYw==
-  
-</textarea>
         </div>
       </div>
     </article>
 
-    <article>
+    <h3 onclick="toggleFold('article5')">U2FsdGVkX1+hBZyuYyTtdTbVQzQRjnu13gBwvClUkROpU/T1fnfM+MjUTkrzEza4g4noipMY4Eu1f+z7oPxYSgx0CUhYAYl2I/TQu+lh2eJmXYIQXzm48ZgjYyUQB0VSfPlt6KtVYgCY2KGTpubEFlntOSnv42ZEa32FfQEKAkvkO46G+yTypVcA1ISxKOcw5tv+Tc1FGJX8XOq1wSnVWoEyRkiuyuVcdJZJeQxSpbtNqTSJcywi0owFVfD1gMLh4LEH/PMLbcugmheEZVaK+hTTzXeKBKgJ0Eh10+Fh8z0ovVCztLR9Tp9drZB3VTJc4jHBu0m4bsQJGmgCQK7y+Dzu512V5xgF9kjcCkW4drmMxs+yeRDPf+uexcJoviK4/l5uyMV3ZzuBK4+5RqepKdarZER+gS8WNTnRCbgkE/VEoiPTPXqHky3eGwlbT53IZUVThtUcAqJpI0t12QLRpwLrtGod0p3+BRvPI9eN+y323rnt7AZTK8vjjjMlG0iGseWc3imJW0EgZHM3Qt5QCmxiOE5RBzTGpwzOLj3UeP5gfqiF/SUMg12NmpkEDgWiT+xdKQMTiLjOJ54OIXJVekXDuy43ZKoUptRtCKPFQDpjG7/fIGyUiBmIVLVCoyQ/1QcMe5IUrS2dyGVXC7T4QeUuK89dZgCDERPUbtx6jG9/XO9/fFwA145M7FUJev1zXIn9i1OaCmK7BBMhTMbHIzmYbOeYedZrmtorQiWwpr1KgwQ2z95NqJ1aVeHipnWZcezgIu3KsFESbvooyrhX3jKUPEzqBrNsFDeepYSrbWB62FgExH++aZRUZ9k8+PXhSuTY9K+rsy0+cWQu/OK3B2t7PDed06oIPJGe+CQPcAKh/ciWnxKqDGbeRtl8nkvMYKN6hlC+jVZ0+l7zH+TuKBE/No1ikiLxrFo3TBir2FxfYw7iTYIxaGZ852hJtPrtLMp3CvFhZHa5XGKeps/bOwZ6UCgAtb9CkNb79e5uH2qjn9Mfg2b87kb0tNYIMy/NLpqQnI+q3L2LTxYItdJE0i0YINiSQ/73vb4EkKRr7btT8UglCUVVxXaETR51ktMOk2MXUnKSUqwduorKWrC6PwJtwpeIvhG7XznHyZjSjSQc07cQ88aja2iaUQeu8c8/0Nka8+lQaGE+FdY/oNWdxjlTfcx3iEiUoLj3pdmZNYOmQiaIfmqTeT+e+emD1QHRPy+DOCL0qr6i+C1ivnjRDcAipzUgsm5OdQEVdmifo7OOg3BrN64/N8KHFJBcey4SJHPUYeO1ZdVlRKh4qph+j4jHJX+vjlbExEmI2UIsFzepJS/Ye9t3E8sN6X3aWk7sDLv9mUuvd50vmUm2bdMWBVmFLDm6s3zFsImBtEPbKdWeaQwM3s+p5/kUW1bAVY4dRrfucNKvc3YgxlEgPYJ3Fdv8qI5tYW+PmfEJvMk7UDioOhmuoXv/HeQM74BeOOXK0W7Y+uvMXYlLxOhpHA9dalnveeIs5mDN5tJZlY/y1BCfsdgls2LGt8v4+tHsKIek （点击折叠/展开）</h3>
+    <article id="article5">
       <div class="compact"></div>
       <div class="inner">
         <div class="info">
-          <strong>January 1st, 2024</strong>
-          <small>Happy new year</small>
         </div>
         <div class="text">
-          <p>Dear People,</p>
-          <textarea style="width:100%;border:1px solid #ff0000;">
-U2FsdGVkX1+hBZyuYyTtdTbVQzQRjnu13gBwvClUkROpU/T1fnfM+MjUTkrzEza4g4noipMY4Eu1f+z7oPxYSgx0CUhYAYl2I/TQu+lh2eJmXYIQXzm48ZgjYyUQB0VSfPlt6KtVYgCY2KGTpubEFlntOSnv42ZEa32FfQEKAkvkO46G+yTypVcA1ISxKOcw5tv+Tc1FGJX8XOq1wSnVWoEyRkiuyuVcdJZJeQxSpbtNqTSJcywi0owFVfD1gMLh4LEH/PMLbcugmheEZVaK+hTTzXeKBKgJ0Eh10+Fh8z0ovVCztLR9Tp9drZB3VTJc4jHBu0m4bsQJGmgCQK7y+Dzu512V5xgF9kjcCkW4drmMxs+yeRDPf+uexcJoviK4/l5uyMV3ZzuBK4+5RqepKdarZER+gS8WNTnRCbgkE/VEoiPTPXqHky3eGwlbT53IZUVThtUcAqJpI0t12QLRpwLrtGod0p3+BRvPI9eN+y323rnt7AZTK8vjjjMlG0iGseWc3imJW0EgZHM3Qt5QCmxiOE5RBzTGpwzOLj3UeP5gfqiF/SUMg12NmpkEDgWiT+xdKQMTiLjOJ54OIXJVekXDuy43ZKoUptRtCKPFQDpjG7/fIGyUiBmIVLVCoyQ/1QcMe5IUrS2dyGVXC7T4QeUuK89dZgCDERPUbtx6jG9/XO9/fFwA145M7FUJev1zXIn9i1OaCmK7BBMhTMbHIzmYbOeYedZrmtorQiWwpr1KgwQ2z95NqJ1aVeHipnWZcezgIu3KsFESbvooyrhX3jKUPEzqBrNsFDeepYSrbWB62FgExH++aZRUZ9k8+PXhSuTY9K+rsy0+cWQu/OK3B2t7PDed06oIPJGe+CQPcAKh/ciWnxKqDGbeRtl8nkvMYKN6hlC+jVZ0+l7zH+TuKBE/No1ikiLxrFo3TBir2FxfYw7iTYIxaGZ852hJtPrtLMp3CvFhZHa5XGKeps/bOwZ6UCgAtb9CkNb79e5uH2qjn9Mfg2b87kb0tNYIMy/NLpqQnI+q3L2LTxYItdJE0i0YINiSQ/73vb4EkKRr7btT8UglCUVVxXaETR51ktMOk2MXUnKSUqwduorKWrC6PwJtwpeIvhG7XznHyZjSjSQc07cQ88aja2iaUQeu8c8/0Nka8+lQaGE+FdY/oNWdxjlTfcx3iEiUoLj3pdmZNYOmQiaIfmqTeT+e+emD1QHRPy+DOCL0qr6i+C1ivnjRDcAipzUgsm5OdQEVdmifo7OOg3BrN64/N8KHFJBcey4SJHPUYeO1ZdVlRKh4qph+j4jHJX+vjlbExEmI2UIsFzepJS/Ye9t3E8sN6X3aWk7sDLv9mUuvd50vmUm2bdMWBVmFLDm6s3zFsImBtEPbKdWeaQwM3s+p5/kUW1bAVY4dRrfucNKvc3YgxlEgPYJ3Fdv8qI5tYW+PmfEJvMk7UDioOhmuoXv/HeQM74BeOOXK0W7Y+uvMXYlLxOhpHA9dalnveeIs5mDN5tJZlY/y1BCfsdgls2LGt8v4+tHsKIek
-                            
-</textarea>
         </div>
       </div>
     </article>
 
-    <article>
+    <h3 onclick="toggleFold('article6')">U2FsdGVkX1+mqq8fqBmbWObbY042PMl/fqv7UCsxAX/0IaAgcx/zWHv2CHOUXLukWTFYYahjBZoyeL2r/+VbOcw4Hvgl0nWvTeSuaiVYKO5/VPz8XUhmfPwi2JYIg+WbWLF/0UE69O9Vep8cAhjSaoR/MC0WzINtBOyC8U9Q2B9ZtzqOTyfUz3GA42Ksrt7Q/SL8y6UPxuo71HNoHXfdPUW48cfIfRlLXlVvFXYINJpS3l1IM/w+nF5uC/qEU/RTQyFdOlEvBtg7m1kPgVVay7tUzE6dLDfXXdKR4zWnchLFPKBSfjFQPCG72dQg3TBHm9SDTEZyJL5Q53JiTsHpeo/qihl4zeO/aftOWtCY0QJOsrbm1ZRH5g81x2CRhRJck6DcL2sgWVBsljqfHGckbH5AMRLbv0K8yiHi7gxQO0W+0BKjeM3Ng8y+AFWUHLUxmFEzv10zhKs7/JnaGb8duk8q/14obO+RcAokYft+9YA= （点击折叠/展开）</h3>
+    <article id="article6">
       <div class="compact"></div>
       <div class="inner">
         <div class="info">
-          <strong>January 1st, 2024</strong>
-          <small>Happy new year</small>
         </div>
         <div class="text">
-          <p>Dear People,</p>
-          <textarea style="width:100%;border:1px solid #ff0000;">
-U2FsdGVkX1+mqq8fqBmbWObbY042PMl/fqv7UCsxAX/0IaAgcx/zWHv2CHOUXLukWTFYYahjBZoyeL2r/+VbOcw4Hvgl0nWvTeSuaiVYKO5/VPz8XUhmfPwi2JYIg+WbWLF/0UE69O9Vep8cAhjSaoR/MC0WzINtBOyC8U9Q2B9ZtzqOTyfUz3GA42Ksrt7Q/SL8y6UPxuo71HNoHXfdPUW48cfIfRlLXlVvFXYINJpS3l1IM/w+nF5uC/qEU/RTQyFdOlEvBtg7m1kPgVVay7tUzE6dLDfXXdKR4zWnchLFPKBSfjFQPCG72dQg3TBHm9SDTEZyJL5Q53JiTsHpeo/qihl4zeO/aftOWtCY0QJOsrbm1ZRH5g81x2CRhRJck6DcL2sgWVBsljqfHGckbH5AMRLbv0K8yiHi7gxQO0W+0BKjeM3Ng8y+AFWUHLUxmFEzv10zhKs7/JnaGb8duk8q/14obO+RcAokYft+9YA=
- 
-</textarea>
-
         </div>
-
       </div>
     </article>
   </div>
-
+<video id="videoPlayer" controls> <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4"> 您的浏览器不支持 HTML5 视频。 </video>
 </body>
 
 </html>
+ 
+ 
