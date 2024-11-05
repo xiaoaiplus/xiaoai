@@ -1,206 +1,153 @@
 
+  
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>我本菜鸟 - 知行合一</title>
-
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600;700&display=swap">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>仿苹果界面</title>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: linear-gradient(to bottom right, #ff6666, #6666ff);
-      transform: scale(0.95);
-      transform-origin: 0 0;
-    }
-
-    #phone {
-      width: 95%;
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #fff;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      padding: 10px;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
     }
 
     h1 {
-      font-size: 1.8rem;
-      color: #333;
       text-align: center;
+      margin-top: 20px;
+      font-size: 24px;
     }
 
-  .theme {
-      margin-top: 15px;
+    input[type="password"] {
+      width: 80%;
       padding: 10px;
-      background-color: linear-gradient(to bottom right, #ffcc66, #99ccff);
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      display: none; 
-    }
-
-  .theme p {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-  .theme.expanded p {
-      -webkit-line-clamp: unset;
-    }
-
-  .theme h2 {
-      font-size: 1.3rem;
-      color: #4CAF50;
-      margin-bottom: 8px;
-    }
-
-    #videoTheme {
-      display: none; 
-    }
-
-    #videoTheme h2 {
-      font-size: 1.3rem;
-      color: #4CAF50;
-      margin-bottom: 8px;
-    }
-
-    #videoTheme video {
-      width: 100%;
-      border-radius: 8px;
-    }
-
-    #passwordInput {
-      padding: 8px;
-      font-size: 0.9rem;
-      border: 1px solid #4CAF50; 
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin: 0 auto 20px;
+      display: block;
     }
 
     button {
-      padding: 8px 15px;
-      background-color: linear-gradient(to bottom right, #66ff66, #6666ff);
-      color: #fff;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #007aff;
+      color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 0.9rem;
+      display: block;
+      margin: 0 auto;
     }
 
-    @media (max-width: 480px) {  
+   .content {
+      display: none;
+      margin: 20px;
+      padding: 10px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+   .video-container {
+      display: none;
+      margin: 20px;
+    }
+
+    video {
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
       h1 {
-        font-size: 1.5rem;
+        font-size: 20px;
       }
 
-      #phone {
-        width: 100%;
-        padding: 8px;
+      input[type="password"] {
+        width: 90%;
       }
 
-    .theme h2 {
-        font-size: 1.2rem;
-      }
-
-    .theme p {
-        font-size: 0.8rem;
-      }
-
-     #videoTheme h2 {
-        font-size: 1.2rem;
-      }
-
-     #passwordInput {
-        padding: 6px;
-        font-size: 0.8rem;
-      }
-
-     button {
-        padding: 6px 12px;
-        font-size: 0.8rem;
+      button {
+        padding: 8px 16px;
+        font-size: 16px;
       }
     }
   </style>
 </head>
 
 <body>
+  <h1>仿苹果界面</h1>
+  <input type="password" id="passwordInput" placeholder="请输入密码">
+  <button onclick="verifyPassword()">验证</button>
 
-  <div id="phone">
-    <div class="screen">
-      <h1>逍遥梦里逍遥游</h1>
+  <div id="chapter1" class="content">
+    <h2>第一章内容</h2>
+    <p>这是第一章的详细内容。</p>
+  </div>
 
-      <input type="password" id="passwordInput" placeholder="请输入密码" style="border-radius: 10px; padding: 12px; font-size: 14px; border: 1px solid #888; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
-<button onclick="checkPassword()" style="padding: 12px 20px; border-radius: 15px; background-color: linear-gradient(to bottom right, #66ff66, #6666ff); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); color: #fff; font-size: 16px; cursor: pointer;">验证</button>
+  <div id="chapter2" class="content">
+    <h2>第二章内容</h2>
+    <p>这是第二章的详细内容。</p>
+  </div>
 
+  <div id="chapter3" class="content">
+    <h2>第三章内容</h2>
+    <p>这是第三章的详细内容。</p>
+  </div>
 
+  <div id="chapter4" class="content">
+    <h2>第四章内容</h2>
+    <p>这是第四章的详细内容。</p>
+  </div>
 
-      <div class="theme" id="theme1">
-        <h2>主题一：探索自然</h2>
-        <p>U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=</p>
-      </div>
+  <div id="chapter5" class="content">
+    <h2>第五章内容</h2>
+    <p>这是第五章的详细内容。</p>
+  </div>
 
-      <div class="theme" id="theme2">
-        <h2>主题二：科技创新</h2>
-        <p>U2FsdGVkX1+o2lPRu8jxnHEIbLNN4vWBaKrgX5RH1zFECcNo2JZF0vq8v20T8X+B/WWpn2/fwiN0rTZ7Sr80O8iet1Bam0S9+3dSH2X9NpuVHY4GR/yz3/ChGLQJrSpr3EXgKpUvC03RajLnvTRxXfWM8d4WFKuGKIAjG3a32Byf6VmTQT4jjdpL4jhnHgva4Rm6RQzPgMMiSqTfg7d90OS4cf9z1X2e/Y40uqnXJ1k1MjLX9Jgq9oKgEC0CzafZcnm9Kl2kszEhsEyaIaIAYeBsd2A3AVjuPwYSEBZm78fiqUweOaL0+zTJ8dJspTaeAf7sgfJHEi+8W/GVschzDYFQxfhMbMalP8Kyss+6XoMnpCbj5iiomblVTkktzqqYWzeHf+uB2Tcf1d5pYscaFb+uOJmn4PMQOq5nFUZLvcT8wFM2ya5YRnvsK1XyRIm7zkahtEH6+ucRlASsBmXUCkYlFxnNyXl1CMd0WvlsK6eKSS1TXlhSNMFf6QqdKoUjqq3RjDvId3DF2ONVxyurpC1eP6fY7TLmckCaofP7csKkr3FOvLj/6rKRjVLhtwLGDnQqcKrO1LNkPNStacLWxZI2jlcKFU/SHU97d+IOeiLc+2lMP6v8FXOWEg39B+jZMzoigZuOz0SlpRxqL8JL3NWFMI3mWLRS1pi0r86k4U16fKvHOUDKicdhIxXL501owYJNNtQgR3WWnPXoKj0krdyxJGA5BggpN6PDd0d3dr8R5VYa9YKmYuAOB9cgb30JwDYLBHkVzeWLK/GKptvzF1UzdP9oy38z3LVnzFE2KUxZ9rP1oYLaTsRucWXGWEG0hdLRgXnplL2UhWXNvO4HdGdPyaldOcxzcVSOk0bqZXEZKnuFt05Yyw4KOw0N18yT6phnCDUxbYQBwTnxXDdqDU6RgpoQOPQkZsJk9eNbPm0ljkdi1gqt8ojr/RKzywFPqLB2LXQm5+zghCQaEihC8EStyKqc13MzlIfbPJtEr2rlfqA2o2cnAjcNbrhcH9vasxghnl0WkwwzVXjD7ygqt7Amaz7SSbcO/sM6xfXt8jf8WoO2AJg7ufIhziwX+5HBRksf7s+dZHJ0woEXylxKm9p+FEq/p2NxEU2zgMIBcqKHDgp9v2vQOfEsSiZhcG4R/cYpbWGqp3p0r9gSDZdHMw==</p>
-      </div>
+  <div id="chapter6" class="content">
+    <h2>第六章内容</h2>
+    <p>这是第六章的详细内容。</p>
+  </div>
 
-      <div class="theme" id="theme3">
-        <h2>主题三：艺术之美</h2>
-        <p>U2FsdGVkX187Q+8ON1+Y/tiDuNUUNUQL+THycv0K6Yt3cOHU+0r1bvvQ2df+th3hkDIKAxsnt9cAYTwwLSAmgs/X/xhpZT2Wz3YDCGnpB8VRQ6nzfJwKhSOf7LcrrGB72DrxL1nm8jDF5q0nwnTSrpqssfSjFFFnS/uVunDpbYzUW/LCUkz/tb7kjiGFc4S4QmgH6mY6TamdIXnzaTwepts0Uj7RdWtzlmOqpm3huc4cCwFM2lx8lO207X2AM0ual4KBd0TL8qksqD3Cai2G+K2NZmG110IcMzxBMHPFW4mc57qW1Vl3qRFp/RhJbIr2OzLJY7jqVXmdF4BKaw4LBY2lHTIw0oK/jeOuscXiG4NhRDJD/lBdQflJ4mWbEgEV</p>
-      </div>
-
-      <div class="theme" id="theme4">
-        <h2>主题四：健康生活</h2>
-        <p>U2FsdGVkX19KbP5Zv6f77GyrxW5ULIY2dLSFGcdSGyVnlfJLrdo1yI902lsWyRoBYVU0doP26Zc3YIVpThWRuLQ8ZfzoSv2fZoYISM5mni6VVLfQMOHxL3p/4+Wt/4Zwo7UUcBBph/RAhDFcBWkY2qupNQtXvn1PUPV8bB6SAgnKSjzd3UTbCnQT3ryF+xO5bdFU9tzRLWqIlAavVdxU93tBqsVORYCk7acufFAp9EnjLqaIh9INIG04O4oBVQAX3MPzvXXLXWmF+n1Tb3ksSPEeyZmUBiCK6E9dbZbN0AcIduVY9DLGyWTU/OFCZuj5nOJhmwvsjVwXIvOkphrYNSMyH6Ur30VBWHjx1MgRBCAeZPudIC6/4KN/2m5iiNTwwObMmu0509uyoWuJMd7a0HObVo6BkV0PknsOiBDsSuS0KB7hy1T8gg7PCWukqj0olIfdsEqfQ7E+tdxB6dP2QStgMsdF6Z4lu1UFZ6NFbBLNtqpNIDDEdgz46hg+HBHr4qmfP408EoQhPfkKkNGYWP/GbZrcZK4ga4itXoulv2rXL0EShXi9GlIfAS0QZFxzlbpMz78+hGIi0WhlG+Tx+FdoGZvTfUXU66Cg9P4oY22ybg5SKSAzbisDM9AnRfzVhuGxLYYS4JD7m6jZ941EYw==</p>
-      </div>
-
-      <div class="theme" id="theme5">
-        <h2>主题五：历史文化</h2>
-        <p>U2FsdGVkX1+hBZyuYyTtdTbVQzQRjnu13gBwvClUkROpU/T1fnfM+MjUTkrzEza4g4noipMY4Eu1f+z7oPxYSgx0CUhYAYl2I/TQu+lh2eJmXYIQXzm48ZgjYyUQB0VSfPlt6KtVYgCY2KGTpubEFlntOSnv42ZEa32FfQEKAkvkO46G+yTypVcA1ISxKOcw5tv+Tc1FGJX8XOq1wSnVWoEyRkiuyuVcdJZJeQxSpbtNqTSJcywi0owFVfD1gMLh4LEH/PMLbcugmheEZVaK+hTTzXeKBKgJ0Eh10+Fh8z0ovVCztLR9Tp9drZB3VTJc4jHBu0m4bsQJGmgCQK7y+Dzu512V5xgF9kjcCkW4drmMxs+yeRDPf+uexcJoviK4/l5uyMV3ZzuBK4+5RqepKdarZER+gS8WNTnRCbgkE/VEoiPTPXqHky3eGwlbT53IZUVThtUcAqJpI0t12QLRpwLrtGod0p3+BRvPI9eN+y323rnt7AZTK8vjjjMlG0iGseWc3imJW0EgZHM3Qt5QCmxiOE5RBzTGpwzOLj3UeP5gfqiF/SUMg12NmpkEDgWiT+xdKQMTiLjOJ54OIXJVekXDuy43ZKoUptRtCKPFQDpjG7/fIGyUiBmIVLVCoyQ/1QcMe5IUrS2dyGVXC7T4QeUuK89dZgCDERPUbtx6jG9/XO9/fFwA145M7FUJev1zXIn9i1OaCmK7BBMhTMbHIzmYbOeYedZrmtorQiWwpr1KgwQ2z95NqJ1aVeHipnWZcezgIu3KsFESbvooyrhX3jKUPEzqBrNsFDeepYSrbWB62FgExH++aZRUZ9k8+PXhSuTY9K+rsy0+cWQu/OK3B2t7PDed06oIPJGe+CQPcAKh/ciWnxKqDGbeRtl8nkvMYKN6hlC+jVZ0+l7zH+TuKBE/No1ikiLxrFo3TBir2FxfYw7iTYIxaGZ852hJtPrtLMp3CvFhZHa5XGKeps/bOwZ6UCgAtb9CkNb79e5uH2qjn9Mfg2b87kb0tNYIMy/NLpqQnI+q3L2LTxYItdJE0i0YINiSQ/73vb4EkKRr7btT8UglCUVVxXaETR51ktMOk2MXUnKSUqwduorKWrC6PwJtwpeIvhG7XznHyZjSjSQc07cQ88aja2iaUQeu8c8/0Nka8+lQaGE+FdY/oNWdxjlTfcx3iEiUoLj3pdmZNYOmQiaIfmqTeT+e+emD1QHRPy+DOCL0qr6i+C1ivnjRDcAipzUgsm5OdQEVdmifo7OOg3BrN64/N8KHFJBcey4SJHPUYeO1ZdVlRKh4qph+j4jHJX+vjlbExEmI2UIsFzepJS/Ye9t3E8sN6X3aWk7sDLv9mUuvd50vmUm2bdMWBVmFLDm6s3zFsImBtEPbKdWeaQwM3s+p5/kUW1bAVY4dRrfucNKvc3YgxlEgPYJ3Fdv8qI5tYW+PmfEJvMk7UDioOhmuoXv/HeQM74BeOOXK0W7Y+uvMXYlLxOhpHA9dalnveeIs5mDN5tJZlY/y1BCfsdgls2LGt8v4+tHsKIek</p>
-      </div>
-
-      <div class="theme" id="theme6">
-        <h2>主题六：心灵成长</h2>
-        <p>U2FsdGVkX1+mqq8fqBmbWObbY042PMl/fqv7UCsxAX/0IaAgcx/zWHv2CHOUXLukWTFYYahjBZoyeL2r/+VbOcw4Hvgl0nWvTeSuaiVYKO5/VPz8XUhmfPwi2JYIg+WbWLF/0UE69O9Vep8cAhjSaoR/MC0WzINtBOyC8U9Q2B9ZtzqOTyfUz3GA42Ksrt7Q/SL8y6UPxuo71HNoHXfdPUW48cfIfRlLXlVvFXYINJpS3l1IM/w+nF5uC/qEU/RTQyFdOlEvBtg7m1kPgVVay7tUzE6dLDfXXdKR4zWnchLFPKBSfjFQPCG72dQg3TBHm9SDTEZyJL5Q53JiTsHpeo/qihl4zeO/aftOWtCY0QJOsrbm1ZRH5g81x2CRhRJck6DcL2sgWVBsljqfHGckbH5AMRLbv0K8yiHi7gxQO0W+0BKjeM3Ng8y+AFWUHLUxmFEzv10zhKs7/JnaGb8duk8q/14obO+RcAokYft+9YA=</p>
-      </div>
-
-      <div id="videoTheme">
-        <h2>主题七：精彩视频</h2>
-        <video controls>
-          <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
-          您的浏览器不支持 video 标签。
-        </video>
-      </div>
-    </div>
+  <div id="chapter7" class="video-container">
+    <h2>第七章 - 视频播放</h2>
+    <video controls>
+      <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
+      您的浏览器不支持 video 标签。
+    </video>
   </div>
 
   <script>
-    function checkPassword() {
-      var password = document.getElementById('passwordInput').value;
-      if (password === 'xiaoai') {  // 将 'your_password' 替换为您实际的密码
-        document.getElementById('theme1').style.display = 'block';
-        document.getElementById('theme2').style.display = 'block';
-        document.getElementById('theme3').style.display = 'block';
-        document.getElementById('theme4').style.display = 'block';
-        document.getElementById('theme5').style.display = 'block';
-        document.getElementById('theme6').style.display = 'block';
-        document.getElementById('videoTheme').style.display = 'block';
+    // 定义正确的密码
+    const correctPassword = "123456";
+
+    function verifyPassword() {
+      const enteredPassword = document.getElementById('passwordInput').value;
+      if (enteredPassword === correctPassword) {
+        // 显示第一章内容
+        document.getElementById('chapter1').style.display = 'block';
       } else {
-        alert('密码错误，请重新输入');
+        alert('密码错误，请重新输入！');
       }
     }
 
-    document.querySelectorAll('.theme').forEach(theme => {
-      theme.addEventListener('click', function() {
-        this.classList.toggle('expanded');
+    // 为每个章节添加点击事件，以显示下一章内容
+    const chapters = document.querySelectorAll('.content');
+    chapters.forEach((chapter, index) => {
+      chapter.addEventListener('click', () => {
+        if (index < chapters.length - 1) {
+          chapters[index + 1].style.display = 'block';
+        } else {
+          // 显示第七章（视频）
+          document.getElementById('chapter7').style.display = 'block';
+        }
       });
     });
   </script>
-
 </body>
 
 </html>
+ 
+ 
