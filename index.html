@@ -6,84 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章阅读</title>
 
-  <!-- 引入 Google Fonts 以获取独特的字体 -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <!-- 引入 Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
   <style>
     body {
-      font-family: 'Orbitron', sans-serif;
       background-color: #111;
       color: #fff;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background-color: #444;
-      padding: 20px;
-    }
-
-    header h1 {
-      margin: 0;
-    }
-
-    main {
-      padding: 20px;
-    }
-
-  .page {
-      background-color: #222;
-      border: 1px solid #666;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-  .video-page {
-      width: 100%;
-    }
-
-  .video-page video {
-      width: 100%;
     }
 
     #passwordContainer {
       display: none;
     }
-
-  .password-input {
-      width: 200px;
-      padding: 10px;
-      font-size: 16px;
-      border: 2px solid #666;
-      border-radius: 5px;
-      background-color: #333;
-      color: #fff;
-    }
-
-  .pagination {
-      position: fixed;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      padding-left: 20px;
-    }
-
-  .pagination a {
-      color: #fff;
-      padding: 10px 20px;
-      border: 1px solid #666;
-      text-decoration: none;
-    }
-
-  .pagination a:hover {
-      background-color: #666;
-    }
-
-  .pagination a.active {
-      background-color: #666;
-      color: #000;
-    }
   </style>
+
+  <!-- 引入 jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- 引入 Bootstrap JavaScript -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <script>
     // 全局变量，记录当前页码
@@ -97,18 +38,16 @@
       currentPage = pageNumber;
 
       // 隐藏所有页面
-      for (let i = 1; i <= 8; i++) {
-        document.getElementById(`page${i}`).style.display = 'none';
-      }
+      $('.page').hide();
 
       // 显示当前页面
-      document.getElementById(`page${currentPage}`).style.display = 'block';
+      $('#page' + currentPage).show();
 
       // 如果当前页面是加密的，显示密码输入框
       if (isPageEncrypted(currentPage)) {
-        document.getElementById('passwordContainer').style.display = 'block';
+        $('#passwordContainer').show();
       } else {
-        document.getElementById('passwordContainer').style.display = 'none';
+        $('#passwordContainer').hide();
       }
     }
 
@@ -119,19 +58,19 @@
 
     // 检查密码是否正确
     function checkPassword() {
-      let inputPassword = document.getElementById('passwordInput').value;
+      let inputPassword = $('#passwordInput').val();
       if (inputPassword === articleAndVideoPassword) {
-        document.getElementById(`page${currentPage}`).style.display = 'block';
-        document.getElementById('passwordContainer').style.display = 'none';
+        $('#page' + currentPage).show();
+        $('#passwordContainer').hide();
       } else {
         alert('密码错误，请重新输入');
       }
     }
 
     // 页面加载时显示第一页
-    window.onload = function () {
+    $(document).ready(function () {
       changePage(1);
-    };
+    });
   </script>
 </head>
 
@@ -140,7 +79,7 @@
     <h1>文章阅读</h1>
   </header>
 
-  <main>
+  <main class="container">
     <!-- 第 1 页（加密） -->
     <div id="page1" class="page" style="display: none;">
       <h2>文章 1 标题</h2>
@@ -178,7 +117,7 @@
     </div>
 
     <!-- 第 7 页（加密视频） -->
-    <div id="page7" class="video-page" style="display: none;">
+    <div id="page7" class="page" style="display: none;">
       <video controls>
         <source src="video1.mp4" type="video/mp4">
         您的浏览器不支持视频播放。
@@ -186,7 +125,7 @@
     </div>
 
     <!-- 第 8 页（加密视频） -->
-    <div id="page8" class="video-page" style="display: none;">
+    <div id="page8" class="page" style="display: none;">
       <video controls>
         <source src="video2.mp4" type="video/mp4">
         您的浏览器不支持视频播放。
@@ -195,20 +134,22 @@
 
     <!-- 密码输入容器 -->
     <div id="passwordContainer">
-      <input type="password" id="passwordInput" class="password-input" />
-      <button onclick="checkPassword()">确认</button>
+      <input type="password" id="passwordInput" class="form-control" />
+      <button onclick="checkPassword()" class="btn btn-primary">确认</button>
     </div>
 
     <!-- 侧面的分页导航 -->
-    <div class="pagination">
-      <a href="javascript:changePage(1)" class="active">1</a>
-      <a href="javascript:changePage(2)">2</a>
-      <a href="javascript:changePage(3)">3</a>
-      <a href="javascript:changePage(4)">4</a>
-      <a href="javascript:changePage(5)">5</a>
-      <a href="javascript:changePage(6)">6</a>
-      <a href="javascript:changePage(7)">7</a>
-      <a href="javascript:changePage(8)">8</a>
+    <div class="fixed-left">
+      <ul class="pagination">
+        <li><a href="javascript:changePage(1)" class="active">1</a></li>
+        <li><a href="javascript:changePage(2)">2</a></li>
+        <li><a href="javascript:changePage(3)">3</a></li>
+        <li><a href="javascript:changePage(4)">4</a></li>
+        <li><a href="javascript:changePage(5)">5</a></li>
+        <li><a href="javascript:changePage(6)">6</a></li>
+        <li><a href="javascript:changePage(7)">7</a></li>
+        <li><a href="javascript:changePage(8)">8</a></li>
+      </ul>
     </div>
   </main>
 </body>
