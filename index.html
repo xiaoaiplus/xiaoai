@@ -6,17 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章阅读</title>
 
+  <!-- 引入 Google Fonts 以获取独特的字体 -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      background-color: #111;
+      color: #fff;
       margin: 0;
       padding: 0;
     }
 
     header {
-      background-color: #f00;
-      color: #fff;
+      background-color: #444;
       padding: 20px;
     }
 
@@ -29,8 +32,8 @@
     }
 
   .page {
-      background-color: #fff;
-      border: 1px solid #f00;
+      background-color: #222;
+      border: 1px solid #666;
       padding: 20px;
       margin-bottom: 20px;
     }
@@ -47,7 +50,7 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      border: 1px solid #f00;
+      border: 1px solid #666;
     }
 
   .pagination {
@@ -57,70 +60,70 @@
     }
 
   .pagination a {
-      color: #f00;
+      color: #fff;
       padding: 10px 20px;
-      border: 1px solid #f00;
+      border: 1px solid #666;
       text-decoration: none;
     }
 
   .pagination a:hover {
-      background-color: #f00;
-      color: #fff;
+      background-color: #666;
     }
 
   .pagination a.active {
-      background-color: #f00;
-      color: #fff;
+      background-color: #666;
+      color: #000;
     }
   </style>
+
+  <!-- 引入 jQuery 库 -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
   <script>
     // 全局变量，记录当前页码
     let currentPage = 1;
 
-    // 文章密码
-    let articlePassword = "123456";
+    // 文章和视频的密码
+    let articleAndVideoPassword = "123456";
 
     // 翻页函数
     function changePage(pageNumber) {
       currentPage = pageNumber;
 
-      // 隐藏所有页面
-      for (let i = 1; i <= 8; i++) {
-        document.getElementById(`page${i}`).style.display = 'none';
-      }
+      // 使用 jQuery 隐藏所有页面
+      $('.page').hide();
 
-      // 显示当前页面
-      document.getElementById(`page${currentPage}`).style.display = 'block';
+      // 使用 jQuery 显示当前页面
+      $('#page' + currentPage).show();
 
-      // 如果是加密文章，显示密码输入框
-      if (currentPage <= 6 && isArticleEncrypted(currentPage)) {
-        document.getElementById('passwordInput').style.display = 'block';
+      // 如果当前页面是加密的，显示密码输入框
+      if (isPageEncrypted(currentPage)) {
+        $('#passwordInput').show();
       } else {
-        document.getElementById('passwordInput').style.display = 'none';
+        $('#passwordInput').hide();
       }
     }
 
-    // 判断文章是否加密
-    function isArticleEncrypted(pageNumber) {
-      return pageNumber % 2 === 0;  // 假设偶数页的文章是加密的
+    // 判断页面是否加密
+    function isPageEncrypted(pageNumber) {
+      return pageNumber > 0 && pageNumber <= 8;  // 假设所有页面都加密
     }
 
     // 检查密码是否正确
     function checkPassword() {
-      let inputPassword = document.getElementById('passwordInput').value;
-      if (inputPassword === articlePassword) {
-        document.getElementById(`page${currentPage}`).style.display = 'block';
-        document.getElementById('passwordInput').style.display = 'none';
+      let inputPassword = $('#passwordInput').val();
+      if (inputPassword === articleAndVideoPassword) {
+        $('#page' + currentPage).show();
+        $('#passwordInput').hide();
       } else {
         alert('密码错误，请重新输入');
       }
     }
 
     // 页面加载时显示第一页
-    window.onload = function () {
+    $(document).ready(function () {
       changePage(1);
-    };
+    });
   </script>
 </head>
 
@@ -130,8 +133,8 @@
   </header>
 
   <main>
-    <!-- 第 1 页 -->
-    <div id="page1" class="page">
+    <!-- 第 1 页（加密） -->
+    <div id="page1" class="page" style="display: none;">
       <h2>文章 1 标题</h2>
       <p>这是文章 1 的内容...</p>
     </div>
@@ -139,10 +142,10 @@
     <!-- 第 2 页（加密） -->
     <div id="page2" class="page" style="display: none;">
       <h2>文章 2 标题</h2>
-      <p>这是加密的文章 2 的内容...</p>
+      <p>这是文章 2 的内容...</p>
     </div>
 
-    <!-- 第 3 页 -->
+    <!-- 第 3 页（加密） -->
     <div id="page3" class="page" style="display: none;">
       <h2>文章 3 标题</h2>
       <p>这是文章 3 的内容...</p>
@@ -151,10 +154,10 @@
     <!-- 第 4 页（加密） -->
     <div id="page4" class="page" style="display: none;">
       <h2>文章 4 标题</h2>
-      <p>这是加密的文章 4 的内容...</p>
+      <p>这是文章 4 的内容...</p>
     </div>
 
-    <!-- 第 5 页 -->
+    <!-- 第 5 页（加密） -->
     <div id="page5" class="page" style="display: none;">
       <h2>文章 5 标题</h2>
       <p>这是文章 5 的内容...</p>
@@ -163,10 +166,10 @@
     <!-- 第 6 页（加密） -->
     <div id="page6" class="page" style="display: none;">
       <h2>文章 6 标题</h2>
-      <p>这是加密的文章 6 的内容...</p>
+      <p>这是文章 6 的内容...</p>
     </div>
 
-    <!-- 第 7 页（视频） -->
+    <!-- 第 7 页（加密视频） -->
     <div id="page7" class="video-page" style="display: none;">
       <video controls>
         <source src="video1.mp4" type="video/mp4">
@@ -174,7 +177,7 @@
       </video>
     </div>
 
-    <!-- 第 8 页（视频） -->
+    <!-- 第 8 页（加密视频） -->
     <div id="page8" class="video-page" style="display: none;">
       <video controls>
         <source src="video2.mp4" type="video/mp4">
