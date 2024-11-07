@@ -1,4 +1,3 @@
-
  
 <!DOCTYPE html>
 <html lang="en">
@@ -6,107 +5,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文章阅读</title>
-
+  <title>仿书页面</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: rgba(0, 0, 0, 0.1);
-      color: #fff;
+      background-color: #f5f5f5;
       margin: 0;
       padding: 0;
     }
 
-    header {
-      background-color: rgba(255, 0, 0, 0.5);
-      padding: 20px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    }
-
-    header h1 {
-      margin: 0;
-    }
-
-    main {
-      padding: 20px;
+   .book {
+      width: 100%;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
 
-  .page {
-      background-color: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+   .page {
       width: 80%;
-      transition: transform 0.3s ease;
-    }
-
-  .page:hover {
-      transform: scale(1.05);
-    }
-
-  .video-page {
-      width: 100%;
-    }
-
-  .video-page video {
-      width: 100%;
-    }
-
-   #passwordContainer {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(255, 255, 255, 0.2);
+      height: 80vh;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
       padding: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      display: none;
     }
 
-  .password-input {
-      width: 200px;
-      padding: 10px;
+   .page h2 {
+      margin-top: 0;
+    }
+
+   .page p {
       font-size: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      border-radius: 5px;
-      background-color: rgba(0, 0, 0, 0.2);
-      color: #fff;
     }
 
-  .pagination {
+   .video-page {
+      width: 80%;
+      height: 80vh;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+    }
+
+   .video-page video {
+      width: 100%;
+      height: 100%;
+    }
+
+   .pagination {
       position: fixed;
       bottom: 20px;
-      right: 20px;
+      width: 100%;
+      text-align: center;
     }
 
-  .pagination a {
-      color: #fff;
+   .pagination a {
+      display: inline-block;
       padding: 10px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      background-color: #333;
+      color: #fff;
       text-decoration: none;
+      margin: 0 10px;
     }
 
-  .pagination a:hover {
-      background-color: rgba(255, 255, 255, 0.5);
-    }
-
-  .pagination a.active {
-      background-color: rgba(255, 255, 255, 0.5);
-      color: #000;
+   .pagination a.active {
+      background-color: #666;
     }
   </style>
+</head>
+
+<body>
+  <div class="book">
+    <!-- 第 1 页（文章） -->
+    <div id="page1" class="page">
+      <h2>文章 1 标题</h2>
+      <p>这是文章 1 的内容...</p>
+    </div>
+
+    <!-- 第 2 页（文章） -->
+    <div id="page2" class="page">
+      <h2>文章 2 标题</h2>
+      <p>这是文章 2 的内容...</p>
+    </div>
+
+    <!-- 第 3 页（文章） -->
+    <div id="page3" class="page">
+      <h2>文章 3 标题</h2>
+      <p>这是文章 3 的内容...</p>
+    </div>
+
+    <!-- 第 4 页（文章） -->
+    <div id="page4" class="page">
+      <h2>文章 4 标题</h2>
+      <p>这是文章 4 的内容...</p>
+    </div>
+
+    <!-- 第 5 页（文章） -->
+    <div id="page5" class="page">
+      <h2>文章 5 标题</h2>
+      <p>这是文章 5 的内容...</p>
+    </div>
+
+    <!-- 第 6 页（文章） -->
+    <div id="page6" class="page">
+      <h2>文章 6 标题</h2>
+      <p>这是文章 6 的内容...</p>
+    </div>
+
+    <!-- 第 7 页（视频） -->
+    <div id="page7" class="video-page">
+      <video controls>
+        <source src="video1.mp4" type="video/mp4">
+        您的浏览器不支持视频播放。
+      </video>
+    </div>
+
+    <!-- 第 8 页（视频） -->
+    <div id="page8" class="video-page">
+      <video controls>
+        <source src="video2.mp4" type="video/mp4">
+        您的浏览器不支持视频播放。
+      </video>
+    </div>
+
+    <div class="pagination">
+      <a href="javascript:changePage(1)" class="active">1</a>
+      <a href="javascript:changePage(2)">2</a>
+      <a href="javascript:changePage(3)">3</a>
+      <a href="javascript:changePage(4)">4</a>
+      <a href="javascript:changePage(5)">5</a>
+      <a href="javascript:changePage(6)">6</a>
+      <a href="javascript:changePage(7)">7</a>
+      <a href="javascript:changePage(8)">8</a>
+    </div>
+  </div>
 
   <script>
     // 全局变量，记录当前页码
     let currentPage = 1;
-
-    // 文章和视频的密码
-    let articleAndVideoPassword = "12345678";
 
     // 翻页函数
     function changePage(pageNumber) {
@@ -119,29 +157,6 @@
 
       // 显示当前页面
       document.getElementById(`page${currentPage}`).style.display = 'block';
-
-      // 如果当前页面是加密的，显示密码输入框
-      if (isPageEncrypted(currentPage)) {
-        document.getElementById('passwordContainer').style.display = 'block';
-      } else {
-        document.getElementById('passwordContainer').style.display = 'none';
-      }
-    }
-
-    // 判断页面是否加密
-    function isPageEncrypted(pageNumber) {
-      return pageNumber > 0 && pageNumber <= 8;  // 假设所有页面都加密
-    }
-
-    // 检查密码是否正确
-    function checkPassword() {
-      let inputPassword = document.getElementById('passwordInput').value;
-      if (inputPassword === articleAndVideoPassword) {
-        document.getElementById(`page${currentPage}`).style.display = 'block';
-        document.getElementById('passwordContainer').style.display = 'none';
-      } else {
-        alert('密码错误，请重新输入');
-      }
     }
 
     // 页面加载时显示第一页
@@ -149,84 +164,8 @@
       changePage(1);
     };
   </script>
-</head>
-
-<body>
-  <header>
-    <h1>文章阅读</h1>
-  </header>
-
-  <main>
-    <!-- 第 1 页（加密） -->
-    <div id="page1" class="page" style="display: none;">
-      <h2>文章 1 标题</h2>
-      <p>这是文章 1 的内容...</p>
-    </div>
-
-    <!-- 第 2 页（加密） -->
-    <div id="page2" class="page" style="display: none;">
-      <h2>文章 2 标题</h2>
-      <p>这是文章 2 的内容...</p>
-    </div>
-
-    <!-- 第 3 页（加密） -->
-    <div id="page3" class="page" style="display: none;">
-      <h2>文章 3 标题</h2>
-      <p>这是文章 3 的内容...</p>
-    </div>
-
-    <!-- 第 4 页（加密） -->
-    <div id="page4" class="page" style="display: none;">
-      <h2>文章 4 标题</h2>
-      <p>这是文章 4 的内容...</p>
-    </div>
-
-    <!-- 第 5 页（加密） -->
-    <div id="page5" class="page" style="display: none;">
-      <h2>文章 5 标题</h2>
-      <p>这是文章 5 的内容...</p>
-    </div>
-
-    <!-- 第 6 页（加密） -->
-    <div id="page6" class="page" style="display: none;">
-      <h2>文章 6 标题</h2>
-      <p>这是文章 6 的内容...</p>
-    </div>
-
-    <!-- 第 7 页（加密视频） -->
-    <div id="page7" class="video-page" style="display: none;">
-      <video controls>
-        <source src="video1.mp4" type="video/mp4">
-        您的浏览器不支持视频播放。
-      </video>
-    </div>
-
-    <!-- 第 8 页（加密视频） -->
-    <div id="page8" class="video-page" style="display: none;">
-      <video controls>
-        <source src="video2.mp4" type="video/mp4">
-        您的浏览器不支持视频播放。
-      </video>
-    </div>
-
-    <!-- 密码输入容器 -->
-    <div id="passwordContainer">
-      <input type="password" id="passwordInput" class="password-input" />
-      <button onclick="checkPassword()">确认</button>
-    </div>
-
-    <!-- 底部的分页导航 -->
-    <div class="pagination">
-      <a href="javascript:changePage(1)" class="active">1</a>
-      <a href="javascript:changePage(2)">2</a>
-      <a href="javascript:changePage(3)">3</a>
-      <a href="javascript:changePage(4)">4</a>
-      <a href="javascript:changePage(5)">5</a>
-      <a href="javascript:changePage(6)">6</a>
-      <a href="javascript:changePage(7)">7</a>
-      <a href="javascript:changePage(8)">8</a>
-    </div>
-  </main>
 </body>
 
 </html>
+ 
+ 
