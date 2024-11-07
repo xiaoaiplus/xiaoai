@@ -27,50 +27,54 @@
       margin: 0;
     }
 
-    main {
+   
       padding: 20px;
     }
 
-  .page {
+   .page {
       background-color: #222;
       border: 1px solid #666;
       padding: 20px;
       margin-bottom: 20px;
     }
 
-  .video-page {
+   .video-page {
       width: 100%;
     }
 
-  .video-page video {
+   .video-page video {
       width: 100%;
     }
 
-  .password-input {
+    #passwordContainer {
+      display: none;
+    }
+
+   .password-input {
       width: 100%;
       padding: 10px;
       font-size: 16px;
       border: 1px solid #666;
     }
 
-  .pagination {
+   .pagination {
       display: flex;
       justify-content: center;
       margin-top: 20px;
     }
 
-  .pagination a {
+   .pagination a {
       color: #fff;
       padding: 10px 20px;
       border: 1px solid #666;
       text-decoration: none;
     }
 
-  .pagination a:hover {
+   .pagination a:hover {
       background-color: #666;
     }
 
-  .pagination a.active {
+   .pagination a.active {
       background-color: #666;
       color: #000;
     }
@@ -87,7 +91,7 @@
     let articleAndVideoPassword = "123456";
 
     // 翻页函数
-    function changePage(pageNumber) {
+    function changePageNumber) {
       currentPage = pageNumber;
 
       // 使用 jQuery 隐藏所有页面
@@ -98,9 +102,9 @@
 
       // 如果当前页面是加密的，显示密码输入框
       if (isPageEncrypted(currentPage)) {
-        $('#passwordInput').show();
+        $('#passwordContainer').show();
       } else {
-        $('#passwordInput').hide();
+        $('#passwordContainer').hide();
       }
     }
 
@@ -114,7 +118,7 @@
       let inputPassword = $('#passwordInput').val();
       if (inputPassword === articleAndVideoPassword) {
         $('#page' + currentPage).show();
-        $('#passwordInput').hide();
+        $('#passwordContainer').hide();
       } else {
         alert('密码错误，请重新输入');
       }
@@ -185,9 +189,11 @@
       </video>
     </div>
 
-    <!-- 密码输入框 -->
-    <input type="password" id="passwordInput" style="display: none;" />
-    <button onclick="checkPassword()">确认</button>
+    <!-- 密码输入容器 -->
+    <div id="passwordContainer">
+      <input type="password" id="passwordInput" class="password-input" />
+      <button onclick="checkPassword()">确认</button>
+    </div>
 
     <!-- 分页导航 -->
     <div class="pagination">
@@ -197,7 +203,7 @@
       <a href="javascript:changePage(4)">4</a>
       <a href="javascript:changePage(5)">5</a>
       <a href="javascript:changePage(6)">6</a>
-      <a href="javascript:changePage(7)">7</a>
+      <a href="javascript:changePage(77</a>
       <a href="javascript:changePage(8)">8</a>
     </div>
   </main>
