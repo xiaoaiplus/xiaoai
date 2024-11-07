@@ -15,7 +15,7 @@
       padding: 0;
     }
 
- .book {
+  .book {
       width: 100%;
       height: 100vh;
       display: flex;
@@ -26,7 +26,7 @@
       background-color: rgba(0, 25, 63, 0.2);  /* 偏冷的书背景色 */
     }
 
- .book::before {
+  .book::before {
       content: "";
       width: 50px;
       height: 100%;
@@ -36,7 +36,7 @@
       box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
     }
 
- .page {
+  .page {
       width: 80%;
       height: 80vh;
       background-color: rgba(25, 35, 55, 0.6);  /* 冷色调页面背景 */
@@ -49,17 +49,19 @@
       display: none;
     }
 
- .page h2 {
+  .page h2 {
       margin-top: 0;
       color: #ccd6eb;  /* 冷色调文字颜色 */
     }
 
- .page p {
+  .page p {
       font-size: 16px;
       color: #ccd6eb;  /* 冷色调文字颜色 */
+      word-wrap: break-word;  /* 自动换行 */
+      line-height: 1.5;  /* 行高，使布局更合理 */
     }
 
- .video-page {
+  .video-page {
       width: 80%;
       height: 80vh;
       background-color: rgba(25, 35, 55, 0.6);  /* 冷色调页面背景 */
@@ -72,12 +74,12 @@
       display: none;
     }
 
- .video-page video {
+  .video-page video {
       width: 80%;
       height: 60vh;
     }
 
- .pagination {
+  .pagination {
       position: absolute;
       bottom: 20px;
       left: 20px;
@@ -88,7 +90,7 @@
       transform: scale(0.95);
     }
 
- .pagination a {
+  .pagination a {
       display: inline-block;
       padding: 5px 10px;
       background-color: rgba(25, 35, 55, 0.8);  /* 冷色调分页按钮背景 */
@@ -98,7 +100,7 @@
       font-size: 14px;
     }
 
- .pagination a:first-child {
+  .pagination a:first-child {
       font-size: 14px;
     }
 
