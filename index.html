@@ -1,168 +1,203 @@
-
-  
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>逍遥梦里逍遥游</title>
+  <title>文章阅读</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      background-color: #fff;
+      margin: 0;
+      padding: 0;
     }
 
-    h1 {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 24px;
+    header {
+      background-color: #f00;
+      color: #fff;
+      padding: 20px;
     }
 
-    input[type="password"] {
-      width: 80%;
-      padding: 10px;
-      font-size: 18px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin: 0 auto 20px;
-      display: block;
+    header h1 {
+      margin: 0;
     }
 
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #007aff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      display: block;
-      margin: 0 auto;
+    main {
+      padding: 20px;
     }
 
-  .content {
-      display: none;
-      margin: 20px;
-      padding: 10px;
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+  .page {
+      background-color: #fff;
+      border: 1px solid #f00;
+      padding: 20px;
+      margin-bottom: 20px;
     }
 
-  .video-container {
-      display: none;
-      margin: 20px;
-    }
-
-    video {
+  .video-page {
       width: 100%;
     }
 
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 20px;
-      }
+  .video-page video {
+      width: 100%;
+    }
 
-      input[type="password"] {
-        width: 90%;
-      }
+  .password-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #f00;
+    }
 
-      button {
-        padding: 8px 16px;
-        font-size: 16px;
-      }
+  .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
 
-    .content p {
-        font-size: 16px;
-        line-height: 1.5;
-        word-wrap: break-word;  /* 新增：使文字自动换行 */
-      }
+  .pagination a {
+      color: #f00;
+      padding: 10px 20px;
+      border: 1px solid #f00;
+      text-decoration: none;
+    }
+
+  .pagination a:hover {
+      background-color: #f00;
+      color: #fff;
+    }
+
+  .pagination a.active {
+      background-color: #f00;
+      color: #fff;
     }
   </style>
+
+  <script>
+    // 全局变量，记录当前页码
+    let currentPage = 1;
+
+    // 文章密码
+    let articlePassword = "123456";
+
+    // 翻页函数
+    function changePage(pageNumber) {
+      currentPage = pageNumber;
+
+      // 隐藏所有页面
+      for (let i = 1; i <= 8; i++) {
+        document.getElementById(`page${i}`).style.display = 'none';
+      }
+
+      // 显示当前页面
+      document.getElementById(`page${currentPage}`).style.display = 'block';
+
+      // 如果是加密文章，显示密码输入框
+      if (currentPage <= 6 && isArticleEncrypted(currentPage)) {
+        document.getElementById('passwordInput').style.display = 'block';
+      } else {
+        document.getElementById('passwordInput').style.display = 'none';
+      }
+    }
+
+    // 判断文章是否加密
+    function isArticleEncrypted(pageNumber) {
+      return pageNumber % 2 === 0;  // 假设偶数页的文章是加密的
+    }
+
+    // 检查密码是否正确
+    function checkPassword() {
+      let inputPassword = document.getElementById('passwordInput').value;
+      if (inputPassword === articlePassword) {
+        document.getElementById(`page${currentPage}`).style.display = 'block';
+        document.getElementById('passwordInput').style.display = 'none';
+      } else {
+        alert('密码错误，请重新输入');
+      }
+    }
+
+    // 页面加载时显示第一页
+    window.onload = function () {
+      changePage(1);
+    };
+  </script>
 </head>
 
 <body>
-  <h1>我本菜鸟</h1>
-  <input type="password" id="passwordInput" placeholder="请输入密码">
-  <button onclick="verifyPassword()">验证</button>
+  <header>
+    <h1>文章阅读</h1>
+  </header>
 
-  <div id="chapter1" class="content">
-    <h2>第一章内容</h2>
-    <p>U2FsdGVkX1+hBZyuYyTtdTbVQzQRjnu13gBwvClUkROpU/T1fnfM+MjUTkrzEza4g4noipMY4Eu1f+z7oPxYSgx0CUhYAYl2I/TQu+lh2eJmXYIQXzm48ZgjYyUQB0VSfPlt6KtVYgCY2KGTpubEFlntOSnv42ZEa32FfQEKAkvkO46G+yTypVcA1ISxKOcw5tv+Tc1FGJX8XOq1wSnVWoEyRkiuyuVcdJZJeQxSpbtNqTSJcywi0owFVfD1gMLh4LEH/PMLbcugmheEZVaK+hTTzXeKBKgJ0Eh10+Fh8z0ovVCztLR9Tp9drZB3VTJc4jHBu0m4bsQJGmgCQK7y+Dzu512V5xgF9kjcCkW4drmMxs+yeRDPf+uexcJoviK4/l5uyMV3ZzuBK4+5RqepKdarZER+gS8WNTnRCbgkE/VEoiPTPXqHky3eGwlbT53IZUVThtUcAqJpI0t12QLRpwLrtGod0p3+BRvPI9eN+y323rnt7AZTK8vjjjMlG0iGseWc3imJW0EgZHM3Qt5QCmxiOE5RBzTGpwzOLj3UeP5gfqiF/SUMg12NmpkEDgWiT+xdKQMTiLjOJ54OIXJVekXDuy43ZKoUptRtCKPFQDpjG7/fIGyUiBmIVLVCoyQ/1QcMe5IUrS2dyGVXC7T4QeUuK89dZgCDERPUbtx6jG9/XO9/fFwA145M7FUJev1zXIn9i1OaCmK7BBMhTMbHIzmYbOeYedZrmtorQiWwpr1KgwQ2z95NqJ1aVeHipnWZcezgIu3KsFESbvooyrhX3jKUPEzqBrNsFDeepYSrbWB62FgExH++aZRUZ9k8+PXhSuTY9K+rsy0+cWQu/OK3B2t7PDed06oIPJGe+CQPcAKh/ciWnxKqDGbeRtl8nkvMYKN6hlC+jVZ0+l7zH+TuKBE/No1ikiLxrFo3TBir2FxfYw7iTYIxaGZ852hJtPrtLMp3CvFhZHa5XGKeps/bOwZ6UCgAtb9CkNb79e5uH2qjn9Mfg2b87kb0tNYIMy/NLpqQnI+q3L2LTxYItdJE0i0YINiSQ/73vb4EkKRr7btT8UglCUVVxXaETR51ktMOk2MXUnKSUqwduorKWrC6PwJtwpeIvhG7XznHyZjSjSQc07cQ88aja2iaUQeu8c8/0Nka8+lQaGE+FdY/oNWdxjlTfcx3iEiUoLj3pdmZNYOmQiaIfmqTeT+e+emD1QHRPy+DOCL0qr6i+C1ivnjRDcAipzUgsm5OdQEVdmifo7OOg3BrN64/N8KHFJBcey4SJHPUYeO1ZdVlRKh4qph+j4jHJX+vjlbExEmI2UIsFzepJS/Ye9t3E8sN6X3aWk7sDLv9mUuvd50vmUm2bdMWBVmFLDm6s3zFsImBtEPbKdWeaQwM3s+p5/kUW1bAVY4dRrfucNKvc3YgxlEgPYJ3Fdv8qI5tYW+PmfEJvMk7UDioOhmuoXv/HeQM74BeOOXK0W7Y+uvMXYlLxOhpHA9dalnveeIs5mDN5tJZlY/y1BCfsdgls2LGt8v4+tHsKIek</p>
-  </div>
+  <main>
+    <!-- 第 1 页 -->
+    <div id="page1" class="page">
+      <h2>文章 1 标题</h2>
+      <p>这是文章 1 的内容...</p>
+    </div>
 
-  <div id="chapter2" class="content">
-    <h2>第二章内容</h2>
-    <p>U2FsdGVkX1+mqq8fqBmbWObbY042PMl/fqv7UCsxAX/0IaAgcx/zWHv2CHOUXLukWTFYYahjBZoyeL2r/+VbOcw4Hvgl0nWvTeSuaiVYKO5/VPz8XUhmfPwi2JYIg+WbWLF/0UE69O9Vep8cAhjSaoR/MC0WzINtBOyC8U9Q2B9ZtzqOTyfUz3GA42Ksrt7Q/SL8y6UPxuo71HNoHXfdPUW48cfIfRlLXlVvFXYINJpS3l1IM/w+nF5uC/qEU/RTQyFdOlEvBtg7m1kPgVVay7tUzE6dLDfXXdKR4zWnchLFPKBSfjFQPCG72dQg3TBHm9SDTEZyJL5Q53JiTsHpeo/qihl4zeO/aftOWtCY0QJOsrbm1ZRH5g81x2CRhRJck6DcL2sgWVBsljqfHGckbH5AMRLbv0K8yiHi7gxQO0W+0BKjeM3Ng8y+AFWUHLUxmFEzv10zhKs7/JnaGb8duk8q/14obO+RcAokYft+9YA=</p>
-  </div>
+    <!-- 第 2 页（加密） -->
+    <div id="page2" class="page" style="display: none;">
+      <h2>文章 2 标题</h2>
+      <p>这是加密的文章 2 的内容...</p>
+    </div>
 
-  <div id="chapter3" class="content">
-    <h2>第三章内容</h2>
-    <p>U2FsdGVkX19KbP5Zv6f77GyrxW5ULIY2dLSFGcdSGyVnlfJLrdo1yI902lsWyRoBYVU0doP26Zc3YIVpThWRuLQ8ZfzoSv2fZoYISM5mni6VVLfQMOHxL3p/4+Wt/4Zwo7UUcBBph/RAhDFcBWkY2qupNQtXvn1PUPV8bB6SAgnKSjzd3UTbCnQT3ryF+xO5bdFU9tzRLWqIlAavVdxU93tBqsVORYCk7acufFAp9EnjLqaIh9INIG04O4oBVQAX3MPzvXXLXWmF+n1Tb3ksSPEeyZmUBiCK6E9dbZbN0AcIduVY9DLGyWTU/OFCZuj5nOJhmwvsjVwXIvOkphrYNSMyH6Ur30VBWHjx1MgRBCAeZPudIC6/4KN/2m5iiNTwwObMmu0509uyoWuJMd7a0HObVo6BkV0PknsOiBDsSuS0KB7hy1T8gg7PCWukqj0olIfdsEqfQ7E+tdxB6dP2QStgMsdF6Z4lu1UFZ6NFbBLNtqpNIDDEdgz46hg+HBHr4qmfP408EoQhPfkKkNGYWP/GbZrcZK4ga4itXoulv2rXL0EShXi9GlIfAS0QZFxzlbpMz78+hGIi0WhlG+Tx+FdoGZvTfUXU66Cg9P4oY22ybg5SKSAzbisDM9AnRfzVhuGxLYYS4JD7m6jZ941EYw==</p>
-  </div>
+    <!-- 第 3 页 -->
+    <div id="page3" class="page" style="display: none;">
+      <h2>文章 3 标题</h2>
+      <p>这是文章 3 的内容...</p>
+    </div>
 
-  <div id="chapter4" class="content">
-    <h2>第四章内容</h2>
-    <p>U2FsdGVkX187Q+8ON1+Y/tiDuNUUNUQL+THycv0K6Yt3cOHU+0r1bvvQ2df+th3hkDIKAxsnt9cAYTwwLSAmgs/X/xhpZT2Wz3YDCGnpB8VRQ6nzfJwKhSOf7LcrrGB72DrxL1nm8jDF5q0nwnTSrpqssfSjFFFnS/uVunDpbYzUW/LCUkz/tb7kjiGFc4S4QmgH6mY6TamdIXnzaTwepts0Uj7RdWtzlmOqpm3huc4cCwFM2lx8lO207X2AM0ual4KBd0TL8qksqD3Cai2G+K2NZmG110IcMzxBMHPFW4mc57qW1Vl3qRFp/RhJbIr2OzLJY7jqVXmdF4BKaw4LBY2lHTIw0oK/jeOuscXiG4NhRDJD/lBdQflJ4mWbEgEV</p>
-  </div>
+    <!-- 第 4 页（加密） -->
+    <div id="page4" class="page" style="display: none;">
+      <h2>文章 4 标题</h2>
+      <p>这是加密的文章 4 的内容...</p>
+    </div>
 
-  <div id="chapter5" class="content">
-    <h2>第五章内容</h2>
-    <p>U2FsdGVkX1+o2lPRu8jxnHEIbLNN4vWBaKrgX5RH1zFECcNo2JZF0vq8v20T8X+B/WWpn2/fwiN0rTZ7Sr80O8iet1Bam0S9+3dSH2X9NpuVHY4GR/yz3/ChGLQJrSpr3EXgKpUvC03RajLnvTRxXfWM8d4WFKuGKIAjG3a32Byf6VmTQT4jjdpL4jhnHgva4Rm6RQzPgMMiSqTfg7d90OS4cf9z1X2e/Y40uqnXJ1k1MjLX9Jgq9oKgEC0CzafZcnm9Kl2kszEhsEyaIaIAYeBsd2A3AVjuPwYSEBZm78fiqUweOaL0+zTJ8dJspTaeAf7sgfJHEi+8W/GVschzDYFQxfhMbMalP8Kyss+6XoMnpCbj5iiomblVTkktzqqYWzeHf+uB2Tcf1d5pYscaFb+uOJmn4PMQOq5nFUZLvcT8wFM2ya5YRnvsK1XyRIm7zkahtEH6+ucRlASsBmXUCkYlFxnNyXl1CMd0WvlsK6eKSS1TXlhSNMFf6QqdKoUjqq3RjDvId3DF2ONVxyurpC1eP6fY7TLmckCaofP7csKkr3FOvLj/6rKRjVLhtwLGDnQqcKrO1LNkPNStacLWxZI2jlcKFU/SHU97d+IOeiLc+2lMP6v8FXOWEg39B+jZMzoigZuOz0SlpRxqL8JL3NWFMI3mWLRS1pi0r86k4U16fKvHOUDKicdhIxXL501owYJNNtQgR3WWnPXoKj0krdyxJGA5BggpN6PDd0d3dr8R5VYa9YKmYuAOB9cgb30JwDYLBHkVzeWLK/GKptvzF1UzdP9oy38z3LVnzFE2KUxZ9rP1oYLaTsRucWXGWEG0hdLRgXnplL2UhWXNvO4HdGdPyaldOcxzcVSOk0bqZXEZKnuFt05Yyw4KOw0N18yT6phnCDUxbYQBwTnxXDdqDU6RgpoQOPQkZsJk9eNbPm0ljkdi1gqt8ojr/RKzywFPqLB2LXQm5+zghCQaEihC8EStyKqc13MzlIfbPJtEr2rlfqA2o2cnAjcNbrhcH9vasxghnl0WkwwzVXjD7ygqt7Amaz7SSbcO/sM6xfXt8jf8WoO2AJg7ufIhziwX+5HBRksf7s+dZHJ0woEXylxKm9p+FEq/p2NxEU2zgMIBcqKHDgp9v2vQOfEsSiZhcG4R/cYpbWGqp3p0r9gSDZdHMw==</p>
-  </div>
+    <!-- 第 5 页 -->
+    <div id="page5" class="page" style="display: none;">
+      <h2>文章 5 标题</h2>
+      <p>这是文章 5 的内容...</p>
+    </div>
 
-  <div id="chapter6" class="content">
-    <h2>第六章内容</h2>
-    <p>U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=</p>
-  </div>
+    <!-- 第 6 页（加密） -->
+    <div id="page6" class="page" style="display: none;">
+      <h2>文章 6 标题</h2>
+      <p>这是加密的文章 6 的内容...</p>
+    </div>
 
-  <div id="chapter6" class="content">
-    <h2>第七章内容</h2>
-    <p>查昨天1Z，看今天看竞价非厂，去KPL看昨天B概念去关联看昨天票，今天入
-    ★★预测明天1Z，去KPL看概念B，关联那天，L1排序，看概念B在B位置，再看300w.有数据。明天可入。明天盯1Z不断平开，主力卖的少
-  净额主力卖的少 ，300红
-    ◆◆主卖的少排序，300w红 看b概念和关联概念一致
-   </p>
-  </div>
+    <!-- 第 7 页（视频） -->
+    <div id="page7" class="video-page" style="display: none;">
+      <video controls>
+        <source src="video1.mp4" type="video/mp4">
+        您的浏览器不支持视频播放。
+      </video>
+    </div>
 
-  <div id="chapter7" class="video-container">
-    <h2>第八章 - 视频播放</h2>
-    <video controls>
-      <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
-      您的浏览器不支持 video 标签。
-    </video>
-  </div>
+    <!-- 第 8 页（视频） -->
+    <div id="page8" class="video-page" style="display: none;">
+      <video controls>
+        <source src="video2.mp4" type="video/mp4">
+        您的浏览器不支持视频播放。
+      </video>
+    </div>
 
-  <script>
-    // 定义正确的密码
-    const correctPassword = "xiaoai";
+    <!-- 密码输入框 -->
+    <input type="password" id="passwordInput" style="display: none;" />
+    <button onclick="checkPassword()">确认</button>
 
-    function verifyPassword() {
-      const enteredPassword = document.getElementById('passwordInput').value;
-      if (enteredPassword === correctPassword) {
-        // 显示第一章内容
-        document.getElementById('chapter1').style.display = 'block';
-      } else {
-        alert('密码错误，请重新输入！');
-      }
-    }
-
-    // 为每个章节添加点击事件，以显示下一章内容
-    const chapters = document.querySelectorAll('.content');
-    chapters.forEach((chapter, index) => {
-      chapter.addEventListener('click', () => {
-        if (index < chapters.length - 1) {
-          chapters[index + 1].style.display = 'block';
-        } else {
-          // 显示第七章（视频）
-          document.getElementById('chapter7').style.display = 'block';
-        }
-      });
-    });
-  </script>
+    <!-- 分页导航 -->
+    <div class="pagination">
+      <a href="javascript:changePage(1)" class="active">1</a>
+      <a href="javascript:changePage(2)">2</a>
+      <a href="javascript:changePage(3)">3</a>
+      <a href="javascript:changePage(4)">4</a>
+      <a href="javascript:changePage(5)">5</a>
+      <a href="javascript:changePage(6)">6</a>
+      <a href="javascript:changePage(7)">7</a>
+      <a href="javascript:changePage(8)">8</a>
+    </div>
+  </main>
 </body>
 
 </html>
- 
- 
