@@ -27,22 +27,22 @@
       margin: 0;
     }
 
-   
+    main {
       padding: 20px;
     }
 
-   .page {
+  .page {
       background-color: #222;
       border: 1px solid #666;
       padding: 20px;
       margin-bottom: 20px;
     }
 
-   .video-page {
+  .video-page {
       width: 100%;
     }
 
-   .video-page video {
+  .video-page video {
       width: 100%;
     }
 
@@ -50,38 +50,35 @@
       display: none;
     }
 
-   .password-input {
+  .password-input {
       width: 100%;
       padding: 10px;
       font-size: 16px;
       border: 1px solid #666;
     }
 
-   .pagination {
+  .pagination {
       display: flex;
       justify-content: center;
       margin-top: 20px;
     }
 
-   .pagination a {
+  .pagination a {
       color: #fff;
       padding: 10px 20px;
       border: 1px solid #666;
       text-decoration: none;
     }
 
-   .pagination a:hover {
+  .pagination a:hover {
       background-color: #666;
     }
 
-   .pagination a.active {
+  .pagination a.active {
       background-color: #666;
       color: #000;
     }
   </style>
-
-  <!-- 引入 jQuery 库 -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
   <script>
     // 全局变量，记录当前页码
@@ -91,20 +88,22 @@
     let articleAndVideoPassword = "123456";
 
     // 翻页函数
-    function changePageNumber) {
+    function changePage(pageNumber) {
       currentPage = pageNumber;
 
-      // 使用 jQuery 隐藏所有页面
-      $('.page').hide();
+      // 隐藏所有页面
+      for (let i = 1; i <= 8; i++) {
+        document.getElementById(`page${i}`).style.display = 'none';
+      }
 
-      // 使用 jQuery 显示当前页面
-      $('#page' + currentPage).show();
+      // 显示当前页面
+      document.getElementById(`page${currentPage}`).style.display = 'block';
 
       // 如果当前页面是加密的，显示密码输入框
       if (isPageEncrypted(currentPage)) {
-        $('#passwordContainer').show();
+        document.getElementById('passwordContainer').style.display = 'block';
       } else {
-        $('#passwordContainer').hide();
+        document.getElementById('passwordContainer').style.display = 'none';
       }
     }
 
@@ -115,19 +114,19 @@
 
     // 检查密码是否正确
     function checkPassword() {
-      let inputPassword = $('#passwordInput').val();
+      let inputPassword = document.getElementById('passwordInput').value;
       if (inputPassword === articleAndVideoPassword) {
-        $('#page' + currentPage).show();
-        $('#passwordContainer').hide();
+        document.getElementById(`page${currentPage}`).style.display = 'block';
+        document.getElementById('passwordContainer').style.display = 'none';
       } else {
         alert('密码错误，请重新输入');
       }
     }
 
     // 页面加载时显示第一页
-    $(document).ready(function () {
+    window.onload = function () {
       changePage(1);
-    });
+    };
   </script>
 </head>
 
@@ -203,7 +202,7 @@
       <a href="javascript:changePage(4)">4</a>
       <a href="javascript:changePage(5)">5</a>
       <a href="javascript:changePage(6)">6</a>
-      <a href="javascript:changePage(77</a>
+      <a href="javascript:changePage(7)">7</a>
       <a href="javascript:changePage(8)">8</a>
     </div>
   </main>
