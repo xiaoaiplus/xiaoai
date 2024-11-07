@@ -1,7 +1,5 @@
-以下是进一步优化后的代码，使分页导航能够更好地适应手机屏幕：
+以下是修改后的代码，将分页导航放置在书中，并缩小了其尺寸：
  
-html
-  
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,7 +15,7 @@ html
       padding: 0;
     }
 
-   .book {
+  .book {
       width: 100%;
       height: 100vh;
       display: flex;
@@ -26,7 +24,7 @@ html
       justify-content: center;
     }
 
-   .page {
+  .page {
       width: 80%;
       height: 80vh;
       background-color: rgba(255, 255, 255, 0.6);
@@ -39,15 +37,15 @@ html
       display: none;
     }
 
-   .page h2 {
+  .page h2 {
       margin-top: 0;
     }
 
-   .page p {
+  .page p {
       font-size: 16px;
     }
 
-   .video-page {
+  .video-page {
       width: 80%;
       height: 80vh;
       background-color: rgba(255, 255, 255, 0.6);
@@ -60,41 +58,31 @@ html
       display: none;
     }
 
-   .video-page video {
+  .video-page video {
       width: 100%;
       height: 100%;
     }
 
-    @media (max-width: 768px) {
-     .pagination {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        padding: 10px 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        text-align: center;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-     .pagination a {
-        padding: 10px 15px;
-        margin: 5px 0;
-      }
+  .pagination {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
     }
 
-   .pagination a {
+  .pagination a {
       display: inline-block;
-      padding: 10px 20px;
+      padding: 5px 10px;
       background-color: rgba(255, 255, 255, 0.8);
       color: #333;
       text-decoration: none;
-      margin: 0 10px;
+      margin: 0 5px;
+      font-size: 14px;
     }
 
-   .pagination a.active {
+  .pagination a.active {
       background-color: #666;
       color: #fff;
     }
@@ -208,6 +196,3 @@ html
 </body>
 
 </html>
- 
- 
-在上述代码中，使用了媒体查询（ @media (max-width: 768px) ）来针对屏幕宽度小于 768 像素（通常被认为是手机屏幕尺寸）的情况，对分页导航的样式进行了调整，使其更适应小屏幕，如增加间距、换行等。
