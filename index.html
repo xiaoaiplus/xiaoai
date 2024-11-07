@@ -61,9 +61,11 @@
     }
 
   .pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      padding-left: 20px;
     }
 
   .pagination a {
@@ -80,15 +82,6 @@
   .pagination a.active {
       background-color: #666;
       color: #000;
-    }
-
-    #sideText {
-      position: fixed;
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-      font-size: 24px;
-      color: #666;
     }
   </style>
 
@@ -206,10 +199,7 @@
       <button onclick="checkPassword()">确认</button>
     </div>
 
-    <!-- 侧面显示的提示文本 -->
-    <div id="sideText">12345678</div>
-
-    <!-- 分页导航 -->
+    <!-- 侧面的分页导航 -->
     <div class="pagination">
       <a href="javascript:changePage(1)" class="active">1</a>
       <a href="javascript:changePage(2)">2</a>
