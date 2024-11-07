@@ -1,4 +1,4 @@
-以下是一个完整的示例，既不使用在线的 JavaScript 库，也不使用在线的 CSS 样式库，所有的代码都写在 HTML 文件中：
+以下是一个重新设计和美化后的版本，增加了一些阴影和过渡效果，希望能符合您的审美需求：
  
 html
   
@@ -12,13 +12,17 @@ html
 
   <style>
     body {
+      font-family: Arial, sans-serif;
       background-color: #111;
       color: #fff;
+      margin: 0;
+      padding: 0;
     }
 
     header {
       background-color: #444;
       padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     }
 
     header h1 {
@@ -34,6 +38,12 @@ html
       border: 1px solid #666;
       padding: 20px;
       margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+    }
+
+  .page:hover {
+      transform: scale(1.05);
     }
 
   .video-page {
