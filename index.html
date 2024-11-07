@@ -1,4 +1,4 @@
-以下是修改后的代码，为书的左边添加了厚度的效果：
+以下是修改后的代码，使分页导航中数字 1 和其他数字的整体元素尺寸相同：
  
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +32,7 @@
       height: 100%;
       position: absolute;
       left: -50px;
-      background-color: rgba(255, 0, 0, 0.4); 
+      background-color: rgba(255, 0, 0, 0.4);
       box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
     }
 
@@ -83,6 +83,7 @@
       background-color: rgba(255, 0, 0, 0.4);
       box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
       border-radius: 5px;
+      transform: scale(0.95);
     }
 
  .pagination a {
@@ -95,9 +96,8 @@
       font-size: 14px;
     }
 
- .pagination a.active {
-      background-color: #666;
-      color: #fff;
+ .pagination a:first-child {
+      font-size: 14px; /* 确保 1 和其他数字字体大小相同 */
     }
 
     @keyframes flipPage {
