@@ -1,4 +1,4 @@
-以下是修改后的代码，添加了手机滑动翻页的功能：
+以下是修改后的代码，调整了视频页面中视频的大小，使其不会影响到分页导航：
  
 <!DOCTYPE html>
 <html lang="en">
@@ -71,8 +71,8 @@
     }
 
   .video-page video {
-      width: 100%;
-      height: 100%;
+      width: 80%;
+      height: 60vh;  /* 调整视频高度，避免影响分页导航 */
     }
 
   .pagination {
