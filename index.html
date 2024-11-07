@@ -1,5 +1,7 @@
-以下是修改后的代码，将分页导航放置在书中，并缩小了其尺寸：
+以下是修改后的代码，增加了书的厚重感，设置书的颜色为透明红，并设计了具有凹凸感且颜色更深的透明红分页导航：
  
+html
+  
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,6 +24,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3); /* 增加厚重感 */
+      background-color: rgba(255, 0, 0, 0.2); /* 透明红 */
     }
 
   .page {
@@ -68,7 +72,8 @@
       bottom: 20px;
       left: 20px;
       padding: 10px;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(255, 0, 0, 0.4); /* 较深的透明红，有凹凸感 */
+      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
       border-radius: 5px;
     }
 
