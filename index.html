@@ -1,5 +1,4 @@
-
-  
+ 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,7 +18,7 @@
       height: 100vh;
     }
 
- .card-container {
+  .card-container {
       width: 80%;
       max-width: 600px;
       height: 80vh;
@@ -28,7 +27,7 @@
       align-items: center;
     }
 
- .card {
+  .card {
       width: 100%;
       height: 100%;
       background-color: #fff;
@@ -45,31 +44,31 @@
       overflow: hidden;
     }
 
- .card:hover {
+  .card:hover {
       transform: scale(1.05);
     }
 
- .card-text {
+  .card-text {
       font-size: 18px;
       color: #333;
       word-break: break-all;
       overflow: hidden;
     }
 
- .card-video {
+  .card-video {
       width: 100%;
       height: 100%;
     }
 
- .card:nth-child(odd) {
+  .card:nth-child(odd) {
       box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.05), -4px -4px 8px rgba(255, 255, 255, 0.8);
     }
 
- .card:nth-child(even) {
+  .card:nth-child(even) {
       box-shadow: -4px -4px 8px rgba(0, 0, 0, 0.05), 4px 4px 8px rgba(255, 255, 255, 0.8);
     }
 
- .lemon {
+  .lemon {
       width: 50px;
       height: 50px;
       background-size: cover;
@@ -123,7 +122,7 @@
   <script>
     // 掉落柠檬的函数
     function createLemonDrop() {
-      for (let i = 0; i < 10; i++) {  // 这里设置为 10 个柠檬，您可以根据需要修改
+      for (let i = 0; i < 5; i++) {  // 这里设置为 10 个柠檬，您可以根据需要修改
         let lemon = document.createElement('div');
         lemon.classList.add('lemon');
         lemon.style.left = Math.random() * window.innerWidth + 'px';
@@ -140,7 +139,7 @@
 
         let animation = setInterval(() => {
           velocity += gravity;
-          let newTop = lemon.offsetTop + velocity;
+          let newTop = parseInt(lemon.style.top) + velocity;  // 确保新的顶部位置是整数
 
           if (newTop > window.innerHeight - 50) {  // 碰到底部
             velocity = -velocity * bounce;  // 反向并减弱速度
