@@ -1,4 +1,6 @@
-
+以下是为您重新优化的新拟态风格的代码，对光影效果进行了进一步的调整：
+ 
+html
   
 <!DOCTYPE html>
 <html lang="en">
@@ -6,272 +8,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我本菜鸟</title>
+  <title>Card Reader</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #001f3f;  /* 深蓝色背景 */
+      background-color: #f5f5f5;
       margin: 0;
       padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-  .book {
-      width: 100%;
-      height: 100vh;
+  .card-container {
+      width: 80%;
+      max-width: 600px;
+      height: 80vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
-      background-color: rgba(0, 25, 63, 0.2);  /* 偏冷的书背景色 */
     }
 
-  .book::before {
-      content: "";
-      width: 50px;
+  .card {
+      width: 100%;
       height: 100%;
-      position: absolute;
-      left: -50px;
-      background-color: rgba(0, 30, 95, 0.4);  /* 更深的冷色 */
-      box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
-    }
-
-  .page {
-      width: 80%;
-      height: 80vh;
-      background-color: rgba(25, 35, 55, 0.6);  /* 冷色调页面背景 */
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      background-color: #fff;
+      box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.05), -8px -8px 16px rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
       padding: 20px;
-      position: absolute;
-      transform-style: preserve-3d;
-      transition: transform 0.5s ease;
-      backface-visibility: hidden;
-      overflow: hidden;  /* 新增，隐藏溢出内容 */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s ease;
+      cursor: pointer;
     }
 
-  .page h2 {
-      margin-top: 0;
-      color: #ccd6eb;  /* 冷色调文字颜色 */
+  .card:hover {
+      transform: scale(1.05);
     }
 
-  .page p {
-      font-size: 16px;
-      color: #ccd6eb;  /* 冷色调文字颜色 */
-      word-wrap: break-word;  /* 自动换行 */
-      line-height: 1.5;  /* 行高，使布局更合理 */
+  .card-text {
+      font-size: 18px;
+      color: #333;
     }
 
-  .video-page {
-      width: 80%;
-      height: 80vh;
-      background-color: rgba(25, 35, 55, 0.6);  /* 冷色调页面背景 */
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-      padding: 20px;
-      position: absolute;
-      transform-style: preserve-3d;
-      transition: transform 0.5s ease;
-      backface-visibility: hidden;
-      display: none;
-      
-     
+  .card-video {
+      width: 100%;
+      height: 100%;
     }
 
-  .video-page video {
-      width: 80%;
-      height: 60vh;
+  .card:nth-child(odd) {
+      box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.05), -4px -4px 8px rgba(255, 255, 255, 0.8);
     }
 
-  .pagination {
-      position: absolute;
-      bottom: 40px;
-      left: 20px;
-      padding: 10px;
-      background-color: rgba(0, 30, 95, 0.4);  /* 冷色调分页导航背景 */
-      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
-      border-radius: 5px;
-      transform: scale(0.95);
-    }
-
-  .pagination a {
-      display: inline-block;
-      padding: 5px 10px;
-      background-color: rgba(25, 35, 55, 0.8);  /* 冷色调分页按钮背景 */
-      color: #ccd6eb;  /* 冷色调文字颜色 */
-      text-decoration: none;
-      margin: 0 5px;
-      font-size: 14px;
-    }
-
-  .pagination a:first-child {
-      font-size: 14px;
-    }
-
-    @keyframes flipPage {
-      0% {
-        transform: rotateY(0deg);
-      }
-
-      100% {
-        transform: rotateY(180deg);
-      }
+  .card:nth-child(even) {
+      box-shadow: -4px -4px 8px rgba(0, 0, 0, 0.05), 4px 4px 8px rgba(255, 255, 255, 0.8);
     }
   </style>
 </head>
 
 <body>
-  <div class="book">
-    <!-- 第 1 页（文章） -->
-    <div id="page1" class="page">
-      <h2>第 1 页</h2>
-      <p onmouseup="copyText(this)">
-        <!-- 只显示前 80 个字 -->
-  U2FsdGVkX1+RErdjVLCqBG/VipMRHEH03B3GlPxEboYZIRZa7M4hLI+Vvt/s/1qYkL6xELlSesvvIk53Lanv4452mc8d0ws6ktLANGgZaQxkBj0QXGGrcfswYIDcLLu3L/gROBhzLJI2juDWtSQtga+URm0no6V0MTKwF/X8lUAR/uETecoDxsls4ayeOJGToc59UtItHiT70XNSjMwIUknvv+etG20SS85voSMRdFcj2zgHiAb1YRipDxAA77/I+yd8gvZHS95XEfHaIy/NrTSYnJWyHAa+9r5k7G7oqeHa7I+D7ACzg/082FoWFzP9dhbY86F3DxIsLZS07RRzZKfOV3n+25QCf874xxi3TAboaaQTxZdLTwqRzzhvWGYStj4MWyWjMJT/Tu6lfVP9vAITy7mT+YeSg6SSPZFeEECA63CKwv+ZrAkXY95+JNzSN4Dhs7sHifNMhbmEIc5AHjemlFP+vXS/VyKAvryOWeg++w5eeNUbxtUa3QSwiEquAALl8JKd5alKli0qYqcH6hkZ9ZKatxkKG/Oq6zhCqtnM5vchlq3G5Av1mjoC2X01L00S53y4IiTxELQXBkv+aMy0khz/DLb5FDyO3iKFAEPYHJXQzrI7oqFverrT3iqKLbKItpFIJzcNgpyeKgR79CE/DQ5n3topTudemlyyfSZ3jthxf7hwVLt+lDL8X6zLc8qBb3fkCveFRcFyPV9Kte0s5YCjHWa0kBwufH36elpD+KV7/VpZOTsBIVwl1E4mOrwaNdPuXMYCpORtwVmT9YqWcVlTaM7MR1CosPaXg57KMeDYXgFXqUHeUiaUpqmR3q84meZNWrDDiJ0KD0zG469K2cnzowgc/OrkYb5ogsFFWvOr4qzmO7RC4Q8Pv1SgAeCzMRlhEsQd7MNq5/imZTwUyKTOdF3KNpXxxzHDXP/7waSOfHvEvfhg3Dc7t/2ekhGrcldd2vPn6CtsmLFVpgfiNzxpFJ7193DM/jdRB2WiNcfq17VVonD8H6916CS0o4J/+NqvHBAiiafDFkDPBKAyemrdHPTqtrxH5GcaEVNcOFvIEPvC/5F0cl6nwEuEnYsXffGVa7Rs3aOo1GmuNvitAX6Red2ECq0MucKPqeQmYMzOM3fRDObvbeTvPAppHDX5nazrFrBejxi1dJthWu4l0SN1roey42XUcqD6s9pO+6EFm5V32JCjBzXpGbjE+32yDnyFVPnfSDcQarKOZdul28DEhkcf5YxnwZkJhU0jlZ022CyvgZ6RcRh/8yRe
-      </p>
+  <div class="card-container">
+    <!-- 卡片 1 -->
+    <div class="card">
+      <div class="card-text">这是卡片 1 的文字内容</div>
     </div>
-
-    <!-- 第 2 页（文章） -->
-    <div id="page2" class="page">
-      <h2>第 2 页</h2>
-      <p onmouseup="copyText(this)">
-        <!-- 只显示前 100 个字 -->
-        U2FsdGVkX1+mqq8fqBmbWObbY042PMl/fqv7UCsxAX/0IaAgcx/zWHv2CHOUXLukWTFYYahjBZoyeL2r/+VbOcw4Hvgl0nWvTeSuaiVYKO5/VPz8XUhmfPwi2JYIg+WbWLF/0UE69O9Vep8cAhjSaoR/MC0WzINtBOyC8U9Q2B9ZtzqOTyfUz3GA42Ksrt7Q/SL8y6UPxuo71HNoHXfdPUW48cfIfRlLXlVvFXYINJpS3l1IM/w+nF5uC/qEU/RTQyFdOlEvBtg7m1kPgVVay7tUzE6dLDfXXdKR4zWnchLFPKBSfjFQPCG72dQg3TBHm9SDTEZyJL5Q53JiTsHpeo/qihl4zeO/aftOWtCY0QJOsrbm1ZRH5g81x2CRhRJck6DcL2sgWVBsljqfHGckbH5AMRLbv0K8yiHi7gxQO0W+0BKjeM3Ng8y+AFWUHLUxmFEzv10zhKs7/JnaGb8duk8q/14obO+RcAokYft+9YA=
-      </p>
+    <!-- 卡片 2 -->
+    <div class="card">
+      <div class="card-text">这是卡片 2 的文字内容</div>
     </div>
-
-    <!-- 第 3 页（文章） -->
-    <div id="page3" class="page">
-      <h2>第 3 页</h2>
-      <p onmouseup="copyText(this)">
-        <!-- 只显示前 100 个字 -->
-        U2FsdGVkX19KbP5Zv6f77GyrxW5ULIY2dLSFGcdSGyVnlfJLrdo1yI902lsWyRoBYVU0doP26Zc3YIVpThWRuLQ8ZfzoSv2fZoYISM5mni6VVLfQMOHxL3p/4+Wt/4Zwo7UUcBBph/RAhDFcBWkY2qupNQtXvn1PUPV8bB6SAgnKSjzd3UTbCnQT3ryF+xO5bdFU9tzRLWqIlAavVdxU93tBqsVORYCk7acufFAp9EnjLqaIh9INIG04O4oBVQAX3MPzvXXLXWmF+n1Tb3ksSPEeyZmUBiCK6E9dbZbN0AcIduVY9DLGyWTU/OFCZuj5nOJhmwvsjVwXIvOkphrYNSMyH6Ur30VBWHjx1MgRBCAeZPudIC6/4KN/2m5iiNTwwObMmu0509uyoWuJMd7a0HObVo6BkV0PknsOiBDsSuS0KB7hy1T8gg7PCWukqj0olIfdsEqfQ7E+tdxB6dP2QStgMsdF6Z4lu1UFZ6NFbBLNtqpNIDDEdgz46hg+HBHr4qmfP408EoQhPfkKkNGYWP/GbZrcZK4ga4itXoulv2rXL0EShXi9GlIfAS0QZFxzlbpMz78+hGIi0WhlG+Tx+FdoGZvTfUXU66Cg9P4oY22ybg5SKSAzbisDM9AnRfzVhuGxLYYS4JD7m6jZ941EYw==
-      </p>
+    <!-- 卡片 3 -->
+    <div class="card">
+      <div class="card-text">这是卡片 3 的文字内容</div>
     </div>
-
-    <!-- 第 4 页（文章） -->
-    <div id="page4" class="page">
-      <h2>第 4 页</h2>
-      <p onmouseup="copyText(this)">
-        <!-- 只显示前 100 个字 -->
-        U2FsdGVkX187Q+8ON1+Y/tiDuNUUNUQL+THycv0K6Yt3cOHU+0r1bvvQ2df+th3hkDIKAxsnt9cAYTwwLSAmgs/X/xhpZT2Wz3YDCGnpB8VRQ6nzfJwKhSOf7LcrrGB72DrxL1nm8jDF5q0nwnTSrpqssfSjFFFnS/uVunDpbYzUW/LCUkz/tb7kjiGFc4S4QmgH6mY6TamdIXnzaTwepts0Uj7RdWtzlmOqpm3huc4cCwFM2lx8lO207X2AM0ual4KBd0TL8qksqD3Cai2G+K2NZmG110IcMzxBMHPFW4mc57qW1Vl3qRFp/RhJbIr2OzLJY7jqVXmdF4BKaw4LBY2lHTIw0oK/jeOuscXiG4NhRDJD/lBdQflJ4mWbEgEV
-      </p>
+    <!-- 卡片 4 -->
+    <div class="card">
+      <div class="card-text">这是卡片 4 的文字内容</div>
     </div>
-
-    <!-- 第 5 页（文章） -->
-    <div id="page5" class="page">
-      <h2>第 5 页</h2>
-      <p onmouseup="copyText(this)">
-        <!-- 只显示前 80 个字 -->
-U2FsdGVkX1+o2lPRu8jxnHEIbLNN4vWBaKrgX5RH1zFECcNo2JZF0vq8v20T8X+B/WWpn2/fwiN0rTZ7Sr80O8iet1Bam0S9+3dSH2X9NpuVHY4GR/yz3/ChGLQJrSpr3EXgKpUvC03RajLnvTRxXfWM8d4WFKuGKIAjG3a32Byf6VmTQT4jjdpL4jhnHgva4Rm6RQzPgMMiSqTfg7d90OS4cf9z1X2e/Y40uqnXJ1k1MjLX9Jgq9oKgEC0CzafZcnm9Kl2kszEhsEyaIaIAYeBsd2A3AVjuPwYSEBZm78fiqUweOaL0+zTJ8dJspTaeAf7sgfJHEi+8W/GVschzDYFQxfhMbMalP8Kyss+6XoMnpCbj5iiomblVTkktzqqYWzeHf+uB2Tcf1d5pYscaFb+uOJmn4PMQOq5nFUZLvcT8wFM2ya5YRnvsK1XyRIm7zkahtEH6+ucRlASsBmXUCkYlFxnNyXl1CMd0WvlsK6eKSS1TXlhSNMFf6QqdKoUjqq3RjDvId3DF2ONVxyurpC1eP6fY7TLmckCaofP7csKkr3FOvLj/6rKRjVLhtwLGDnQqcKrO1LNkPNStacLWxZI2jlcKFU/SHU97d+IOeiLc+2lMP6v8FXOWEg39B+jZMzoigZuOz0SlpRxqL8JL3NWFMI3mWLRS1pi0r86k4U16fKvHOUDKicdhIxXL501owYJNNtQgR3WWnPXoKj0krdyxJGA5BggpN6PDd0d3dr8R5VYa9YKmYuAOB9cgb30JwDYLBHkVzeWLK/GKptvzF1UzdP9oy38z3LVnzFE2KUxZ9rP1oYLaTsRucWXGWEG0hdLRgXnplL2UhWXNvO4HdGdPyaldOcxzcVSOk0bqZXEZKnuFt05Yyw4KOw0N18yT6phnCDUxbYQBwTnxXDdqDU6RgpoQOPQkZsJk9eNbPm0ljkdi1gqt8ojr/RKzywFPqLB2LXQm5+zghCQaEihC8EStyKqc13MzlIfbPJtEr2rlfqA2o2cnAjcNbrhcH9vasxghnl0WkwwzVXjD7ygqt7Amaz7SSbcO/sM6xfXt8jf8WoO2AJg7ufIhziwX+5HBRksf7s+dZHJ0woEXylxKm9p+FEq/p2NxEU2zgMIBcqKHDgp9v2vQOfEsSiZhcG4R/cYpbWGqp3p0r9gSDZdHMw==
-  
-      </p>
+    <!-- 卡片 5 -->
+    <div class="card">
+      <div class="card-text">这是卡片 5 的文字内容</div>
     </div>
-
-    <!-- 第 6 页（文章） -->
-    <div id="page6" class="page">
-      <h2>第 6 页</h2>
-      <p onmouseup="copyText(this)">
-        <!-- 只显示前 100 个字 -->
-        U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=
-        
-  ★★★★★
-  U2FsdGVkX1+mZNubv5QrvlI01Hf6FDvy3Wfz1xTNdfTmIasXqbdrqy0WVYXt0T3kgKnDkTltAh1vUjUgEcMyoqLeSgniwldLMdkfej9cQBbpqO1zQXye2KVkhNb9QKRnRwXpvke60TM80uM1EjTbwLIwra62jhuxrTWgohrCWHWlg9Bbdalm3YmdexniVzgCrbkVeUrFmmAzSmFGNdbTnFEYb++Alw6bQcnWgNm8BGrLK2RuJuXjx7B5pcgu1+Qd
-      </p>
+    <!-- 卡片 6 -->
+    <div class="card">
+      <div class="card-text">这是卡片 6 的文字内容</div>
     </div>
-
-    <!-- 第 7 页（视频） -->
-    <div id="page7" class="video-page">
-      <video controls>
-        <source src="/xiaoai/lv_0_20241105155404.mp4" type="video/mp4">
-        您的浏览器不支持视频播放。
+    <!-- 卡片 7 -->
+    <div class="card">
+      <video class="card-video" controls>
+        <source src="your_video.mp4" type="video/mp4">
+        您的浏览器不支持视频播放
       </video>
     </div>
-
-    <!-- 第 8 页（视频） -->
-    <div id="page8" class="video-page">
-      <video controls>
-        <source src="/xiaoai/1.mp4" type="video/mp4">
-        您的浏览器不支持视频播放。
+    <!-- 卡片 8 -->
+    <div class="card">
+      <video class="card-video" controls>
+        <source src="your_another_video.mp4" type="video/mp4">
+        您的浏览器不支持视频播放
       </video>
-    </div>
-
-    <div class="pagination">
-      <a href="javascript:changePage(1)" class="active">1</a>
-      <a href="javascript:changePage(2)">2</a>
-      <a href="javascript:changePage(3)">3</a>
-      <a href="javascript:changePage(4)">4</a>
-      <a href="javascript:changePage(5)">5</a>
-      <a href="javascript:changePage(6)">6</a>
-      <a href="javascript:changePage(7)">7</a>
-      <a href="javascript:changePage(8)">8</a>
     </div>
   </div>
 
   <script>
-    // 全局变量，记录当前页码
-    let currentPage = 1;
+    // 获取所有卡片
+    var cards = document.querySelectorAll('.card');
 
-    // 翻页函数
-    function changePage(pageNumber) {
-      let currentDiv = document.getElementById(`page${currentPage}`);
-      currentDiv.style.transform = 'rotateY(180deg)';
-
-      setTimeout(() => {
-        currentPage = pageNumber;
-
-        // 隐藏所有页面
-        for (let i = 1; i <= 8; i++) {
-          document.getElementById(`page${i}`).style.display = 'none';
-        }
-
-        // 显示当前页面
-        document.getElementById(`page${currentPage}`).style.display = 'block';
-        document.getElementById(`page${currentPage}`).style.transform = 'rotateY(0deg)';
-      }, 500);
-    }
-
-    // 页面加载时显示第一页
-    window.onload = function () {
-      changePage(1);
-    };
-
-    // 手机滑动事件处理
-    let startX, startY;
-
-    document.addEventListener('touchstart', function (e) {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
+    // 为每个卡片添加双击事件监听器
+    cards.forEach(function(card) {
+      card.addEventListener('dblclick', function() {
+        var currentCard = this;
+        var nextCard = currentCard.nextElementSibling || cards[0];
+        currentCard.style.transform = 'rotateY(180deg)';
+        setTimeout(function() {
+          currentCard.style.display = 'none';
+          nextCard.style.display = 'flex';
+          nextCard.style.transform = 'rotateY(0deg)';
+        }, 500);
+      });
     });
-
-    document.addEventListener('touchmove', function (e) {
-      let endX = e.touches[0].clientX;
-      let endY = e.touches[0].clientY;
-
-      if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
-        if (endX < startX) {
-          if (currentPage < 8) {
-            changePage(currentPage + 1);
-          }
-        } else {
-          if (currentPage > 1) {
-            changePage(currentPage - 1);
-          }
-        }
-      }
-    });
-
-    // 点击文章复制内容的函数
-    function copyText(element) {
-      let range = document.createRange();
-      range.selectNodeContents(element);
-      let selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-      document.execCommand('copy');
-      selection.removeAllRanges();
-    }
   </script>
 </body>
 
 </html>
- 
- 
