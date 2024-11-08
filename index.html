@@ -72,8 +72,7 @@
       transition: transform 0.5s ease;
       backface-visibility: hidden;
       display: none;
-      
-     
+
     }
 
   .video-page video {
@@ -83,8 +82,9 @@
 
   .pagination {
       position: absolute;
-      top: 20px;  /* 移动到顶部，距离顶部 20 像素 */
-      left: 20px;  /* 左侧位置 */
+      bottom: 20px;  /* 移动到底部，距离底部 20 像素 */
+      left: 50%;  /* 水平居中 */
+      transform: translateX(-50%);  /* 修正水平居中的偏移 */
       padding: 10px;
       background-color: rgba(0, 30, 95, 0.4);  /* 冷色调分页导航背景 */
       box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
