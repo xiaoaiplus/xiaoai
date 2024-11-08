@@ -114,8 +114,45 @@
       </video>
     </div>
   </div>
-
+   
   <script>
+    // 全局镭射灯效果函数
+    function createLaserLight() {
+      var laser = document.createElement('div');
+      laser.style.position = 'absolute';
+      laser.style.width = '2px';
+      laser.style.height = '20px';
+      laser.style.backgroundColor ='red';
+      laser.style.borderRadius = '1px';
+      document.body.appendChild(laser);
+
+      // 随机起始位置
+      var startX = Math.random() * window.innerWidth;
+      var startY = Math.random() * window.innerHeight;
+
+      laser.style.left = startX + 'px';
+      laser.style.top = startY + 'px';
+
+      setInterval(function() {
+        var angle = Math.random() * 360;
+        var distance = 10;
+
+        var newX = startX + distance * Math.cos(angle * Math.PI / 180);
+        var newY = startY + distance * Math.sin(angle * Math.PI / 180);
+
+        if (newX < 0 || newX > window.innerWidth || newY < 0 || newY > window.innerHeight) {
+          startX = Math.random() * window.innerWidth;
+          startY = Math.random() * window.innerHeight;
+        } else {
+          laser.style.left = newX + 'px';
+          laser.style.top = newY + 'px';
+        }
+      }, 50);
+    }
+
+    // 页面加载时调用创建镭射灯
+    window.onload = createLaserLight;
+    
     // 获取所有卡片
     var cards = document.querySelectorAll('.card');
 
