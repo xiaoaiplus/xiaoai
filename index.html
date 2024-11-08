@@ -1,11 +1,11 @@
-
+ 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Card Reader</title>
+  <title>我本菜鸟</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -40,6 +40,7 @@
       align-items: center;
       transition: transform 0.3s ease;
       cursor: pointer;
+      position: relative;
     }
 
   .card:hover {
@@ -117,15 +118,30 @@
 
     // 为每个卡片添加双击事件监听器
     cards.forEach(function(card) {
-      card.addEventListener('dblclick', function() {
-        var currentCard = this;
-        var nextCard = currentCard.nextElementSibling || cards[0];
-        currentCard.style.transform = 'rotateY(180deg)';
-        setTimeout(function() {
-          currentCard.style.display = 'none';
-          nextCard.style.display = 'flex';
-          nextCard.style.transform = 'rotateY(0deg)';
-        }, 500);
+      card.addEventListener('dblclick', function(event) {
+        var rect = card.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var width = rect.width;
+
+        if (x < width / 2) {
+          // 点击左半边，往前翻
+          var prevCard = card.previousElementSibling || cards[cards.length - 1];
+          card.style.transform = 'rotateY(180deg)';
+          setTimeout(function() {
+            card.style.display = 'none';
+            prevCard.style.display = 'flex';
+            prevCard.style.transform = 'rotateY(0deg)';
+          }, 500);
+        } else {
+          // 点击右半边，往后翻
+          var nextCard = card.nextElementSibling || cards[0];
+          card.style.transform = 'rotateY(180deg)';
+          setTimeout(function() {
+            card.style.display = 'none';
+            nextCard.style.display = 'flex';
+            nextCard.style.transform = 'rotateY(0deg)';
+          }, 500);
+        }
       });
     });
   </script>
