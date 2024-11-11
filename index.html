@@ -1,4 +1,5 @@
-
+以下是修改后的代码：
+ 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,7 +19,7 @@
       height: 100vh;
     }
 
- .card-container {
+    #card-container {
       width: 80%;
       max-width: 600px;
       height: 80vh;
@@ -27,7 +28,7 @@
       align-items: center;
     }
 
- .card {
+  .card {
       width: 100%;
       height: 100%;
       background-color: #fff;
@@ -40,47 +41,38 @@
       align-items: center;
       transition: transform 0.3s ease;
       cursor: pointer;
-      position: relative;   
-      overflow: hidden; /* 隐藏超出部分的内容 */
-      text-overflow: ellipsis; /* 超出部分显示省略号 */
+      position: relative;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
- .card:hover {
+  .card:hover {
       transform: scale(1.05);
     }
 
- .card-text {
+  .card-text {
       font-size: 18px;
       color: #333;
       word-break: break-all;
-      overflow: hidden;
     }
 
- .card-video {
+  .card-video {
       width: 100%;
       height: 100%;
     }
 
- .card:nth-child(odd) {
+  .card:nth-child(odd) {
       box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.05), -4px -4px 8px rgba(255, 255, 255, 0.8);
     }
 
- .card:nth-child(even) {
+  .card:nth-child(even) {
       box-shadow: -4px -4px 8px rgba(0, 0, 0, 0.05), 4px 4px 8px rgba(255, 255, 255, 0.8);
-    }
-
- .lemon {
-      width: 50px;
-      height: 50px;
-      background-image: `url('lemon.jpg')`;  // 替换为实际可用的在线柠檬图片地址
-      background-size: cover;
-      position: absolute;
     }
   </style>
 </head>
 
 <body>
-  <div class="card-container">
+  <div id="card-container">
     <!-- 卡片 1 -->
     <div class="card" style="display: flex;">
       <div class="card-text">U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=
@@ -125,83 +117,32 @@
   </div>
 
   <script>
-    // 掉落柠檬的函数
-    function createLemonDrop() {
-      for (let i = 0; i < 10; i++) {  // 这里设置为 10 个柠檬，您可以根据需要修改
-        let lemon = document.createElement('div');
-        lemon.classList.add('lemon');
-        lemon.style.left = Math.random() * window.innerWidth + 'px';
-        document.body.appendChild(lemon);
+    // 页面加载时生成随机全局渐变色
+    window.onload = function () {
+      var randomColor1 = '#' + Math.floor(Math.random()*16777215).toString(16);
+      var randomColor2 = '#' + Math.floor(Math.random()*16777215).toString(16);
+      document.body.style.background = `linear-gradient(to bottom right, ${randomColor1}, ${randomColor2})`;
+    };
 
-        let initialTop = -50;  // 从页面顶部外开始掉落
-        lemon.style.top = initialTop + 'px';
-
-        let gravity = 0.5;  // 重力加速度
-        let bounce = 0.8;  // 弹跳系数
-
-        let velocity = 0;  // 初始速度
-
-        let animation = setInterval(() => {
-          velocity += gravity;
-          let newTop = lemon.offsetTop + velocity;
-
-          if (newTop > window.innerHeight - 50) {  // 碰到底部
-            velocity = -velocity * bounce;  // 反向并减弱速度
-          }
-
-          if (newTop <= window.innerHeight - 50 && velocity >= 0) {  // 稳定在底部
-            clearInterval(animation);
-          } else {
-            lemon.style.top = newTop + 'px';
-          }
-        }, 10);
+    // 访问密码验证
+    function verifyPassword() {
+      var password = prompt('请输入访问密码：');
+      if (password === 'xiaoai') {
+        // 密码正确，显示所有卡片
+        var cards = document.querySelectorAll('.card');
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].style.display = 'flex';
+        }
+      } else {
+        alert('密码错误，请重新输入。');
       }
     }
 
-    // 页面加载时调用创建柠檬掉落动画
-    window.onload = createLemonDrop;
+    // 页面加载时调用密码验证函数
+    window.onload = function () {
+      verifyPassword();
+    };
 
-    // 获取所有卡片
-    var cards = document.querySelectorAll('.card');
-
-    // 初始显示第一张卡片，其余隐藏
-    cards[0].style.display = 'flex';
-
-    // 为每个卡片添加双击事件监听器
-    cards.forEach(function(card) {
-      card.addEventListener('dblclick', function(event) {
-        var rect = card.getBoundingClientRect();
-        var x = event.clientX - rect.left;
-        var width = rect.width;
-
-        if (x < width / 2) {
-          // 点击左半边，往前翻
-          var prevCard = card.previousElementSibling || cards[cards.length - 1];
-          card.style.transform = 'rotateY(180deg)';
-          setTimeout(function() {
-            card.style.display = 'none';
-            prevCard.style.display = 'flex';
-            prevCard.style.transform = 'rotateY(0deg)';
-          }, 500);
-        } else {
-          // 点击右半边，往后翻
-          var nextCard = card.nextElementSibling || cards[0];
-          card.style.transform = 'rotateY(180deg)';
-          setTimeout(function() {
-            card.style.display = 'none';
-            nextCard.style.display = 'flex';
-            nextCard.style.transform = 'rotateY(0deg)';
-          }, 500);
-        }
-      });
-    });
-    
-    // 限制每个卡片的文本显示 10 个字
-    cards.forEach(function(card) {
-      var cardText = card.querySelector('.card-text');
-      var fullText = cardText.innerHTML;
-      cardText.innerHTML = fullText.slice(0, 10) + '...';
-    });
     // 处理选择和复制操作
     document.addEventListener('copy', function (event) {
       // 获取当前选择的范围
@@ -212,8 +153,18 @@
         // 如果当前卡片文本元素在选择范围内
         if (selection.containsNode(cardText, true)) {
           // 将原始的完整内容设置为复制的内容
-          cardText.innerHTML = cardText.originalText;
+          cardText.innerHTML = cardText.textContent;
         }
+      }
+    });
+
+    // 修复卡片显示 10 个字的问题
+    var cards = document.querySelectorAll('.card');
+    cards.forEach(function(card) {
+      var cardText = card.querySelector('.card-text');
+      var fullText = cardText.textContent;
+      if (fullText.length > 10) {
+        cardText.innerHTML = fullText.slice(0, 10) + '...';
       }
     });
   </script>
