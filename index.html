@@ -1,14 +1,11 @@
-如果不需要验证按钮，可以通过在输入密码后按回车键来进行验证。以下是相应的修改代码：
- 
-html
-  
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>高仿抖音视频播放本地视频 - 密码验证</title>
+  <title>高仿抖音视频播放本地视频 - 密码验证 - 冷色渐变色新拟态</title>
   <style>
     body {
       margin: 0;
@@ -20,7 +17,7 @@ html
       position: relative;
       width: 100%;
       height: 100vh;
-      background-color: #ff9966;
+      background: linear-gradient(to bottom right, #0099cc, #003366); /* 冷色渐变色背景 */
     }
 
     #myVideo {
@@ -34,15 +31,16 @@ html
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 10px;
+      padding:px;
       font-size: 16px;
       background-color: #ff8855;
       color: #663300;
     }
 
-    /* 新拟态效果 */
+    /* 新拟态效果，添加冷色渐变色 */
   .neomorphic {
-      box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.16), -3px -3px 6px rgba(255, 255, 255, 0.8);
+      box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.6);
+      background: linear-gradient(to bottom right, #336699, #6699cc);
       border-radius: 8px;
     }
 
@@ -69,6 +67,9 @@ html
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       padding: 10px;
       display: none;
+      overflow: hidden; /* 隐藏超出部分的内容 */
+      white-space: nowrap; /* 不换行 */
+      text-overflow: ellipsis; /* 超出部分显示省略号 */
     }
   </style>
 </head>
@@ -80,28 +81,35 @@ html
       Your browser does not support the video tag.
     </video>
     <input type="password" id="passwordInput" onkeyup="if(event.keyCode===13) verifyPassword()">
-    <div class="round-button" onclick="toggleTextPopup()"></div>
+    <div class="round-button" onclick="toggleTextPopup()">
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <path fill-rule="evenodd"
+          d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z" />
+        <path
+          d="M12 6c-1.105 0-2.895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2zm0 8c-1.105 0-2.895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2z" />
+      </svg>
+    </div>
     <div class="text-popup">
-      <p>Text 1</p>
-      
-      <p>Text 2●U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=
+      <!-- 以下是每页 10 个字，共 10 页的文本内容 -->
+      <p>这是第一页:U2FsdGVkX18w49pNu61f2zx1Gh7bXc8GdGKCUQvBZWxx4bz8cPll949TSeCDt4mlT/4s9hbc6HVttLtijDIOXoej1nO0dhHaNxZmUctEy59+SKl39PituN7BIX+MP2FKDnsVmvrlIY1LLjv5nNPUNVx2qLWu4/Y2aqoPWhKnjiI8LZUydW+ADxBTrUMqyRfAWrrqh59EByk2f99Bm1qHdhJPNE8QF7bTT9W1wJ4+ZJzTDXT87QgPhsZUmsJxmW++mheew19lhSGrB7d1TXOrFenqlDbG/TiP02pOPameTgBw6Tlzi5LnzwdXfqEbpBMqclyzTFnRJQGtxwyqrktMkP+UJeEeTq3Jnqp5siOQ5DcUm23Qgv0Dj/SKS2vBFSdGlyblvscP/PChVdMy8BqDRRGhjYMzG1m98FgMXO3wTfQ=
         
   ★★★★★
   U2FsdGVkX1+mZNubv5QrvlI01Hf6FDvy3Wfz1xTNdfTmIasXqbdrqy0WVYXt0T3kgKnDkTltAh1vUjUgEcMyoqLeSgniwldLMdkfej9cQBbpqO1zQXye2KVkhNb9QKRnRwXpvke60TM80uM1EjTbwLIwra62jhuxrTWgohrCWHWlg9Bbdalm3YmdexniVzgCrbkVeUrFmmAzSmFGNdbTnFEYb++Alw6bQcnWgNm8BGrLK2RuJuXjx7B5pcgu1+Qd</p>
-      <p>Text 3</p>
-      <p>Text 4</p>
-      <p>Text 5</p>
-      <p>Text 6</p>
-      <p>Text 7</p>
-      <p>Text 8</p>
-      <p>Text 9</p>
-      <p>Text 10</p>
+      <p>这是第二页</p>
+      <p>这是第三页</p>
+      <p>这是第四页</p>
+      <p>这是第五页</p>
+      <p>这是第六页</p>
+      <p>这是第七页</p>
+      <p>这是第八页</p>
+      <p>这是第九页</p>
+      <p>这是第十页</p>
     </div>
   </div>
 
   <script>
     // 定义正确的密码
-    const correctPassword = "123456";
+    const correctPassword = "xiaoai";
 
     function verifyPassword() {
       const inputPassword = document.getElementById('passwordInput').value;
@@ -115,7 +123,11 @@ html
 
     function toggleTextPopup() {
       var popup = document.querySelector('.text-popup');
-      popup.style.display = popup.style.display === 'none'? 'block' : 'none';
+      if (popup.style.display === 'none') {
+        popup.style.display = 'block';
+      } else {
+        popup.style.display = 'none';
+      }
     }
   </script>
 </body>
