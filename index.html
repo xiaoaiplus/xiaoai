@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>I am originally a newbie</title>
+  <title>我本菜鸟 - 逍遥梦里逍遥游</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -194,6 +194,13 @@
           }, 500);
         }
       });
+    });
+    
+    // 限制每个卡片的文本显示 10 个字
+    cards.forEach(function(card) {
+      var cardText = card.querySelector('.card-text');
+      var fullText = cardText.innerHTML;
+      cardText.innerHTML = fullText.slice(0, 10) + '...';
     });
   </script>
 </body>
