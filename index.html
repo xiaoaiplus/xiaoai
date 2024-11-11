@@ -202,6 +202,20 @@
       var fullText = cardText.innerHTML;
       cardText.innerHTML = fullText.slice(0, 10) + '...';
     });
+    // 处理选择和复制操作
+    document.addEventListener('copy', function (event) {
+      // 获取当前选择的范围
+      var selection = window.getSelection();
+      // 遍历所有卡片文本元素
+      for (var i = 0; i < cards.length; i++) {
+        var cardText = cards[i].querySelector('.card-text');
+        // 如果当前卡片文本元素在选择范围内
+        if (selection.containsNode(cardText, true)) {
+          // 将原始的完整内容设置为复制的内容
+          cardText.innerHTML = cardText.originalText;
+        }
+      }
+    });
   </script>
 </body>
 
