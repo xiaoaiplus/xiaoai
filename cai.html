@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新拟态博客</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e0e5ec;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1, h2, p {
+            margin: 0;
+        }
+
+        /* 新拟态效果 */
+        .card {
+            background: #e0e5ec;
+            border-radius: 15px;
+            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), -8px -8px 15px rgba(255, 255, 255, 0.7);
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px;
+        }
+
+        /* 卡片内容 */
+        .blog-post {
+            background-color: #e0e5ec;
+            border-radius: 15px;
+            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.1), -8px -8px 15px rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .blog-post:hover {
+            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2), -10px -10px 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .blog-post h2 {
+            color: #4a4a4a;
+            font-size: 1.8em;
+        }
+
+        .blog-post p {
+            color: #5a5a5a;
+            font-size: 1.1em;
+        }
+
+        /* 博客列表 */
+        .blog-list {
+            width: 100%;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .blog-list li {
+            margin-bottom: 20px;
+        }
+
+        /* 标题样式 */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #4a4a4a;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        /* 页面底部 */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 1em;
+            color: #666;
+        }
+
+        footer a {
+            text-decoration: none;
+            color: #4a4a4a;
+        }
+
+        footer a:hover {
+            color: #0088cc;
+        }
+
+        /* 翻页按钮 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background-color: #e0e5ec;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #0088cc;
+            color: white;
+        }
+
+        /* 手机适配 */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .blog-post h2 {
+                font-size: 1.5em;
+            }
+
+            .blog-post p {
+                font-size: 1em;
+            }
+
+            .card {
+                width: 95%;
+            }
+
+            .pagination button {
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 页头 -->
+    <header>
+        <h1>我的博客</h1>
+        <p>欢迎来到我的个人博客！</p>
+    </header>
+
+    <!-- 博客内容 -->
+    <div class="card">
+        <ul class="blog-list" id="blogList">
+            <!-- 博客文章会在这里动态显示 -->
+        </ul>
+    </div>
+
+    <!-- 翻页按钮 -->
+    <div class="pagination">
+        <button id="prevPage" disabled>上一页</button>
+        <button id="nextPage">下一页</button>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>© 2024 <a href="https://www.example.com" target="_blank">我的博客</a>。所有权利保留。</p>
+    </footer>
+
+    <script>
+        // 所有的博客内容数据
+        const posts = [
+            { title: "第一篇：菜5卧龙🌸", content: "🌷♯板块♯精选♯最下5TIME♯区间净额红♯关联区间5TIME量比绿排序♯有收盘封单L1♯明天进" },
+            { title: "第二篇：菜5凤雏🌸", content: "明天进♯板块♯精选♯强度正排序♯最下时间最后五分钟♯区间净额红♯涨停股量比绿♯（AB概念最好别和上主概念相同♯300W红♯主力买多）" },
+            { title: "第三篇：早盘战法🌸", content: "当天进♯打板♯竞价♯涨停委买额♯前几(换手低)概念B♯昨天有涨停L1♯{无虎量比绿}" },
+            { title: "第四篇：交易技巧🌸", content: "掌握市场趋势♯结合技术面分析♯做好仓位管理♯减少风险" },
+            { title: "第五篇：股市心理学🌸", content: "心理素质对交易影响很大♯保持冷静的头脑和清晰的分析" },
+            { title: "第六篇：短期交易策略🌸", content: "如何在短时间内抓住机会♯快速反应和分析市场变化" },
+            { title: "第七篇：中长期投资策略🌸", content: "适合长期持有的股票选股技巧♯分散投资，降低风险" },
+            { title: "第八篇：资金管理🌸", content: "合理分配资金♯避免重仓单一股票♯保持资金流动性" }
+        ];
+
+        const postsPerPage = 3;  // 每页显示3篇文章
+        let currentPage = 1;  // 当前页数
+
+        // 显示文章
+        function displayPosts(page) {
+            const start = (page - 1) * postsPerPage;
+            const end = page * postsPerPage;
+            const postsToDisplay = posts.slice(start, end);
+
+            const blogList = document.getElementById("blogList");
+            blogList.innerHTML = "";  // 清空当前列表
+
+            postsToDisplay.forEach(post => {
+                const postElement = document.createElement("li");
+                postElement.classList.add("blog-post");
+                postElement.innerHTML = `
+                    <h2>${post.title}</h2>
+                    <p>${post.content}</p>
+                `;
+                blogList.appendChild(postElement);
+            });
+
+            // 更新按钮状态
+            document.getElementById("prevPage").disabled = currentPage === 1;
+            document.getElementById("nextPage").disabled = currentPage * postsPerPage >= posts.length;
+        }
+
+        // 翻到上一页
+        document.getElementById("prevPage").addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayPosts(currentPage);
+            }
+        });
+
+        // 翻到下一页
+        document.getElementById("nextPage").addEventListener("click", () => {
+            if (currentPage * postsPerPage < posts.length) {
+                currentPage++;
+                displayPosts(currentPage);
+            }
+        });
+
+        // 初始化显示第一页
+        displayPosts(currentPage);
+    </script>
+
+</body>
+</html>
