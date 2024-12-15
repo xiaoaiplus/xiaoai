@@ -56,6 +56,27 @@
             background-size: 100%;
             animation: animate 4s ease-in-out infinite;
         }
+        .scan .fingerprint::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 8px;
+            width: 100%;
+            margin-top: -30px;
+            background: #3fefef;
+            border-radius: 8px;
+            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
+            animation: animate_line 4s ease-in-out infinite; /* 荧光棒动画 */
+        }
+        @keyframes animate_line {
+            0%, 100% {
+                top: 0;
+            }
+            50% {
+                top: 100%;
+            }
+        }
         @keyframes animate {
             0%, 100% {
                 opacity: 0;
@@ -90,7 +111,7 @@
             text-align: center;
             font-size: 24px;
             color: #3FEFEF;
-            margin-bottom: 20px;
+            margin: 20px 0; /* 增加上下间距 */
         }
         .blog-post {
             margin: 20px 0;
