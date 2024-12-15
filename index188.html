@@ -26,39 +26,11 @@
             max-width: 400px;
         }
         #fingerprint {
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle at center, #87CEEB, #5B9BD5);
-            border-radius: 50%;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 
-                        0 5px 15px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            position: relative;
+            width: 100px;
+            height: 100px;
             margin: 20px auto;
-            overflow: hidden;
+            cursor: pointer;
         }
-
-        /* 指纹纹路效果 */
-        #fingerprint::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 120%;
-            height: 120%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 20%, transparent 20%),
-                        radial-gradient(circle, rgba(255, 255, 255, 0.2) 20%, transparent 20%);
-            background-size: 100% 100%, 100% 100%;
-            background-position: 0% 0%, 50% 50%;
-            animation: fingerprint-rings 2s infinite linear;
-            border-radius: 50%;
-        }
-
-        @keyframes fingerprint-rings {
-            0% { background-position: 0% 0%, 50% 50%; }
-            100% { background-position: 100% 100%, 0% 0%; }
-        }
-
         .message {
             margin-top: 20px;
             font-size: 18px;
@@ -72,14 +44,133 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .pagination {
-            margin: 30px 0;  /* 增加上下翻页按钮的间距 */
+            margin: 20px 0;
             display: flex;
             justify-content: center;
-            gap: 15px; /* 添加按钮之间的间距 */
         }
         .pagination button {
             flex: 1;
-            max-width: 120px;
-            padding: 10px;
-            border: 2px solid #ccc; /* 浅灰色边框 */
-            background-color: rgba(240
+            max-width: 100px;
+            padding: 8px;
+            border: 2px solid #87CEEB;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .pagination button:hover {
+            background-color: rgba(135, 206, 235, 0.3);
+        }
+        @media (max-width: 600px) {
+            .pagination button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="authContainer">
+        <h1>指纹验证</h1>
+        <img id="fingerprint" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Fingerprint_icon.svg/1024px-Fingerprint_icon.svg.png" alt="指纹图标" onclick="verifyFingerprint()" />
+        <div class="message" id="message">验证中...</div>
+    </div>
+
+    <div class="container" id="blogContainer" style="display: none;">
+        <h1>我的博客</h1>
+        <div id="posts"></div>
+        <div class="pagination">
+            <button id="prevButton" disabled>上一页</button>
+            <button id="nextButton">下一页</button>
+        </div>
+    </div>
+
+    <script>
+        const posts = [
+            { title: "文章 1", content: "这是文章 1 的内容。" },
+            { title: "文章 2", content: "这是文章 2 的内容。" },
+            { title: "文章 3", content: "这是文章 3 的内容。" },
+            { title: "文章 4", content: "这是文章 4 的内容。" },
+            { title: "文章 5", content: "这是文章 5 的内容。" },
+            { title: "文章 6", content: "这是文章 6 的内容。" }
+        ];
+
+        let currentPage = 0;
+        const postsPerPage = 2;
+
+        let fingerprintCount = 0; // 连续按压次数
+        let verificationTimeout; // 定时器
+
+        function verifyFingerprint() {
+            fingerprintCount++; // 每次点击增加计数
+            const messageDiv = document.getElementById('message');
+
+            // 显示"验证中"
+            messageDiv.textContent = "验证中...";
+            messageDiv.style.color = "black";
+
+            if (fingerprintCount === 8) {
+                // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
+                setTimeout(() => {
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('blogContainer').style.display = 'block';
+                    displayPosts();
+                    resetFingerprintCount();
+                }, 5000); // 5000毫秒 = 5秒
+
+            } else if (fingerprintCount > 8) {
+                // 如果点击次数超过8次，显示失败消息并重置计数
+                messageDiv.textContent = "指纹验证失败，请重试。";
+                messageDiv.style.color = "red";
+                resetFingerprintCount();
+            } else {
+                // 每次按压后设置定时器，1秒后判断是否需要重置计数
+                clearTimeout(verificationTimeout);
+                verificationTimeout = setTimeout(() => {
+                    messageDiv.textContent = "指纹验证失败，请重试。";
+                    messageDiv.style.color = "red";
+                    resetFingerprintCount();
+                }, 1000);
+            }
+        }
+
+        function resetFingerprintCount() {
+            fingerprintCount = 0; // 重置计数
+            clearTimeout(verificationTimeout); // 清除定时器
+        }
+
+        function displayPosts() {
+            const postsDiv = document.getElementById('posts');
+            postsDiv.innerHTML = ''; // 清空当前内容
+            const start = currentPage * postsPerPage;
+            const end = start + postsPerPage;
+            const currentPosts = posts.slice(start, end);
+
+            currentPosts.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'blog-post';
+                postDiv.innerHTML = `<h2>${post.title}</h2><p>${post.content}</p>`;
+                postsDiv.appendChild(postDiv);
+            });
+
+            // 更新按钮状态
+            document.getElementById('prevButton').disabled = currentPage === 0;
+            document.getElementById('nextButton').disabled = end >= posts.length;
+        }
+
+        document.getElementById('prevButton').addEventListener('click', function() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayPosts();
+            }
+        });
+
+        document.getElementById('nextButton').addEventListener('click', function() {
+            if ((currentPage + 1) * postsPerPage < posts.length) {
+                currentPage++;
+                displayPosts();
+            }
+        });
+    </script>
+</body>
+</html>
