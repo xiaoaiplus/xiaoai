@@ -123,16 +123,23 @@
         .pagination button {
             flex: 1;
             max-width: 100px;
-            padding: 8px;
-            border: 2px solid #87CEEB;
-            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border: none; /* 去掉默认边框 */
+            background-color: #3FEFEF; /* 背景色与指纹区域一致 */
+            color: #000; /* 按钮文字颜色 */
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* 添加阴影效果 */
         }
         .pagination button:hover {
-            background-color: rgba(135, 206, 235, 0.3);
+            background-color: #2fbfbf; /* 悬停时的背景色变化 */
+            transform: translateY(-2px); /* 悬停时的浮动效果 */
+        }
+        .pagination button:disabled {
+            background-color: rgba(63, 239, 239, 0.5); /* 禁用状态背景色 */
+            cursor: not-allowed; /* 禁用状态光标 */
         }
         @media (max-width: 600px) {
             .pagination button {
