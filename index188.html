@@ -131,7 +131,7 @@
             // 改变指纹图标的背景颜色为天空蓝色
             fingerprintIcon.style.backgroundColor = "#87CEEB"; // SkyBlue 色
 
-            // 只显示"验证中"，不显示数字
+            // 只显示"验证中"
             messageDiv.textContent = "验证中...";
             messageDiv.style.color = "black";
 
@@ -145,6 +145,11 @@
                 displayPosts();
 
                 // 重置计数
+                resetFingerprintCount();
+            } else if (fingerprintCount > 8) {
+                // 如果点击次数超过8次，显示失败消息并重置计数
+                messageDiv.textContent = "指纹验证失败，请重试。";
+                messageDiv.style.color = "red";
                 resetFingerprintCount();
             } else {
                 // 每次按压后设置定时器，1秒后判断是否需要重置计数
