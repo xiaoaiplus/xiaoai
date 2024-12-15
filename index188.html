@@ -35,7 +35,7 @@
             box-shadow: inset 6px 6px 10px rgba(0, 0, 0, 0.2), 
                         inset -6px -6px 10px rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            transition: background-color 0.3s ease; /* 添加过渡效果 */
+            transition: background-color 0.3s ease;
         }
         button {
             padding: 10px 20px;
@@ -131,6 +131,10 @@
             // 改变指纹图标的背景颜色为天空蓝色
             fingerprintIcon.style.backgroundColor = "#87CEEB"; // SkyBlue 色
 
+            // 只显示"验证中"，不显示数字
+            messageDiv.textContent = "验证中...";
+            messageDiv.style.color = "black";
+
             if (fingerprintCount === 8) {
                 messageDiv.textContent = "指纹验证成功！";
                 messageDiv.style.color = "green";
@@ -143,9 +147,6 @@
                 // 重置计数
                 resetFingerprintCount();
             } else {
-                messageDiv.textContent = `验证中...(${fingerprintCount}/8)`;
-                messageDiv.style.color = "black";
-
                 // 每次按压后设置定时器，1秒后判断是否需要重置计数
                 clearTimeout(verificationTimeout);
                 verificationTimeout = setTimeout(() => {
