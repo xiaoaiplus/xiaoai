@@ -4,32 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>指纹验证与博客</title>
-    <style>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "calisto mt", Arial, sans-serif;
+        }
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
+            min-height: 100vh;
+            background: #111;
+            color: #fff;
         }
         .container {
             text-align: center;
-            background: #f0f0f0;
+            background: #222;
             border-radius: 20px;
-            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.2), 
-                        -8px -8px 15px rgba(255, 255, 255, 0.7);
+            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.5);
             padding: 40px;
             width: 100%;
             max-width: 400px;
         }
-        #fingerprint {
-            width: 100px;
-            height: 100px;
-            margin: 20px auto;
-            cursor: pointer;
+        .scan {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .scan .fingerprint {
+            position: relative;
+            width: 200px;
+            height: 280px;
+            background: url(img/finger0.png) no-repeat;
+            background-size: 100%;
+        }
+        .scan .fingerprint::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: url(img/finger2.png) no-repeat;
+            background-size: 100%;
+            animation: animate 4s ease-in-out infinite;
+        }
+        .scan .fingerprint::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 8px;
+            width: 100%;
+            margin-top: -30px;
+            background: #3fefef;
+            border-radius: 8px;
+            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
+            animation: animate_line 4s ease-in-out infinite;
+        }
+        @keyframes animate_line {
+            0%, 100% {
+                top: 0;
+            }
+            50% {
+                top: 100%;
+            }
+        }
+        @keyframes animate {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .scan h3 {
+            text-transform: unset;
+            font-size: 2em;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            color: #3FEFEF;
+            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
+            animation: animate_txt 4s ease-in-out infinite;
+        }
+        @keyframes animate_txt {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
         }
         .message {
             margin-top: 20px;
@@ -72,7 +139,10 @@
 <body>
     <div class="container" id="authContainer">
         <h1>指纹验证</h1>
-        <img id="fingerprint" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Fingerprint_icon.svg/1024px-Fingerprint_icon.svg.png" alt="指纹图标" onclick="verifyFingerprint()" />
+        <div class="scan">
+            <div class="fingerprint"></div>
+            <h3>Scanning...</h3>
+        </div>
         <div class="message" id="message">验证中...</div>
     </div>
 
