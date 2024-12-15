@@ -18,12 +18,8 @@
             min-height: 100vh;
             background: #111;
             color: #fff;
-        }
-        .header {
-            text-align: center;
-            font-size: 32px;
-            color: #3FEFEF;
-            margin: 20px 0; /* 增加上下间距 */
+            justify-content: center; /* 垂直居中 */
+            padding: 10px; /* 为了确保内容不会被挤出屏幕 */
         }
         .container {
             text-align: center;
@@ -32,7 +28,8 @@
             box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.5);
             padding: 40px;
             width: 100%;
-            max-width: 400px;
+            max-width: 400px; /* 最大宽度限制 */
+            margin: 0 auto; /* 左右居中 */
         }
         .scan {
             position: relative;
@@ -150,6 +147,9 @@
             transform: translateY(-2px); /* 悬停时的浮动效果 */
         }
         @media (max-width: 600px) {
+            .container {
+                padding: 20px; /* 小屏幕上增加内边距 */
+            }
             .pagination button {
                 width: 100%;
             }
@@ -157,10 +157,7 @@
     </style>
 </head>
 <body>
-    <div class="header">我的博客</div> <!-- 博客标题放在网站最上面 -->
-    
     <div class="container" id="authContainer">
-        <h1>指纹验证</h1>
         <div class="scan">
             <div class="fingerprint" onclick="verifyFingerprint()"></div>
             <h3>Scanning...</h3>
