@@ -34,6 +34,7 @@
             border-radius: 50%;
             box-shadow: inset 6px 6px 10px rgba(0, 0, 0, 0.2), 
                         inset -6px -6px 10px rgba(255, 255, 255, 0.7);
+            cursor: pointer; /* 鼠标悬停时显示为可点击 */
         }
         button {
             padding: 10px 20px;
@@ -45,6 +46,7 @@
             box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2), 
                         -6px -6px 10px rgba(255, 255, 255, 0.7);
             transition: all 0.3s ease;
+            margin: 5px; /* 按钮之间的间距 */
         }
         button:hover {
             background-color: #d0d0d0;
@@ -62,9 +64,12 @@
         }
         .pagination {
             margin: 20px 0;
+            display: flex; /* 使用flex布局 */
+            justify-content: center; /* 居中对齐 */
         }
         .pagination button {
-            margin: 0 5px;
+            flex: 1; /* 按钮均分空间 */
+            max-width: 100px; /* 最大宽度限制 */
         }
 
         /* 媒体查询 */
@@ -89,8 +94,7 @@
 <body>
     <div class="container" id="authContainer">
         <h1>指纹验证</h1>
-        <div id="fingerprint"></div>
-        <button id="verifyButton">验证指纹</button>
+        <div id="fingerprint" onclick="verifyFingerprint()"></div> <!-- 点击指纹图标进行验证 -->
         <div class="message" id="message"></div>
     </div>
 
@@ -116,7 +120,7 @@
         let currentPage = 0;
         const postsPerPage = 2;
 
-        document.getElementById('verifyButton').addEventListener('click', function() {
+        function verifyFingerprint() {
             // 模拟指纹验证
             const isVerified = Math.random() < 0.5; // 50% 概率验证成功
             const messageDiv = document.getElementById('message');
@@ -131,7 +135,7 @@
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
             }
-        });
+        }
 
         function displayPosts() {
             const postsDiv = document.getElementById('posts');
