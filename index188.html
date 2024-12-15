@@ -136,16 +136,18 @@
             messageDiv.style.color = "black";
 
             if (fingerprintCount === 8) {
+                // 点击8次时，显示成功消息并停留5秒
                 messageDiv.textContent = "指纹验证成功！";
                 messageDiv.style.color = "green";
 
-                // 切换到博客页面
-                document.getElementById('authContainer').style.display = 'none';
-                document.getElementById('blogContainer').style.display = 'block';
-                displayPosts();
+                // 5秒后切换到博客页面
+                setTimeout(() => {
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('blogContainer').style.display = 'block';
+                    displayPosts();
+                    resetFingerprintCount();
+                }, 5000); // 5000毫秒 = 5秒
 
-                // 重置计数
-                resetFingerprintCount();
             } else if (fingerprintCount > 8) {
                 // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
@@ -164,7 +166,7 @@
 
         function resetFingerprintCount() {
             fingerprintCount = 0; // 重置计数
-            clearTimeout(verificationTimeout); // 清除定时器
+            clear(verificationTimeout); // 清除定时器
 
             // 重置指纹图标颜色
             const fingerprintIcon = document.getElementById('fingerprint');
