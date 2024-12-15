@@ -40,6 +40,7 @@
             height: 280px;
             background: url(img/finger0.png) no-repeat;
             background-size: 100%;
+            cursor: pointer; /* 增加鼠标指针样式 */
         }
         .scan .fingerprint::before {
             content: '';
@@ -101,7 +102,7 @@
         .message {
             margin-top: 20px;
             font-size: 18px;
-            color: black;
+            color: #3FEFEF;
         }
         .blog-post {
             margin: 20px 0;
@@ -109,6 +110,7 @@
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #000;
         }
         .pagination {
             margin: 20px 0;
@@ -140,10 +142,10 @@
     <div class="container" id="authContainer">
         <h1>指纹验证</h1>
         <div class="scan">
-            <div class="fingerprint"></div>
+            <div class="fingerprint" onclick="verifyFingerprint()"></div>
             <h3>Scanning...</h3>
         </div>
-        <div class="message" id="message">验证中...</div>
+        <div class="message" id="message">请点击指纹区域进行验证。</div>
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
@@ -177,7 +179,7 @@
 
             // 显示"验证中"
             messageDiv.textContent = "验证中...";
-            messageDiv.style.color = "black";
+            messageDiv.style.color = "#3FEFEF";
 
             if (fingerprintCount === 8) {
                 // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
@@ -197,8 +199,8 @@
                 // 每次按压后设置定时器，1秒后判断是否需要重置计数
                 clearTimeout(verificationTimeout);
                 verificationTimeout = setTimeout(() => {
-                    messageDiv.textContent = "指纹验证失败，请重试。";
-                    messageDiv.style.color = "red";
+                    messageDiv.textContent = "请继续点击指纹区域进行验证。";
+                    messageDiv.style.color = "#3FEFEF";
                     resetFingerprintCount();
                 }, 1000);
             }
