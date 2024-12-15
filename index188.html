@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html="zh">
 <head>
-    <meta charset="UTF-8">
+   meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>指纹验证与博客</title>
     <style>
@@ -37,21 +37,6 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 10px;
-            background-color: #e0e0e0;
-            box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.2), 
-                        -6px -6px 10px rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #d0d0d0;
-        }
         .message {
             margin-top: 20px;
             font-size: 18px;
@@ -71,22 +56,19 @@
         .pagination button {
             flex: 1;
             max-width: 100px;
+            padding: 10px;
+            border: 2px solid #87CEEB; /* 浅蓝色边框 */
+            background-color: rgba(255, 255, 255, 0.7); /* 透明背景 */
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-
+        .pagination button:hover {
+            background-color: rgba(135, 206, 235, 0.3); /* 浅蓝色背景 */
+        }
         @media (max-width: 600px) {
-            button {
+            .pagination button {
                 width: 100%;
-                padding: 15px;
-                font-size: 18px;
-            }
-            .container {
-                padding: 20px;
-            }
-            .message {
-                font-size: 16px;
-            }
-            .blog-post {
-                padding: 15px;
             }
         }
     </style>
@@ -95,7 +77,7 @@
     <div class="container" id="authContainer">
         <h1>指纹验证</h1>
         <div id="fingerprint" onclick="verifyFingerprint()"></div> <!-- 点击指纹图标进行验证 -->
-        <div class="message" id="message"></div>
+        <div class="message" id="message">验证中...</div> <!-- 默认显示验证中 -->
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
@@ -131,16 +113,12 @@
             // 改变指纹图标的背景颜色为天空蓝色
             fingerprintIcon.style.backgroundColor = "#87CEEB"; // SkyBlue 色
 
-            // 只显示"验证中"
+            // 显示"验证中"
             messageDiv.textContent = "验证中...";
             messageDiv.style.color = "black";
 
             if (fingerprintCount === 8) {
-                // 点击8次时，显示成功消息并停留5秒
-                messageDiv.textContent = "指纹验证成功！";
-                messageDiv.style.color = "green";
-
-                // 5秒后切换到博客页面
+                // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
                 setTimeout(() => {
                     document.getElementById('authContainer').style.display = 'none';
                     document.getElementById('blogContainer').style.display = 'block';
@@ -149,7 +127,7 @@
                 }, 5000); // 5000毫秒 = 5秒
 
             } else if (fingerprintCount > 8) {
-                // 如果点击次数超过8次，显示失败消息并重置计数
+ // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
@@ -166,7 +144,7 @@
 
         function resetFingerprintCount() {
             fingerprintCount = 0; // 重置计数
-            clear(verificationTimeout); // 清除定时器
+            clearTimeout(verificationTimeout); // 清除定时器
 
             // 重置指纹图标颜色
             const fingerprintIcon = document.getElementById('fingerprint');
