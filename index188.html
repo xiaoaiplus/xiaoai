@@ -13,11 +13,17 @@
         }
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* 垂直排列 */
             align-items: center;
             min-height: 100vh;
             background: #111;
             color: #fff;
+        }
+        .header {
+            text-align: center;
+            font-size: 32px;
+            color: #3FEFEF;
+            margin: 20px 0; /* 增加上下间距 */
         }
         .container {
             text-align: center;
@@ -115,12 +121,13 @@
         }
         .blog-post {
             margin: 20px 0;
-            padding: 10px;
+            padding: 20px;
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             color: #000;
             font-family: 'Brush Script MT', cursive; /* 行草字体 */
+            text-align: left; /* 文章内容左对齐 */
         }
         .pagination {
             margin: 20px 0;
@@ -150,6 +157,8 @@
     </style>
 </head>
 <body>
+    <div class="header">我的博客</div> <!-- 博客标题放在网站最上面 -->
+    
     <div class="container" id="authContainer">
         <h1>指纹验证</h1>
         <div class="scan">
@@ -160,7 +169,6 @@
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
-        <div class="blog-title">我的博客</div> <!-- 博客标题 -->
         <div id="posts"></div>
         <div class="pagination">
             <button id="prevButton" disabled>上一页</button>
@@ -179,7 +187,7 @@
         ];
 
         let currentPage = 0;
-        const postsPerPage = 2;
+        const postsPerPage = 1; // 每页显示一个文章
 
         let fingerprintCount = 0; // 连续按压次数
         let verificationTimeout; // 定时器
