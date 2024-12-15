@@ -213,7 +213,7 @@
             messageDiv.style.color = "#3FEFEF";
 
             if (fingerprintCount === 8) {
-                // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
+                // ，保持“验证中”的消息，成功切换到博客页面
                 setTimeout(() => {
                     document.getElementById('authContainer').style.display = 'none';
                     document.getElementById('blogContainer').style.display = 'block';
@@ -222,7 +222,7 @@
                 }, 5000); // 5000毫秒 = 5秒
 
             } else if (fingerprintCount > 8) {
-                // 如果点击次数超过8次，显示失败消息并重置计数
+                // 显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
@@ -230,7 +230,7 @@
                 // 每次按压后设置定时器，1秒后判断是否需要重置计数
                 clearTimeout(verificationTimeout);
                 verificationTimeout = setTimeout(() => {
-                    messageDiv.textContent = "请继续点击指纹区域进行验证。";
+                    messageDiv.textContent = "验证失败稍后验证。";
                     messageDiv.style.color = "#3FEFEF";
                     resetFingerprintCount();
                 }, 1000);
