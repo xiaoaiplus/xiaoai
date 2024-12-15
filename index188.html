@@ -28,6 +28,12 @@
             width: 100%;
             max-width: 400px;
         }
+        .title {
+            font-size: 36px; /* 增大字体大小 */
+            color: #3FEFEF;
+            margin-bottom: 20px; /* 增加底部间距 */
+            font-family: 'KaiTi', '行楷', cursive; /* 设置为行楷字体 */
+        }
         .scan {
             position: relative;
             display: flex;
@@ -107,12 +113,6 @@
             font-size: 18px;
             color: #3FEFEF;
         }
-        .blog-title {
-            text-align: center;
-            font-size: 24px;
-            color: #3FEFEF;
-            margin: 20px 0; /* 增加上下间距 */
-        }
         .blog-post {
             margin: 20px 0;
             padding: 10px;
@@ -160,7 +160,7 @@
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
-        <div class="blog-title">我的博客</div> <!-- 博客标题 -->
+        <div class="title">我的博客</div> <!-- 博客标题放在标题区 -->
         <div id="posts"></div>
         <div class="pagination">
             <button id="prevButton" disabled>上一页</button>
