@@ -1,7 +1,7 @@
-<!DOCTYPE html>
-<html="zh">
+DOCTYPE html>
+<html lang="zh">
 <head>
-   meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>指纹验证与博客</title>
     <style>
@@ -28,18 +28,30 @@
         #fingerprint {
             width: 80px;
             height: 80px;
-            background: url('https://img.icons8.com/ios-filled/100/000000/fingerprint.png') no-repeat center center;
-            background-size: contain;
-            margin: 20px auto;
+            background: radial-gradient(circle at center, #87CEEB, #5B9BD5);
             border-radius: 50%;
             box-shadow: inset 6px 6px 10px rgba(0, 0, 0, 0.2), 
                         inset -6px -6px 10px rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            position: relative;
+            margin: 20px auto;
+        }
+        #fingerprint::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2), 
+                        inset -2px -2px 5px rgba(255, 255, 255, 0.7);
         }
         .message {
             margin-top: 20px;
             font-size: 18px;
+            color: black;
         }
         .blog-post {
             margin: 20px 0;
@@ -108,10 +120,6 @@
         function verifyFingerprint() {
             fingerprintCount++; // 每次点击增加计数
             const messageDiv = document.getElementById('message');
-            const fingerprintIcon = document.getElementById('fingerprint');
-
-            // 改变指纹图标的背景颜色为天空蓝色
-            fingerprintIcon.style.backgroundColor = "#87CEEB"; // SkyBlue 色
 
             // 显示"验证中"
             messageDiv.textContent = "验证中...";
@@ -127,7 +135,7 @@
                 }, 5000); // 5000毫秒 = 5秒
 
             } else if (fingerprintCount > 8) {
- // 如果点击次数超过8次，显示失败消息并重置计数
+                // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
@@ -145,10 +153,6 @@
         function resetFingerprintCount() {
             fingerprintCount = 0; // 重置计数
             clearTimeout(verificationTimeout); // 清除定时器
-
-            // 重置指纹图标颜色
-            const fingerprintIcon = document.getElementById('fingerprint');
-            fingerprintIcon.style.backgroundColor = ""; // 恢复默认背景颜色
         }
 
         function displayPosts() {
