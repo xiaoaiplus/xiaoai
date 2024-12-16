@@ -30,9 +30,10 @@
         }
         .title {
             font-size: 36px; /* 增大字体大小 */
-            color: #3FEFEF;
+            color: #FFFFFF; /* 设置文字为白色 */
             margin-bottom: 20px; /* 增加底部间距 */
             font-family: 'KaiTi', '行楷', cursive; /* 设置为行楷字体 */
+            font-weight: normal; /* 不加粗 */
         }
         .scan {
             position: relative;
@@ -184,8 +185,11 @@
 
         let fingerprintCount = 0; // 连续按压次数
         let verificationTimeout; // 定时器
+        let hasVerified = false; // 标记是否已成功验证
 
         function verifyFingerprint() {
+            if (hasVerified) return; // 如果已成功验证，直接返回
+
             fingerprintCount++; // 每次点击增加计数
             const messageDiv = document.getElementById('message');
 
@@ -195,13 +199,13 @@
 
             if (fingerprintCount === 8) {
                 // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
+                hasVerified = true; // 设置成功验证标记
                 setTimeout(() => {
                     document.getElementById('authContainer').style.display = 'none';
                     document.getElementById('blogContainer').style.display = 'block';
                     displayPosts();
                     resetFingerprintCount();
                 }, 5000); // 5000毫秒 = 5秒
-
             } else if (fingerprintCount > 8) {
                 // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
