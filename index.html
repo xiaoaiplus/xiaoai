@@ -163,11 +163,14 @@
                     }
                     resetFingerprintCount(); // 重置计数
                 }, 3000); // 3000毫秒 = 3秒
-            } else if (totalClicks >= 1) {
-                // 如果总点击次数达到1次或更多，显示失败消息并重置计数
-                messageDiv.textContent = "指纹验证失败，请重试。";
-                messageDiv.style.color = "red";
-                resetFingerprintCount();
+            } else if (totalClicks >= 1 && fingerprintCount < 8) {
+                // 如果总点击次数达到1次但未达到8次，设置5秒后检查
+                clearTimeout(verificationTimeout);
+                verificationTimeout = setTimeout(() => {
+                    messageDiv.textContent = "指纹验证失败，请重试。";
+                    messageDiv.style.color = "red";
+                    resetFingerprintCount();
+                }, 5000); // 5000毫秒 = 5秒
             } else {
                 // 每次按压后设置定时器，5秒后判断是否需要重置计数
                 clearTimeout(verificationTimeout);
