@@ -1,5 +1,6 @@
-<!DOCTYPE>
-<html lang="zh<head>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>指纹验证与博客</title>
@@ -102,7 +103,7 @@
         }
         @keyframes animate_txt {
             0%, 100% {
-                opacity: ;
+                opacity: 0;
             }
             50% {
                 opacity: 1;
@@ -188,7 +189,7 @@
         let isWaiting = false; // 标记是否在等待期间
 
         function verifyFingerprint() {
-            if (hasVerified || isWaiting) return; // 如果已成功验证或在等待，直接返回
+            if (hasVerified) return; // 如果已成功验证，直接返回
 
             fingerprintCount++; // 每次点击增加计数
             const messageDiv = document.getElementById('message');
@@ -198,10 +199,11 @@
             messageDiv.style.color = "#3FEFEF";
 
             if (fingerprintCount === 8) {
-                // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
+                // 点击8次时，设置成功验证标记并进入等待状态
                 hasVerified = true; // 设置成功验证标记
                 isWaiting = true; // 设置为等待状态
                 setTimeout(() => {
+                    if (!isWaiting) return; // 如果在等待期间有点击，直接返回
                     document.getElementById('authContainer').style.display = 'none';
                     document.getElementById('blogContainer').style.display = 'block';
                     displayPosts();
@@ -259,6 +261,17 @@
             if ((currentPage + 1) * postsPerPage < posts.length) {
                 currentPage++;
                 displayPosts();
+            }
+        });
+
+        // 监听点击事件以判断是否在等待期间点击
+        document.querySelector('.fingerprint').addEventListener('click', function() {
+            if (hasVerified && isWaiting) {
+                // 如果在等待期间点击，显示失败消息并重置计数
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = "指纹验证失败，请重试。";
+                messageDiv.style.color = "red";
+                resetFingerprintCount();
             }
         });
     </script>
