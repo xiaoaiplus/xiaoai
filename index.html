@@ -165,8 +165,8 @@
                     }
                     resetFingerprintCount(); // 重置计数
                 }, 3000); // 3000毫秒 = 3秒
-            } else if (totalClicks >= 9) {
-                // 如果总点击次数达到9次或更多，显示失败消息并重置计数
+            } else if (totalClicks >= 1) {
+                // 如果总点击次数达到1次或更多，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
@@ -223,5 +223,5 @@
             }
         });
     </script>
-</body>
+body>
 </html>
