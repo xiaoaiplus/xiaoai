@@ -29,10 +29,10 @@
             max-width: 400px;
         }
         .title {
-            font-size: 30px; /* 将字体大小改为30px */
-            color: white; /* 设置文字颜色为白色 */
-            margin-bottom: 20px;
-            font-family: 'KaiTi', '行楷', cursive;
+            font-size: 36px; /* 增大字体大小 */
+            color: #3FEFEF;
+            margin-bottom: 20px; /* 增加底部间距 */
+            font-family: 'KaiTi', '行楷', cursive; /* 设置为行楷字体 */
         }
         .scan {
             position: relative;
@@ -43,25 +43,75 @@
         .scan .fingerprint {
             position: relative;
             width: 200px;
-            height: 300px;
+            height: 180px;
+            background: url(https://xis.github./xiaoai/zhiwen.gif) no-repeat; /* 指纹图片路径 */
+            background-size: contain; /* 确保图片自适应 */
+            cursor: pointer; /* 增加鼠标指针样式 */
+            outline: none; /* 移除点击时的轮廓 */
+            border: none; /* 移除边框 */
+            -webkit-tap-highlight-color: transparent; /* 移除移动设备上的高亮效果 */
+        }
+        .scan .fingerprint::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
             background: url(https://xis.github./xiaoai/zhiwen.gif) no-repeat;
-            background-size: contain;
-            cursor: pointer;
-            outline: none;
-            border: none;
-            -webkit-tap-highlight-color: transparent;
+            background-size: 100%;
+            animation: animate 4s ease-in-out infinite;
+        }
+        .scan .fingerprint::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 8px;
+            width: 100%;
+            margin-top: -30px;
+            background: #3fefef;
+            border-radius: 8px;
+            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
+            animation: animate_line 4s ease-in-out infinite; /* 荧光棒动画 */
+        }
+        @keyframes animate_line {
+            0%, 100% {
+                top: 0;
+            }
+            50% {
+                top: 100%;
+            }
+        }
+        @keyframes animate {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
         }
         .scan h3 {
             text-transform: unset;
             font-size: 2em;
             letter-spacing: 2px;
             margin-top: 20px;
-            color: white; /* 将文字颜色设置为白色 */
+            color: #3FEFEF;
+            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
+            animation: animate_txt 4s ease-in-out infinite;
+        }
+        @keyframes animate_txt {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
         }
         .message {
             margin-top: 20px;
             font-size: 18px;
-            color: white; /* 将消息文字颜色设置为白色 */
+            color: #3FEFEF;
         }
         .blog-post {
             margin: 20px 0;
@@ -70,28 +120,33 @@
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             color: #000;
-            font-family: 'Brush Script MT', cursive;
-            text-align: left;
+            font-family: 'Brush Script MT', cursive; /* 行草字体 */
+            text-align: left; /* 左对齐 */
         }
         .pagination {
             margin: 20px 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* 按钮之间的间距 */
         }
         .pagination button {
             flex: 1;
             max-width: 100px;
             padding: 10px;
-            border: none;
-            background-color: rgba(63, 239, 239, 0.5);
-            color: #000;
+            border: none; /* 去掉默认边框 */
+            background-color: rgba(63, 239, 239, 0.5); /* 背景色透明 */
+            color: #000; /* 按钮文字颜色 */
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
         }
         .pagination button:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px); /* 悬停时的浮动效果 */
+        }
+        @media (max-width: 600px) {
+            .pagination button {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -106,7 +161,7 @@
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
-        <div class="title">我的博客</div>
+        <div class="title">我的博客</div> <!-- 博客标题放在标题区 -->
         <div id="posts"></div>
         <div class="pagination">
             <button id="prevButton" disabled>上一页</button>
@@ -129,29 +184,24 @@
 
         let fingerprintCount = 0; // 连续按压次数
         let verificationTimeout; // 定时器
-        let hasEnteredBlog = false; // 标记是否已进入博客界面
-        let clickTimeout; // 用于检测点击间隔
 
         function verifyFingerprint() {
-            if (hasEnteredBlog) return; // 如果已经进入博客界面，忽略后续点击
-
             fingerprintCount++; // 每次点击增加计数
             const messageDiv = document.getElementById('message');
 
             // 显示"验证中"
             messageDiv.textContent = "验证中...";
-            messageDiv.style.color = "white"; // 将验证状态文字颜色设置为白色
+            messageDiv.style.color = "#3FEFEF";
 
-            // 检查点击次数
             if (fingerprintCount === 8) {
-                // 点击8次时，设置5秒后进入博客
-                messageDiv.textContent = "验证成功，进入博客...";
-                clickTimeout = setTimeout(() => {
+                // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
+                setTimeout(() => {
                     document.getElementById('authContainer').style.display = 'none';
                     document.getElementById('blogContainer').style.display = 'block';
                     displayPosts();
-                    hasEnteredBlog = true; // 设置已进入博客的标记
+                    resetFingerprintCount();
                 }, 5000); // 5000毫秒 = 5秒
+
             } else if (fingerprintCount > 8) {
                 // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
@@ -162,23 +212,15 @@
                 clearTimeout(verificationTimeout);
                 verificationTimeout = setTimeout(() => {
                     messageDiv.textContent = "请继续点击指纹区域进行验证。";
-                    messageDiv.style.color = "white"; // 将消息文字颜色设置为白色
+                    messageDiv.style.color = "#3FEFEF";
                     resetFingerprintCount();
                 }, 1000);
             }
-
-            // 检测点击间隔
-            clearTimeout(clickTimeout);
-            clickTimeout = setTimeout(() => {
-                messageDiv.textContent = "指纹验证中断，请重新开始。";
-                resetFingerprintCount();
-            }, 2000); // 2秒内未点击视为中断
         }
 
         function resetFingerprintCount() {
             fingerprintCount = 0; // 重置计数
             clearTimeout(verificationTimeout); // 清除定时器
-            clearTimeout(clickTimeout); // 清除点击间隔定时器
         }
 
         function displayPosts() {
