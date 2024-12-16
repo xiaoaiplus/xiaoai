@@ -189,7 +189,7 @@
         let isWaiting = false; // 标记是否在等待期间
 
         function verifyFingerprint() {
-            if (hasVerified) return; // 如果已成功验证，直接返回
+            if (isWaiting) return; // 如果在等待期间，直接返回
 
             fingerprintCount++; // 每次点击增加计数
             const messageDiv = document.getElementById('message');
@@ -203,14 +203,15 @@
                 hasVerified = true; // 设置成功验证标记
                 isWaiting = true; // 设置为等待状态
                 setTimeout(() => {
-                    if (!isWaiting) return; // 如果在等待期间有点击，直接返回
-                    document.getElementById('authContainer').style.display = 'none';
-                    document.getElementById('blogContainer').style.display = 'block';
-                    displayPosts();
-                    resetFingerprintCount();
+                    if (isWaiting) { // 如果在等待状态没有点击
+                        document.getElementById('authContainer').style.display = 'none';
+                        document.getElementById('blogContainer').style.display = 'block';
+                        displayPosts();
+                    }
+                    resetFingerprintCount(); // 重置计数
                 }, 5000); // 5000毫秒 = 5秒
-            } else if (fingerprintCount > 9) {
-                // 如果点击次数超过9次，显示失败消息并重置计数
+            } else if (fingerprintCount > 8) {
+                // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
@@ -229,6 +230,7 @@
             fingerprintCount = 0; // 重置计数
             clearTimeout(verificationTimeout); // 清除定时器
             isWaiting = false; // 重置等待状态
+            hasVerified = false; // 重置验证状态
         }
 
         function displayPosts() {
@@ -266,7 +268,7 @@
 
         // 监听点击事件以判断是否在等待期间点击
         document.querySelector('.fingerprint').addEventListener('click', function() {
-            if (hasVerified && isWaiting) {
+            if (isWaiting) {
                 // 如果在等待期间点击，显示失败消息并重置计数
                 const messageDiv = document.getElementById('message');
                 messageDiv.textContent = "指纹验证失败，请重试。";
