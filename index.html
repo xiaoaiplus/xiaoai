@@ -52,62 +52,12 @@
             border: none; /* 移除边框 */
             -webkit-tap-highlight-color: transparent; /* 移除移动设备上的高亮效果 */
         }
-        .scan .fingerprint::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            background: url(https://xis.github./xiaoai/zhiwen.gif) no-repeat;
-            background-size: 100%;
-            animation: animate 4s ease-in-out infinite;
-        }
-        .scan .fingerprint::after {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            height: 8px;
-            width: 100%;
-            margin-top: -30px;
-            background: #3fefef;
-            border-radius: 8px;
-            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
-            animation: animate_line 4s ease-in-out infinite; /* 荧光棒动画 */
-        }
-        @keyframes animate_line {
-            0%, 100% {
-                top: 0;
-            }
-            50% {
-                top: 100%;
-            }
-        }
-        @keyframes animate {
-            0%, 100% {
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
         .scan h3 {
             text-transform: unset;
             font-size: 2em;
             letter-spacing: 2px;
             margin-top: 20px;
             color: #3FEFEF;
-            filter: drop-shadow(0 0 20px #3fefef) drop-shadow(0 0 60px #3fefef);
-            animation: animate_txt 4s ease-in-out infinite;
-        }
-        @keyframes animate_txt {
-            0%, 100% {
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-            }
         }
         .message {
             margin-top: 20px;
@@ -203,26 +153,26 @@
                 hasVerified = true; // 设置成功验证标记
                 isWaiting = true; // 设置为等待状态
                 setTimeout(() => {
-                    if (isWaiting) { // 如果在等待状态没有点击
+                    if (hasVerified) { // 确保已经验证成功
                         document.getElementById('authContainer').style.display = 'none';
                         document.getElementById('blogContainer').style.display = 'block';
-                        displayPosts();
+                        displayPosts(); // 显示博客内容
                     }
                     resetFingerprintCount(); // 重置计数
-                }, 5000); // 5000毫秒 = 5秒
+                }, 500); // 500毫秒 = 0.5秒
             } else if (fingerprintCount > 8) {
                 // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
             } else {
-                // 每次按压后设置定时器，1秒后判断是否需要重置计数
+                // 每次按压后设置定时器，5秒后判断是否需要重置计数
                 clearTimeout(verificationTimeout);
                 verificationTimeout = setTimeout(() => {
                     messageDiv.textContent = "请继续点击指纹区域进行验证。";
                     messageDiv.style.color = "#3FEFEF";
                     resetFingerprintCount();
-                }, 1000);
+                }, 5000); // 5000毫秒 = 5秒
             }
         }
 
@@ -263,17 +213,6 @@
             if ((currentPage + 1) * postsPerPage < posts.length) {
                 currentPage++;
                 displayPosts();
-            }
-        });
-
-        // 监听点击事件以判断是否在等待期间点击
-        document.querySelector('.fingerprint').addEventListener('click', function() {
-            if (isWaiting) {
-                // 如果在等待期间点击，显示失败消息并重置计数
-                const messageDiv = document.getElementById('message');
-                messageDiv.textContent = "指纹验证失败，请重试。";
-                messageDiv.style.color = "red";
-                resetFingerprintCount();
             }
         });
     </script>
