@@ -198,48 +198,54 @@
             { title: "第二十篇", content: "仰天大笑出门去-我辈岂是蓬蒿人♯红(蓝)蓝" }
         ];
 
-        let currentPage = 0;
-        const postsPerPage = 2;
+let currentPage = 0;
+const postsPerPage = 2;
 
-        let fingerprintCount = 0; // 连续按压次数
-        let verificationTimeout; // 定时器
+let fingerprintCount = 0; // 连续按压次数
+let verificationTimeout; // 定时器
+let hasEnteredBlog = false; // 标记是否已进入博客界面
 
-        function verifyFingerprint() {
-            fingerprintCount++; // 每次点击增加计数
-            const messageDiv = document.getElementById('message');
+function verifyFingerprint() {
+    if (hasEnteredBlog) return; // 如果已经进入博客界面，忽略后续点击
 
-            // 显示"验证中"
-            messageDiv.textContent = "验证中...";
-            messageDiv.style.color = "#3FEFEF";
+    fingerprintCount++; // 每次点击增加计数
+    const messageDiv = document.getElementById('message');
 
-            if (fingerprintCount === 8) {
-                // ，保持“验证中”的消息，成功切换到博客页面
-                setTimeout(() => {
-                    document.getElementById('authContainer').style.display = 'none';
-                    document.getElementById('blogContainer').style.display = 'block';
-                    displayPosts();
-                    resetFingerprintCount();
-                }, 5000); // 5000毫秒 = 5秒
+    // 显示"验证中"
+    messageDiv.textContent = "验证中...";
+    messageDiv.style.color = "#3FEFEF";
 
-            } else if (fingerprintCount > 8) {
-                // 显示失败消息并重置计数
-                messageDiv.textContent = "指纹验证失败，请重试。";
-                messageDiv.style.color = "red";
-                resetFingerprintCount();
-            } else {
-                // 每次按压后设置定时器，1秒后判断是否需要重置计数
-                clearTimeout(verificationTimeout);
-                verificationTimeout = setTimeout(() => {
-                    messageDiv.textContent = "验证失败稍后验证。";
-                    messageDiv.style.color = "#3FEFEF";
-                    resetFingerprintCount();
-                }, 1000);
+    if (fingerprintCount === 8) {
+        // 点击8次时，保持“验证中”的消息，5秒后切换到博客页面
+        setTimeout(() => {
+            if (fingerprintCount === 8) { // 再次检查计数是否仍为8
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('blogContainer').style.display = 'block';
+                displayPosts();
+                hasEnteredBlog = true; // 设置已进入博客的标记
             }
-        }
+            resetFingerprintCount();
+        }, 5000); // 5000毫秒 = 5秒
 
-        function resetFingerprintCount() {
-            fingerprintCount = 0; // 重置计数
-            clearTimeout(verificationTimeout); // 清除定时器
+    } else if (fingerprintCount > 8) {
+        // 如果点击次数超过8次，显示失败消息并重置计数
+        messageDiv.textContent = "指纹验证失败，请重试。";
+        messageDiv.style.color = "red";
+        resetFingerprintCount();
+    } else {
+        // 每次按压后设置定时器，1秒后判断是否需要重置计数
+        clearTimeout(verificationTimeout);
+        verificationTimeout = setTimeout(() => {
+            messageDiv.textContent = "请继续点击指纹区域进行验证。";
+            messageDiv.style.color = "#3FEFEF";
+            resetFingerprintCount();
+        }, 1000);
+    }
+}
+
+function resetFingerprintCount() {
+    fingerprintCount = 0; // 重置计数
+    clearTimeout(verificationTimeout); // 清除定时器
         }
 
         function displayPosts() {
