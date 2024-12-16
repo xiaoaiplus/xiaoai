@@ -209,8 +209,8 @@
                     displayPosts();
                     resetFingerprintCount();
                 }, 5000); // 5000毫秒 = 5秒
-            } else if (fingerprintCount > 8) {
-                // 如果点击次数超过8次，显示失败消息并重置计数
+            } else if (fingerprintCount > 9) {
+                // 如果点击次数超过9次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
