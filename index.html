@@ -29,11 +29,11 @@
             max-width: 400px;
         }
         .title {
-            font-size: 36px; /* 增大字体大小 */
-            color: #FFFFFF; /* 设置文字为白色 */
-            margin-bottom: 20px; /* 增加底部间距 */
-            font-family: 'KaiTi', '行楷', cursive; /* 设置为行楷字体 */
-            font-weight: normal; /* 不加粗 */
+            font-size: 36px;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-family: 'KaiTi', '行楷', cursive;
+            font-weight: normal;
         }
         .scan {
             position: relative;
@@ -46,11 +46,11 @@
             width: 200px;
             height: 180px;
             background: url(https://xis.github./xiaoai/zhiwen.gif) no-repeat; /* 指纹图片路径 */
-            background-size: contain; /* 确保图片自适应 */
-            cursor: pointer; /* 增加鼠标指针样式 */
-            outline: none; /* 移除点击时的轮廓 */
-            border: none; /* 移除边框 */
-            -webkit-tap-highlight-color: transparent; /* 移除移动设备上的高亮效果 */
+            background-size: contain;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .scan h3 {
             text-transform: unset;
@@ -71,28 +71,28 @@
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             color: #000;
-            font-family: 'Brush Script MT', cursive; /* 行草字体 */
-            text-align: left; /* 左对齐 */
+            font-family: 'Brush Script MT', cursive;
+            text-align: left;
         }
         .pagination {
             margin: 20px 0;
             display: flex;
-            justify-content: space-between; /* 按钮之间的间距 */
+            justify-content: space-between;
         }
         .pagination button {
             flex: 1;
             max-width: 100px;
             padding: 10px;
-            border: none; /* 去掉默认边框 */
-            background-color: rgba(63, 239, 239, 0.5); /* 背景色透明 */
-            color: #000; /* 按钮文字颜色 */
+            border: none;
+            background-color: rgba(63, 239, 239, 0.5);
+            color: #000;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
         }
         .pagination button:hover {
-            transform: translateY(-2px); /* 悬停时的浮动效果 */
+            transform: translateY(-2px);
         }
         @media (max-width: 600px) {
             .pagination button {
@@ -112,7 +112,7 @@
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
-        <div class="title">我的博客</div> <!-- 博客标题放在标题区 -->
+        <div class="title">我的博客</div>
         <div id="posts"></div>
         <div class="pagination">
             <button id="prevButton" disabled>上一页</button>
@@ -135,8 +135,10 @@
 
         let fingerprintCount = 0; // 连续按压次数
         let verificationTimeout; // 定时器
+        let resetTimeout; // 计时器，用于3秒内未点击自动进入
         let hasVerified = false; // 标记是否已成功验证
         let isWaiting = false; // 标记是否在等待期间
+        let failureTimeout; // 点击9次或更多次后的失败计时器
 
         function verifyFingerprint() {
             if (isWaiting) return; // 如果在等待期间，直接返回
@@ -152,14 +154,16 @@
                 // 点击8次时，设置成功验证标记并进入等待状态
                 hasVerified = true; // 设置成功验证标记
                 isWaiting = true; // 设置为等待状态
-                setTimeout(() => {
+
+                // 设置3秒等待时间
+                resetTimeout = setTimeout(() => {
                     if (hasVerified) { // 确保已经验证成功
                         document.getElementById('authContainer').style.display = 'none';
                         document.getElementById('blogContainer').style.display = 'block';
                         displayPosts(); // 显示博客内容
                     }
                     resetFingerprintCount(); // 重置计数
-                }, 500); // 500毫秒 = 0.5秒
+                }, 3000); // 3000毫秒 = 3秒
             } else if (fingerprintCount > 8) {
                 // 如果点击次数超过8次，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
@@ -179,6 +183,7 @@
         function resetFingerprintCount() {
             fingerprintCount = 0; // 重置计数
             clearTimeout(verificationTimeout); // 清除定时器
+            clearTimeout(resetTimeout); // 清除等待3秒的定时器
             isWaiting = false; // 重置等待状态
             hasVerified = false; // 重置验证状态
         }
