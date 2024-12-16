@@ -3,29 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的博客</title>
-    <style>
+    <title>指纹验证与博客</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "calisto mt", Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #111;
+            color: #fff;
+        }
         .container {
-            margin: 20px;
+            text-align: center;
+            background: #222;
+            border-radius: 20px;
+            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .title {
+            font-size: 36px;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-family: 'KaiTi', '行楷', cursive;
+            font-weight: normal;
+        }
+        .scan {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .scan .fingerprint {
+            position: relative;
+            width: 200px;
+            height: 180px;
+            background: url(https://xis.github./xiaoai/zhiwen.gif) no-repeat; /* 指纹图片路径 */
+            background-size: contain;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .scan h3 {
+            text-transform: unset;
+            font-size: 2em;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            color: #3FEFEF;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #3FEFEF;
         }
         .blog-post {
-            margin-bottom: 20px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #000;
+            font-family: 'Brush Script MT', cursive;
+            text-align: left;
         }
         .pagination {
-            margin-top: 20px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
         }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+        .pagination button {
+            flex: 1;
+            max-width: 100px;
+            padding: 10px;
+            border: none;
+            background-color: rgba(63, 239, 239, 0.5);
+            color: #000;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .pagination button:hover {
+            transform: translateY(-2px);
+        }
+        @media (max-width: 600px) {
+            .pagination button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="authContainer">
-        <div id="message"></div>
-        <div id="fingerprint" style="padding: 20px; background-color: #f0f0f0; cursor: pointer;">
-            点击进行验证
+    <div class="container" id="authContainer">
+        <h1 class="title">指纹验证</h1>
+        <div class="scan">
+            <div class="fingerprint" onclick="verifyFingerprint()"></div>
+            <h3>Scanning...</h3>
         </div>
+        <div class="message" id="message">请点击指纹区域进行验证。</div>
     </div>
 
     <div class="container" id="blogContainer" style="display: none;">
@@ -56,7 +139,6 @@
         let resetTimeout; // 计时器，用于3秒内未点击自动进入
         let hasVerified = false; // 标记是否已成功验证
         let isWaiting = false; // 标记是否在等待期间
-        let fiveSecondTimer; // 5秒定时器
 
         function verifyFingerprint() {
             if (isWaiting) return; // 如果在等待期间，直接返回
@@ -69,47 +151,38 @@
             messageDiv.textContent = "验证中...";
             messageDiv.style.color = "#3FEFEF";
 
-            // 如果点击次数达到8次
             if (fingerprintCount === 8) {
+                // 点击8次时，设置成功验证标记并进入等待状态
                 hasVerified = true; // 设置成功验证标记
                 isWaiting = true; // 设置为等待状态
 
                 // 设置3秒等待时间
                 resetTimeout = setTimeout(() => {
                     if (hasVerified) { // 确保已经验证成功
-                        document.getElementById('authContainer').style.display = 'none';
-                        document.getElementById('blogContainer').style.display = 'block';
-                        displayPosts(); // 显示博客内容
+                        switchToBlog(); // 切换到博客
                     }
                     resetFingerprintCount(); // 重置计数
                 }, 3000); // 3000毫秒 = 3秒
-            }
-
-            // 如果总点击次数超过8次，但未在5秒内完成8次点击
-            if (totalClicks > 8) {
+            } else if (totalClicks >= 1) {
+                // 如果总点击次数达到1次或更多，显示失败消息并重置计数
                 messageDiv.textContent = "指纹验证失败，请重试。";
                 messageDiv.style.color = "red";
                 resetFingerprintCount();
-                return;
+            } else {
+                // 每次按压后设置定时器，5秒后判断是否需要重置计数
+                clearTimeout(verificationTimeout);
+                verificationTimeout = setTimeout(() => {
+                    messageDiv.textContent = "请继续点击指纹区域进行验证。";
+                    messageDiv.style.color = "#3FEFEF";
+                    resetFingerprintCount();
+                }, 5000); // 5000毫秒 = 5秒
             }
-
-            // 每次按压后设置定时器，5秒后判断是否需要重置计数
-            clearTimeout(fiveSecondTimer);
-            fiveSecondTimer = setTimeout(() => {
-                messageDiv.textContent = "指纹验证失败，请重试。";
-                messageDiv.style.color = "red";
-                resetFingerprintCount();
-            }, 5000); // 5000毫秒 = 5秒
         }
 
-        function onClickDuringWait() {
-            // 在3秒等待期间点击，验证失败
-            if (isWaiting) {
-                const messageDiv = document.getElementById('message');
-                messageDiv.textContent = "指纹验证失败，请重试。";
-                messageDiv.style.color = "red";
-                resetFingerprintCount();
-            }
+        function switchToBlog() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('blogContainer').style.display = 'block';
+            displayPosts(); // 显示博客内容
         }
 
         function resetFingerprintCount() {
@@ -117,7 +190,6 @@
             totalClicks = 0; // 重置总点击计数
             clearTimeout(verificationTimeout); // 清除定时器
             clearTimeout(resetTimeout); // 清除等待3秒的定时器
-            clearTimeout(fiveSecondTimer); // 清除5秒的定时器
             isWaiting = false; // 重置等待状态
             hasVerified = false; // 重置验证状态
         }
@@ -154,10 +226,6 @@
                 displayPosts();
             }
         });
-
-        // 监听点击事件
-        document.getElementById('fingerprint').addEventListener('click', verifyFingerprint);
-        document.addEventListener('click', onClickDuringWait);
     </script>
 </body>
 </html>
