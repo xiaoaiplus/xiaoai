@@ -19,30 +19,29 @@
             background: #111;
             color: #fff;
         }
-      .container {
+        .container {
             text-align: center;
+            background: #222;
             border-radius: 20px;
-            background: #b0b0b0;
-            box-shadow: inset -5px 5px 9px #464646,
-                        inset 5px -5px 9px #ffffff;
+            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.5);
             padding: 40px;
             width: 100%;
             max-width: 400px;
         }
-      .title {
+        .title {
             font-size: 36px;
             color: #FFFFFF;
             margin-bottom: 20px;
             font-family: 'KaiTi', '行楷', cursive;
             font-weight: normal;
         }
-      .scan {
+        .scan {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-      .scan.fingerprint {
+        .scan .fingerprint {
             position: relative;
             width: 200px;
             height: 180px;
@@ -53,19 +52,19 @@
             border: none;
             -webkit-tap-highlight-color: transparent;
         }
-      .scan h3 {
+        .scan h3 {
             text-transform: unset;
             font-size: 2em;
             letter-spacing: 2px;
             margin-top: 20px;
             color: #3FEFEF;
         }
-      .message {
+        .message {
             margin-top: 20px;
             font-size: 18px;
             color: #3FEFEF;
         }
-      .blog-post {
+        .blog-post {
             margin: 20px 0;
             padding: 10px;
             background: #fff;
@@ -75,30 +74,28 @@
             font-family: 'Brush Script MT', cursive;
             text-align: left;
         }
-      .pagination {
+        .pagination {
             margin: 20px 0;
             display: flex;
             justify-content: space-between;
         }
-      .pagination button {
+        .pagination button {
             flex: 1;
             max-width: 100px;
             padding: 10px;
             border: none;
-            border-radius: 20px;
-            background: #182b11;
-            box-shadow: inset -5px 5px 9px #0a1107,
-                        inset 5px -5px 9px #26451b;
+            background-color: rgba(63, 239, 239, 0.5);
             color: #000;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
         }
-      .pagination button:hover {
+        .pagination button:hover {
             transform: translateY(-2px);
         }
         @media (max-width: 600px) {
-          .pagination button {
+            .pagination button {
                 width: 100%;
             }
         }
