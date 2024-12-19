@@ -19,29 +19,30 @@
             background: #111;
             color: #fff;
         }
-        .container {
+      .container {
             text-align: center;
-            background: #222;
             border-radius: 20px;
-            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.5);
+            background: #b0b0b0;
+            box-shadow: inset -5px 5px 9px #464646,
+                        inset 5px -5px 9px #ffffff;
             padding: 40px;
             width: 100%;
             max-width: 400px;
         }
-        .title {
+      .title {
             font-size: 36px;
             color: #FFFFFF;
             margin-bottom: 20px;
             font-family: 'KaiTi', '行楷', cursive;
             font-weight: normal;
         }
-        .scan {
+      .scan {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .scan .fingerprint {
+      .scan.fingerprint {
             position: relative;
             width: 200px;
             height: 180px;
@@ -52,19 +53,19 @@
             border: none;
             -webkit-tap-highlight-color: transparent;
         }
-        .scan h3 {
+      .scan h3 {
             text-transform: unset;
             font-size: 2em;
             letter-spacing: 2px;
             margin-top: 20px;
             color: #3FEFEF;
         }
-        .message {
+      .message {
             margin-top: 20px;
             font-size: 18px;
             color: #3FEFEF;
         }
-        .blog-post {
+      .blog-post {
             margin: 20px 0;
             padding: 10px;
             background: #fff;
@@ -74,28 +75,30 @@
             font-family: 'Brush Script MT', cursive;
             text-align: left;
         }
-        .pagination {
+      .pagination {
             margin: 20px 0;
             display: flex;
             justify-content: space-between;
         }
-        .pagination button {
+      .pagination button {
             flex: 1;
             max-width: 100px;
             padding: 10px;
             border: none;
-            background-color: rgba(63, 239, 239, 0.5);
+            border-radius: 20px;
+            background: #182b11;
+            box-shadow: inset -5px 5px 9px #0a1107,
+                        inset 5px -5px 9px #26451b;
             color: #000;
-            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
         }
-        .pagination button:hover {
+      .pagination button:hover {
             transform: translateY(-2px);
         }
         @media (max-width: 600px) {
-            .pagination button {
+          .pagination button {
                 width: 100%;
             }
         }
@@ -128,6 +131,8 @@
     </div>
     <script>
         const posts = [
+            { title: "无敌版：🍎🍎🍎🍎🍎", content: "♯个股♯净额♯尾五♯涨停♯带龙虎♯30W今红高昨红低▄▉（今蓝昨红红的话明天要看水下负五)" }, 
+            { title: "传奇版：🍒🍒🍒🍒🍒🍒", content: "外：区间净额排序♯尾五♯300红   量红┃内：主力净额排序一♯非独立 " },        
             { title: "第一篇封妖式：☀️☀️☀️☀️☀️☀️", content: "♯预测明一字♯关联属性♯左上角负独立概念♯竞价量比红♯量比正300正♯周线大单近2个非绿 周线底五日线内无上影线" },
             { title: "第二篇回封板：☀️☀️☀️☀️☀️", content: "♯涨停榜♯看竞价比绿♯区间0-10♯量比绿♯300红♯明天一字回封买点" },
             { title: "第三篇开悟篇：☀️☀️☀️", content: "♯当日涨停榜♯300红♯量比绿♯区间红不超10或者0 ♯竞价比绿 ♯竞价红♯明天入/-竞价绿♯尾盘入" },
