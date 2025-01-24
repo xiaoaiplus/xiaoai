@@ -1,4 +1,3 @@
-
  
 <!DOCTYPE html>
 <html lang="en">
@@ -7,7 +6,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎁</title>
+  <title>🎈</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -35,6 +34,7 @@
       border: 2px solid #9e9e9e;
       border-radius: 5px;
       background-color: #fafafa;
+      max-width: 260px; /* 限制输入框的最大宽度 */
     }
 
     #buttonContainer {
@@ -44,7 +44,7 @@
       margin-top: 20px;
     }
 
-  .button {
+ .button {
       width: 50px;
       height: 50px;
       font-size: 20px;
@@ -59,7 +59,7 @@
       transition: all 0.3s ease;
     }
 
- .button:hover {
+.button:hover {
       background-color: #bdbdbd;
     }
 
@@ -73,19 +73,19 @@
       display: none;
     }
 
-  .messageForm {
+ .messageForm {
       width: 80%;
       margin: 0 auto;
     }
 
-  .messageForm label {
+ .messageForm label {
       display: block;
       margin-top: 10px;
       font-size: 16px;
     }
 
-  .messageForm input,
-  .messageForm textarea {
+ .messageForm input,
+ .messageForm textarea {
       width: 100%;
       padding: 10px;
       font-size: 16px;
@@ -94,7 +94,7 @@
       background-color: #fafafa;
     }
 
-  .messageForm input[type="submit"] {
+ .messageForm input[type="submit"] {
       width: 100%;
       padding: 10px;
       font-size: 18px;
@@ -106,7 +106,7 @@
       margin-top: 20px;
     }
 
-  .card {
+ .card {
       border: 1px solid #9e9e9e;
       padding: 15px;
       margin-bottom: 15px;
@@ -114,12 +114,12 @@
       border-radius: 10px;
     }
 
-  .card h3 {
+ .card h3 {
       margin: 0 0 5px 0;
       font-size: 20px;
     }
 
-  .card p {
+ .card p {
       margin: 0;
       font-size: 16px;
     }
@@ -150,7 +150,8 @@
     </div>
   </div>
   <div id="messageBoard">
-    
+    <form id="messageForm" class="hidden">
+      
     </form>
     <div class="card">
       <h3>用户 1</h3>
