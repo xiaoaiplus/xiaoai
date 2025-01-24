@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎁</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "calisto mt", Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #111;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            background: #222;
+            border-radius: 20px;
+            box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .title {
+            font-size: 36px;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-family: 'KaiTi', '行楷', cursive;
+            font-weight: normal;
+        }
+        .scan {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .scan .fingerprint {
+            position: relative;
+            width: 200px;
+            height: 180px;
+            background: url(https://xiaoaiplus.github.io/xiaoai/zhiwen.jpeg) no-repeat; /* 指纹图片路径 */
+            background-size: contain;
+            cursor: pointer;
+            outline: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .scan h3 {
+            text-transform: unset;
+            font-size: 2em;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            color: #3FEFEF;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #3FEFEF;
+        }
+        .blog-post {
+            margin: 20px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #000;
+            font-family: 'Brush Script MT', cursive;
+            text-align: left;
+        }
+        .pagination {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .pagination button {
+            flex: 1;
+            max-width: 100px;
+            padding: 10px;
+            border: none;
+            background-color: rgba(63, 239, 239, 0.5);
+            color: #000;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .pagination button:hover {
+            transform: translateY(-2px);
+        }
+        @media (max-width: 600px) {
+            .pagination button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="authContainer">
+        <h1 class="title">指纹验证</h1>
+        <div class="scan">
+            <div class="fingerprint" onclick="verifyFingerprint()"></div>
+            <h3>Scanning...</h3>
+        </div>
+        <div class="message" id="message">请点击指纹区域进行验证。</div>
+    </div>
+
+    <div class="container" id="blogContainer" style="display: none;">
+        <div class="title">我的博客</div>
+        <p>仰天大笑出门去-我辈岂是蓬蒿人</p>
+        <div id="posts"></div>
+        <div class="pagination">
+            <button id="prevButton" disabled>上一页</button>
+            <button id="nextButton">下一页</button>
+        </div>
+        
+        <!-- 页脚 -->
+    <footer>
+        <p>© 2024 <a href="https://m.cls.cn/" target="_blank">我的博客</a>。所有权利保留。日周月红蓝蓝砸尾蓝</p>
+    </footer>
+        
+    </div>
+    <script>
+        const posts = [             
+               { title: "无敌战神：🌸🌸🌸🌸🌸", content: "♯可转债，涨素排行，涨幅红，板块。" }, 
+              { title: "无人扶我青云志，我踏云梯破九重。", content: "♯ø市场情绪，打板，自然涨停板，最后涨停时间晚排序，回风首版股。涨停原因，涨停板(优)非首版比较，非断板，威武，区间最高。（首版也能比较）" }, 
+            { title: "我无敌了：🎁🎁🎁🎁🎁", content: "♯当日市场情绪  ♯竞价  ♯换手低排序*涨停（ˣ委买最多）  ♯概念a ，♯关联内  ♯当日 (ˣ上一日)  ♯尾五  ♯主力卖灵  ♯区成交最高  ♯次日打板进" }, 
+            { title: "情绪流：🍒🍒🍒🍒🍒", content: "市场情绪♯找个连班率高的几板♯尾五净额负♯散户多的♯散户少的。♣T♣H♣S{♯月♯日♯板涨停，♯月♯日尾盘某分钟区间净额流向倒叙，♯月♯日散户数量}" },
+            { title: "反包流：🥩🥩🥩🥩🥩", content: "♣T♣H♣S♯1个交易日前反包涨停股概念，1个交易日前尾盘5分钟区间净额流向倒叙（次日挂涨停）" },
+            { title: "智慧：🍎🍎🍎🍎🍎", content: "♯个股♯净额♯尾五♯涨停♯带龙虎♯30W今红高昨红低▄▉（今蓝昨红红的话明天要看水下负五)" },
+            { title: "传奇：🍎🍎🍎🍎🍎", content: "外：区间净额排序♯尾五♯300红   量红┃内：主力净额排序一♯非独立 " },  
+            { title: "涅槃：🍎🍎🍎🍎🍎", content: "板块/精选/尾五/强度/净额红/300红/量比绿/根据竞价绿300红区间0-10量比绿，无虎红兰兰30今日，上周，今月红✨" },     
+            { title: "第一篇封妖式：☀️☀️☀️☀️☀️☀️", content: "♯预测明一字♯关联属性♯左上角负独立概念♯竞价量比红♯量比正300正♯周线大单近2个非绿 周线底五日线内无上影线" },
+            { title: "第二篇回封板：☀️☀️☀️☀️☀️", content: "♯涨停榜♯看竞价比绿♯区间0-10♯量比绿♯300红♯明天一字回封买点" },
+            { title: "第三篇开悟篇：☀️☀️☀️", content: "♯当日涨停榜♯300红♯量比绿♯区间红不超10或者0 ♯竞价比绿 ♯竞价红♯明天入/-竞价绿♯尾盘入" },
+            { title: "第四篇", content: "明天进♯板块♯最后五分钟♯强度排序♯区间净额红♯关联左上角净额(绿)♯只看lone量比(绿)“30红”“不高”■注意：300红∥无虎♯300绿∥有虎" },
+            { title: "第五篇", content: "板块♯精选♯强度排序♯最下五分钟♯查量比绿300绿♯左上角净额绿♯L.one♯300红当天无虎/300绿当天需虎♯" },
+            { title: "第六篇", content: "明天进♯板块精选♯强度排序 ♯量比负♯关联涨幅排行只看L1300红/ ♯返回关联其他量比负继续鉴定" },
+            { title: "第七篇", content: "🌷♯板块♯精选♯最下5TIME♯区间净额红♯关联区间5TIME量比绿排序♯有收盘封单L1♯明天进" },
+            { title: "第八篇", content: "明天进♯板块♯精选♯强度正序♯最下5TIME♯区间净额红♯涨停股量比绿♯（AB概念≠主概念♯300W红♯主力买多）" },                                               { title: "第九篇", content: "当天进♯打板♯竞价♯涨停委买额♯前几(换手低)概念B♯昨天有涨停L1♯{无虎量比绿}" },                                               { title: "第十篇", content: "明天进♯板块精选♯强度≠主力净额负概念♯涨幅排序♯量比绿♯300w为正" },
+            { title: "第十一篇", content: "明天进♯自然涨停♯涨停时间排序♯9点30分前封单最多♯涨停原因♯量比绿♯(会炸板♯概念A和概念一样不选)" },
+            { title: "第十二篇", content: "明天进♯板块♯精选♯涨速↑♯300W红♯L1≈注意30红蓝" },
+            { title: "第十三篇", content: "明天进♯沪深地区♯区间涨幅(🌸红)排序♯涨幅排序只看L1♯量比绿(300红尾盘进 绿开盘进" },
+            { title: "第十四篇", content: "明天进♯精选♯涨速低至高非黑零♯涨速红♯300W红♯主力净额红" },
+            { title: "第十五篇", content: "今日板块竞价异动♯最高爆量♯＞800W♯竞价净额红排序♯概念b♯量比绿排序♯尾盘看明天进/早上看昨天今天进" },
+            { title: "第十六篇", content: "委买排序♯前五换手最低♯概念A♯前一天L1♯左上角概念主力净额正→负or负→正" },
+            { title: "第十七篇", content: "①板块精选②主力净额高③第一页选涨速最低④看板块右上角资金±⑤明天开盘或尾盘进⑥隔天九个点出货" },
+            { title: "第十八篇", content: "①市场情绪②涨停时间排序③概念A④上个交易日L1⑤左上角资金负开盘进，资金正尾盘进⑥隔天出货" },
+            { title: "第十九篇隐藏卡", content: "板块/精选/尾五/强度/净额红/300红/量比绿/根据竞价绿300红区间0-10量比绿，无虎红兰兰30今日，上周，今月红✨" }, 
+            { title: "壹A10🍥", content: "🍬️板块♯精选♯强度♯威武♯区间红=量比绿/区间绿=量比红♯内涨幅排序♯量比绿♯非首" }, 
+            { title: "️贰A10🍥", content: "🍬️板块♯强度排序1（分支跳过）♯内威武♯区间净绿排序♯非首" }, 
+            { title: "叁A10🍥", content: "🍬️板块♯精选♯前五♯300排序♯内涨幅♯龙一/或量比绿非首板" }, 
+            { title: "肆A10🍥", content: "🍬️威武♯300排序♯量比绿♯内非首版♯量比绿断板涨停的尾盘进♯连班涨停开盘进" }, 
+            { title: "🎁", content: "♯精选💞强度排序♯主力净额负的♯内早(全)盘/净额负排序非首板/非破板" }, 
+             { title: "无敌是多么寂寞：A", content: "♯【★市场情绪♯大单净最极端两个♯再看日均线大和净】                    🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊🎊           ★月★日3板涨停，★月★日尾盘5分钟区间净额流向倒叙，★月★日散户数量，非科创，非创业，非st，★月★日早盘大单净额" }, 
+            { title: "第二十篇", content: "仰天大笑出门去-我辈岂是蓬蒿人♯红(蓝)蓝" }       
+        ];
+
+        let currentPage = 0;
+        const postsPerPage = 2;
+
+        let fingerprintCount = 0; // 连续按压次数
+        let totalClicks = 0; // 总点击次数
+        let verificationTimeout; // 定时器
+        let resetTimeout; // 计时器，用于3秒内未点击自动进入
+        let hasVerified = false; // 标记是否已成功验证
+        let isWaiting = false; // 标记是否在等待期间
+
+        function verifyFingerprint() {
+            if (isWaiting) return; // 如果在等待期间，直接返回
+
+            totalClicks++; // 增加总点击次数
+            fingerprintCount++; // 每次点击增加计数
+            const messageDiv = document.getElementById('message');
+
+            // 显示"验证中"
+            messageDiv.textContent = "验证中...";
+            messageDiv.style.color = "#3FEFEF";
+
+            if (fingerprintCount === 8) {
+                // 点击8次时，设置成功验证标记并进入等待状态
+                hasVerified = true; // 设置成功验证标记
+                isWaiting = true; // 设置为等待状态
+
+                // 设置3秒等待时间
+                resetTimeout = setTimeout(() => {
+                    if (hasVerified) { // 确保已经验证成功
+                        switchToBlog(); // 切换到博客
+                    }
+                    resetFingerprintCount(); // 重置计数
+                }, 3000); // 3000毫秒 = 3秒
+            } else if (totalClicks >= 1 && fingerprintCount < 8) {
+                // 如果总点击次数达到1次但未达到8次，设置5秒后检查
+                clearTimeout(verificationTimeout);
+                verificationTimeout = setTimeout(() => {
+                    messageDiv.textContent = "指纹验证失败，请重试。";
+                    messageDiv.style.color = "red";
+                    resetFingerprintCount();
+                }, 5000); // 5000毫秒 = 5秒
+            } else {
+                // 每次按压后设置定时器，5秒后判断是否需要重置计数
+                clearTimeout(verificationTimeout);
+                verificationTimeout = setTimeout(() => {
+                    messageDiv.textContent = "请继续点击指纹区域进行验证。";
+                    messageDiv.style.color = "#3FEFEF";
+                    resetFingerprintCount();
+                }, 5000); // 5000毫秒 = 5秒
+            }
+        }
+
+        function switchToBlog() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('blogContainer').style.display = 'block';
+            displayPosts(); // 显示博客内容
+        }
+
+        function resetFingerprintCount() {
+            fingerprintCount = 0; // 重置计数
+            totalClicks = 0; // 重置总点击计数
+            clearTimeout(verificationTimeout); // 清除定时器
+            clearTimeout(resetTimeout); // 清除等待3秒的定时器
+            isWaiting = false; // 重置等待状态
+            hasVerified = false; // 重置验证状态
+        }
+
+        function displayPosts() {
+            const postsDiv = document.getElementById('posts');
+            postsDiv.innerHTML = ''; // 清空当前内容
+            const start = currentPage * postsPerPage;
+            const end = start + postsPerPage;
+            const currentPosts = posts.slice(start, end);
+
+            currentPosts.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'blog-post';
+                postDiv.innerHTML = `<h2>${post.title}</h2><p>${post.content}</p>`;
+                postsDiv.appendChild(postDiv);
+            });
+
+            // 更新按钮状态
+            document.getElementById('prevButton').disabled = currentPage === 0;
+            document.getElementById('nextButton').disabled = end >= posts.length;
+        }
+
+        document.getElementById('prevButton').addEventListener('click', function() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayPosts();
+            }
+        });
+
+        document.getElementById('nextButton').addEventListener('click', function() {
+            if ((currentPage + 1) * postsPerPage < posts.length) {
+                currentPage++;
+                displayPosts();
+            }
+        });
+    </script>
+</body>
+</html>
