@@ -1,0 +1,226 @@
+
+  
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多功能页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    #calculator {
+      width: 300px;
+      margin: 0 auto;
+      background-color: #e0e0e0;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #inputField {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      border: 2px solid #9e9e9e;
+      border-radius: 5px;
+      background-color: #fafafa;
+    }
+
+    #buttonContainer {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+   .button {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      background-color: #f5f5f5;
+      border: 2px solid #9e9e9e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+  .button:hover {
+      background-color: #bdbdbd;
+    }
+
+    #messageBoard {
+      width: 80%;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+ .card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+    }
+
+ .card h3 {
+      margin: 0;
+    }
+
+ .card p {
+      margin: 5px 0;
+    }
+
+ .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>多功能页面</h1>
+  <div id="calculator">
+    <input type="text" id="inputField" />
+    <div id="buttonContainer">
+      <button class="button" onclick="appendNumber(1)">1</button>
+      <button class="button" onclick="appendNumber(2)">2</button>
+      <button class="button" onclick="appendNumber(3)">3</button>
+      <button class="button" onclick="appendOperator('+')">+</button>
+      <button class="button" onclick="appendNumber(4)">4</button>
+      <button class="button" onclick="appendNumber(5)">5</button>
+      <button class="button" onclick="appendNumber(6)">6</button>
+      <button class="button" onclick="appendOperator('-')">-</button>
+      <button class="button" onclick="appendNumber(7)">7</button>
+      <button class="button" onclick="appendNumber(8)">8</button>
+      <button class="button" onclick="appendNumber(9)">9</button>
+      <button class="button" onclick="appendOperator('*')">*</button>
+      <button class="button" onclick="appendNumber(0)">0</button>
+      <button class="button" onclick="calculate()">=</button>
+      <button class="button" onclick="appendOperator('/')">/</button>
+    </div>
+  </div>
+  <div id="messageBoard">
+    <div class="card">
+      <h3>用户 1</h3>
+      <p>这是一条留言！</p>
+    </div>
+    <div class="card">
+      <h3>用户 2</h3>
+      <p>很棒的留言板！</p>
+    </div>
+  </div>
+
+  <form id="messageForm" class="hidden">
+    <input type="text" id="username" placeholder="用户名">
+    <textarea id="messageContent" placeholder="您的留言"></textarea>
+    <input type="submit" value="提交">
+  </form>
+
+  <script>
+    var expression = '';
+
+    function appendNumber(number) {
+      expression += number;
+      document.getElementById('inputField').value = expression;
+    }
+
+    function appendOperator(operator) {
+      if (expression.length > 0) {
+        expression += operator;
+        document.getElementById('inputField').value = expression;
+      }
+    }
+
+    function calculate() {
+      var inputValue = expression;
+      if (inputValue === '1024') {
+        document.getElementById('calculator').style.display = 'none';
+        document.getElementById('messageBoard').style.display = 'block';
+        document.getElementById('messageForm').classList.remove('hidden');
+      } else {
+        var operators = ['+', '-', '*', '/'];
+        var operator = '';
+        for (var i = 0; i < inputValue.length; i++) {
+          if (operators.includes(inputValue[i])) {
+            operator = inputValue[i];
+            break;
+          }
+        }
+        if (operator) {
+          var values = inputValue.split(operator);
+          var num1 = parseInt(values[0]);
+          var num2 = parseInt(values[1]);
+          if (isNaN(num1) || isNaN(num2)) {
+            alert('请输入有效的数字进行计算！');
+          } else {
+            var result;
+            switch (operator) {
+              case '+':
+                result = num1 + num2;
+                break;
+              case '-':
+                result = num1 - num2;
+                break;
+              case '*':
+                result = num1 * num2;
+                break;
+              case '/':
+                if (num2 === 0) {
+                  alert('除数不能为 0！');
+                  return;
+                }
+                result = num1 / num2;
+                break;
+            }
+            expression = result.toString();
+            document.getElementById('inputField').value = expression;
+          }
+        } else {
+          alert('请输入有效的计算表达式（如：2 + 3）');
+        }
+      }
+    }
+
+    document.getElementById('messageForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var username = document.getElementById('username').value;
+      var messageContent = document.getElementById('messageContent').value;
+
+      var newCard = document.createElement('div');
+      newCard.classList.add('card');
+
+      var h3 = document.createElement('h3');
+      h3.textContent = username;
+
+      var p = document.createElement('p');
+      p.textContent = messageContent;
+
+      newCard.appendChild(h3);
+      newCard.appendChild(p);
+
+      document.getElementById('messageBoard').appendChild(newCard);
+
+      document.getElementById('username').value = '';
+      document.getElementById('messageContent').value = '';
+    });
+  </script>
+</body>
+
+</html>
