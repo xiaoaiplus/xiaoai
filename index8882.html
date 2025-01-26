@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全能计算器</title>
+    <title>智能计算器</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -45,7 +45,7 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            z-index: 10; /* 提高层级 */
+            z-index: 10;
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             color: white;
@@ -53,9 +53,6 @@
             padding: 8px 20px;
             border-radius: 12px;
             font-size: 0.9em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -75,7 +72,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             min-height: 1.2em;
-            background: var(--background);
             padding: 15px;
             border-radius: 8px;
         }
@@ -84,14 +80,130 @@
             display: block;
         }
 
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            background: #333;
+            color: white;
+            outline: none;
+            caret-color: #0af;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calc-btn {
+            background: var(--number-bg);
+            color: var(--number-color);
+            border: none;
+            padding: 16px;
+            font-size: 1.2em;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: var(--button-shadow);
+        }
+
         .standard-ui {
             display: none;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin-top: 30px; /* 增加上边距 */
+            margin-top: 30px;
         }
 
-        /* 其他样式保持不变... */
+        .operator {
+            background: var(--operator);
+            font-size: 1.4em;
+        }
+
+        .special {
+            background: var(--special);
+            color: var(--background);
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        .hidden-mode {
+            display: none !important;
+        }
+
+        .visible-mode {
+            display: grid !important;
+        }
+
+        .results {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            margin-top: 20px;
+            padding: 15px;
+            color: white;
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @media (max-width: 480px) {
+            .display-text {
+                font-size: 2.2em;
+            }
+            .calc-btn {
+                padding: 14px;
+                font-size: 1.1em;
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --primary: #007AFF;
+                --operator: #FF9500;
+                --special: #E5E5EA;
+                --number-bg: #FFFFFF;
+                --number-color: #1C1C1E;
+                --background: #FFFFFF;
+                --button-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            body {
+                background: #F5F5F5;
+            }
+            .calculator {
+                background: white;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            .display {
+                background: white;
+            }
+            input {
+                background: #F2F2F7;
+                color: #1C1C1E;
+            }
+            .mode-switch {
+                background: rgba(0,0,0,0.05);
+                color: #1C1C1E;
+                border-color: rgba(0,0,0,0.1);
+            }
+            .results {
+                background: rgba(0,0,0,0.05);
+                color: #1C1C1E;
+            }
+        }
     </style>
 </head>
 <body>
@@ -100,21 +212,109 @@
             <span>切换模式</span>
         </button>
         
-        <!-- 复利计算器界面保持不变... -->
+        <!-- 复利计算器界面 -->
+        <div class="compound-ui">
+            <div class="display">
+                <div class="display-text" id="display">0</div>
+            </div>
+            
+            <div class="input-group">
+                <input type="number" id="principal" placeholder="初始本金（元）" step="100">
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="rate" placeholder="年化收益率（%）" step="0.1">
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="years" placeholder="投资年限" step="1">
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="compound" value="365" placeholder="年复利次数">
+            </div>
+
+            <div class="button-group">
+                <button class="calc-btn" onclick="calculateCompound()" style="background: var(--primary);">计算</button>
+                <button class="calc-btn special" onclick="resetForm()">重置</button>
+            </div>
+
+            <div class="results" id="results">
+                <div class="result-item">
+                    <span>初始本金</span>
+                    <span id="initAmount">-</span>
+                </div>
+                <div class="result-item">
+                    <span>最终金额</span>
+                    <span id="finalAmount">-</span>
+                </div>
+                <div class="result-item">
+                    <span>总收益</span>
+                    <span id="totalProfit">-</span>
+                </div>
+            </div>
+        </div>
 
         <!-- 普通计算器界面 -->
         <div class="standard-ui">
-            <!-- 按钮布局保持不变... -->
+            <button class="calc-btn special" onclick="clearDisplay()">C</button>
+            <button class="calc-btn special" onclick="toggleSign()">±</button>
+            <button class="calc-btn special" onclick="percent()">%</button>
+            <button class="calc-btn operator" onclick="inputOperator('÷')">÷</button>
+            
+            <button class="calc-btn" onclick="inputNumber('7')">7</button>
+            <button class="calc-btn" onclick="inputNumber('8')">8</button>
+            <button class="calc-btn" onclick="inputNumber('9')">9</button>
+            <button class="calc-btn operator" onclick="inputOperator('×')">×</button>
+            
+            <button class="calc-btn" onclick="inputNumber('4')">4</button>
+            <button class="calc-btn" onclick="inputNumber('5')">5</button>
+            <button class="calc-btn" onclick="inputNumber('6')">6</button>
+            <button class="calc-btn operator" onclick="inputOperator('-')">-</button>
+            
+            <button class="calc-btn" onclick="inputNumber('1')">1</button>
+            <button class="calc-btn" onclick="inputNumber('2')">2</button>
+            <button class="calc-btn" onclick="inputNumber('3')">3</button>
+            <button class="calc-btn operator" onclick="inputOperator('+')">+</button>
+            
+            <button class="calc-btn span-2" onclick="inputNumber('0')">0</button>
+            <button class="calc-btn" onclick="inputDecimal()">.</button>
+            <button class="calc-btn operator" onclick="calculate()">=</button>
         </div>
     </div>
 
     <script>
-        // 修改后的显示更新逻辑
+        // 模式切换控制
+        let isStandardMode = false;
+        
+        function toggleMode() {
+            isStandardMode = !isStandardMode;
+            const compoundUI = document.querySelector('.compound-ui');
+            const standardUI = document.querySelector('.standard-ui');
+            
+            if(isStandardMode) {
+                compoundUI.classList.add('hidden-mode');
+                standardUI.classList.add('visible-mode');
+                document.querySelector('.mode-switch').textContent = '理财模式';
+                clearDisplay();
+            } else {
+                compoundUI.classList.remove('hidden-mode');
+                standardUI.classList.remove('visible-mode');
+                document.querySelector('.mode-switch').textContent = '普通计算';
+                resetForm();
+            }
+        }
+
+        // 普通计算器逻辑
+        let currentValue = '0';
+        let firstOperand = null;
+        let operator = null;
+        let waitingForSecondOperand = false;
+
         function updateDisplay() {
             const display = document.getElementById('display');
             let displayValue = currentValue;
             
-            // 格式化显示（带千位分隔符）
             if(currentValue.includes('.')) {
                 const parts = currentValue.split('.');
                 displayValue = `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`;
@@ -127,7 +327,51 @@
                 .getPropertyValue('--number-color');
         }
 
-        // 增强计算功能
+        function inputNumber(num) {
+            if(waitingForSecondOperand) {
+                currentValue = num;
+                waitingForSecondOperand = false;
+            } else {
+                currentValue = currentValue === '0' ? num : currentValue + num;
+            }
+            updateDisplay();
+        }
+
+        function inputDecimal() {
+            if(!currentValue.includes('.')) {
+                currentValue += '.';
+                updateDisplay();
+            }
+        }
+
+        function inputOperator(nextOperator) {
+            const inputValue = parseFloat(currentValue);
+            
+            if(operator && waitingForSecondOperand) {
+                operator = nextOperator;
+                return;
+            }
+            
+            if(firstOperand === null) {
+                firstOperand = inputValue;
+            } else if(operator) {
+                const result = performCalculation[operator](firstOperand, inputValue);
+                currentValue = result % 1 === 0 ? String(result) : String(result.toFixed(6));
+                updateDisplay();
+                firstOperand = result;
+            }
+            
+            waitingForSecondOperand = true;
+            operator = nextOperator;
+        }
+
+        const performCalculation = {
+            '+': (a, b) => a + b,
+            '-': (a, b) => a - b,
+            '×': (a, b) => a * b,
+            '÷': (a, b) => a / b
+        };
+
         function calculate() {
             if(operator && !waitingForSecondOperand) {
                 const inputValue = parseFloat(currentValue);
@@ -139,7 +383,61 @@
             }
         }
 
-        // 其他逻辑保持不变...
+        function clearDisplay() {
+            currentValue = '0';
+            firstOperand = null;
+            operator = null;
+            waitingForSecondOperand = false;
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            currentValue = String(-parseFloat(currentValue));
+            updateDisplay();
+        }
+
+        function percent() {
+            currentValue = String(parseFloat(currentValue) / 100);
+            updateDisplay();
+        }
+
+        // 复利计算器逻辑
+        function calculateCompound() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const annualRate = parseFloat(document.getElementById('rate').value) / 100;
+            const years = parseInt(document.getElementById('years').value);
+            const compoundTimes = parseInt(document.getElementById('compound').value);
+
+            if ([principal, annualRate, years, compoundTimes].some(v => isNaN(v) || v <= 0)) {
+                alert("请填写所有有效数值");
+                return;
+            }
+
+            const finalAmount = principal * Math.pow(1 + annualRate/compoundTimes, compoundTimes*years);
+            
+            document.getElementById('display').textContent = finalAmount.toLocaleString('zh-CN', {
+                style: 'currency',
+                currency: 'CNY',
+                maximumFractionDigits: 2
+            });
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('initAmount').textContent = `¥${principal.toFixed(2)}`;
+            document.getElementById('finalAmount').textContent = `¥${finalAmount.toFixed(2)}`;
+            document.getElementById('totalProfit').textContent = 
+                `¥${(finalAmount - principal).toFixed(2)}`;
+        }
+
+        function resetForm() {
+            document.querySelectorAll('.compound-ui input').forEach(input => input.value = '');
+            document.getElementById('compound').value = '365';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('display').textContent = '0';
+            updateDisplay();
+        }
+
+        // 初始化显示
+        updateDisplay();
     </script>
 </body>
 </html>
