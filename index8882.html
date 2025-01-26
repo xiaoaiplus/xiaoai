@@ -9,7 +9,8 @@
             --primary: #007AFF;
             --operator: #FF9500;
             --special: #A5ABB3;
-            --number: #2C2C2E;
+            --number-bg: #2C2C2E;
+            --number-color: white;
             --background: #000000;
             --button-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
@@ -67,13 +68,16 @@
         }
 
         .display-text {
-            color: white;
+            color: var(--number-color);
             font-size: 3em;
             text-align: right;
             font-weight: 300;
             overflow: hidden;
             text-overflow: ellipsis;
             min-height: 1.2em;
+            background: var(--background);
+            padding: 15px;
+            border-radius: 8px;
         }
 
         .compound-ui {
@@ -104,8 +108,8 @@
         }
 
         .calc-btn {
-            background: var(--number);
-            color: white;
+            background: var(--number-bg);
+            color: var(--number-color);
             border: none;
             padding: 16px;
             font-size: 1.2em;
@@ -159,7 +163,8 @@
                 --primary: #007AFF;
                 --operator: #FF9500;
                 --special: #E5E5EA;
-                --number: #FFFFFF;
+                --number-bg: #FFFFFF;
+                --number-color: #1C1C1E;
                 --background: #FFFFFF;
                 --button-shadow: 0 4px 12px rgba(0,0,0,0.1);
             }
@@ -172,9 +177,6 @@
             }
             .display {
                 background: white;
-            }
-            .display-text {
-                color: #1C1C1E;
             }
             input {
                 background: #F2F2F7;
@@ -294,7 +296,10 @@
         let waitingForSecondOperand = false;
 
         function updateDisplay() {
-            document.getElementById('display').textContent = currentValue;
+            const display = document.getElementById('display');
+            display.textContent = currentValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            display.style.color = getComputedStyle(document.documentElement)
+                .getPropertyValue('--number-color');
         }
 
         function inputNumber(num) {
@@ -403,7 +408,11 @@
             document.getElementById('compound').value = '365';
             document.getElementById('results').style.display = 'none';
             document.getElementById('display').textContent = '0';
+            updateDisplay();
         }
+
+        // 初始化显示
+        updateDisplay();
     </script>
 </body>
 </html>
