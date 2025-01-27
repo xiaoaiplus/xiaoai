@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沪深分时涨停监控</title>
+    <style>
+        :root {
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --blue: #3498db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, '微软雅黑', sans-serif;
+        }
+
+        body {
+            background: #f8f9fa;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .time-filter {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: var(--blue);
+            color: white;
+        }
+
+        .stock-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .stock-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stock-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .stock-code {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .price-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .change-percent {
+            font-weight: 600;
+        }
+
+        .positive { color: var(--red); }
+        .negative { color: var(--green); }
+
+        .load-more {
+            margin-top: 20px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--blue);
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--blue);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>📈 分时涨停监控</h2>
+            <div class="time-filter">
+                <button class="filter-btn active" data-period="all">全部</button>
+                <button class="filter-btn" data-period="morning">早盘(9:30-11:30)</button>
+                <button class="filter-btn" data-period="afternoon">午盘(13:00-15:00)</button>
+            </div>
+        </div>
+        
+        <div id="loading" class="loader"></div>
+        <div id="stockList" class="stock-list"></div>
+        <div id="errorMsg" style="color: var(--red); text-align: center; display: none;"></div>
+    </div>
+
+    <script>
+        // 新浪财经全量股票接口（JSONP）
+        const API_URL = 'https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page=1&num=100&sort=changepercent&asc=0&node=hs_a';
+
+        // 分时段配置
+        const TRADE_PERIODS = {
+            morning: { start: 930, end: 1130 },
+            afternoon: { start: 1300, end: 1500 }
+        };
+
+        // 涨停阈值
+        const LIMIT_UP_PERCENT = 9.9;
+
+        // 数据缓存
+        let stockData = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initEventListeners();
+            fetchData();
+        });
+
+        // 事件监听
+        function initEventListeners() {
+            document.querySelector('.time-filter').addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    document.querySelectorAll('.filter-btn').forEach(btn => 
+                        btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    filterStocks(e.target.dataset.period);
+                }
+            });
+        }
+
+        // 获取数据
+        async function fetchData() {
+            try {
+                const data = await jsonpFetch(API_URL);
+                processData(data);
+                renderStocks('all');
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                showError('数据加载失败，请刷新重试');
+            }
+        }
+
+        // 处理原始数据
+        function processData(rawData) {
+            stockData = rawData
+                .filter(item => parseFloat(item.changepercent) >= LIMIT_UP_PERCENT)
+                .map(item => ({
+                    code: item.symbol,
+                    name: item.name,
+                    price: item.trade,
+                    change: item.changepercent,
+                    time: parseTime(item.ticktime),
+                    concept: item.industry
+                }));
+        }
+
+        // 时间解析
+        function parseTime(timeStr) {
+            const time = timeStr.replace(/:/g, '');
+            return {
+                display: timeStr,
+                numeric: parseInt(time)
+            };
+        }
+
+        // 分时段过滤
+        function filterStocks(period) {
+            if (period === 'all') return renderStocks(stockData);
+            
+            const { start, end } = TRADE_PERIODS[period];
+            const filtered = stockData.filter(item => 
+                item.time.numeric >= start && item.time.numeric <= end
+            );
+            renderStocks(filtered);
+        }
+
+        // 渲染股票列表
+        function renderStocks(data) {
+            const container = document.getElementById('stockList');
+            container.innerHTML = data.map(stock => `
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div>
+                            <div class="stock-name">${stock.name}</div>
+                            <div class="stock-code">${stock.code}</div>
+                        </div>
+                        <div class="change-percent ${stock.change > 0 ? 'positive' : 'negative'}">
+                            +${stock.change}%
+                        </div>
+                    </div>
+                    <div class="price-info">
+                        <div>涨停时间：${stock.time.display}</div>
+                        <div>最新价：${stock.price}</div>
+                    </div>
+                    ${stock.concept ? `<div style="margin-top:8px;color:#7f8c8d;font-size:0.9em">板块：${stock.concept}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // JSONP请求封装
+        function jsonpFetch(url) {
+            return new Promise((resolve, reject) => {
+                const callbackName = `jsonp_callback_${Date.now()}`;
+                const script = document.createElement('script');
+                
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+
+                script.src = `${url}&callback=${callbackName}`;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            });
+        }
+
+        // 错误处理
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorMsg').textContent = msg;
+        }
+    </script>
+</body>
+</html>
