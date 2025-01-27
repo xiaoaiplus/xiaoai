@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沪深涨停监控 - Alpha Vantage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .stock-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stock-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .stock-code {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .change-percent {
+            font-weight: 600;
+        }
+        .positive { color: #2ecc71; }
+        .negative { color: #e74c3c; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>沪深涨停监控</h1>
+        <div id="loading" class="loader"></div>
+        <div id="stockList"></div>
+    </div>
+
+    <script>
+        // Alpha Vantage API 配置
+        const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY'; // 替换为你的 API Key
+        const API_URL = `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${API_KEY}`;
+
+        // 获取数据
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                processData(data);
+            } catch (error) {
+                console.error('数据加载失败:', error);
+                showError();
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // 处理数据
+        function processData(data) {
+            const topGainers = data.top_gainers || [];
+            const filteredStocks = topGainers
+                .filter(stock => parseFloat(stock.change_percentage) >= 9.9) // 筛选涨停股
+                .map(stock => ({
+                    symbol: stock.ticker,
+                    name: stock.company_name,
+                    price: stock.price,
+                    change: stock.change_percentage.replace('%', '')
+                }));
+
+            renderStocks(filteredStocks);
+        }
+
+        // 渲染股票列表
+        function renderStocks(stocks) {
+            const container = document.getElementById('stockList');
+            container.innerHTML = stocks.map(stock => `
+                <div class="stock-card">
+                    <div class="stock-name">${stock.name}</div>
+                    <div class="stock-code">${stock.symbol}</div>
+                    <div class="change-percent ${stock.change > 0 ? 'positive' : 'negative'}">
+                        涨幅：${stock.change}%
+                    </div>
+                    <div>最新价：${stock.price}</div>
+                </div>
+            `).join('');
+        }
+
+        // 错误处理
+        function showError() {
+            const container = document.getElementById('stockList');
+            container.innerHTML = '<p style="color: red;">数据加载失败，请刷新重试</p>';
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
