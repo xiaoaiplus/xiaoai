@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沪深涨停监控 - Alpha Vantage</title>
+    <title>沪深涨停监控 - 二板以上涨停股</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,22 +51,47 @@
 </head>
 <body>
     <div class="container">
-        <h1>沪深涨停监控</h1>
+        <h1>沪深涨停监控 - 二板以上涨停股</h1>
         <div id="loading" class="loader"></div>
         <div id="stockList"></div>
     </div>
 
     <script>
-        // Alpha Vantage API 配置
-        const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY'; // 替换为你的 API Key
-        const API_URL = `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${API_KEY}`;
+        // 腾讯财经接口（海外或香港服务器 IP 访问）
+        const API_URL = 'https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=';
 
-        // 获取数据
-        async function fetchData() {
+        // 沪深 A 股代码示例（需自行维护更新）
+        const stockCodes = [
+            'sh600000', // 浦发银行
+            'sz000001', // 平安银行
+            'sh601318'  // 中国平安
+        ];
+
+        // 获取股票数据
+        async function fetchStockData() {
             try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                processData(data);
+                const responses = await Promise.all(
+                    stockCodes.map(code => 
+                        fetch(`${API_URL}${code}`)
+                        .then(res => res.json())
+                    )
+                );
+                
+                const validData = responses
+                    .filter(res => res.code === 0)
+                    .map(res => {
+                        const [market, code] = res.data._code.split('.');
+                        return {
+                            code: `${market.toUpperCase()}${code}`,
+                            name: res.data._market[res.data._code].qt[res.data._code][1],
+                            price: res.data._market[res.data._code].qt[res.data._code][3],
+                            change: res.data._market[res.data._code].qt[res.data._code][4],
+                            streak: res.data._market[res.data._code].qt[res.data._code][5] // 连板数
+                        };
+                    })
+                    .filter(stock => stock.streak >= 2); // 筛选二板以上涨停股
+
+                renderStocks(validData);
             } catch (error) {
                 console.error('数据加载失败:', error);
                 showError();
@@ -75,32 +100,23 @@
             }
         }
 
-        // 处理数据
-        function processData(data) {
-            const topGainers = data.top_gainers || [];
-            const filteredStocks = topGainers
-                .filter(stock => parseFloat(stock.change_percentage) >= 9.9) // 筛选涨停股
-                .map(stock => ({
-                    symbol: stock.ticker,
-                    name: stock.company_name,
-                    price: stock.price,
-                    change: stock.change_percentage.replace('%', '')
-                }));
-
-            renderStocks(filteredStocks);
-        }
-
         // 渲染股票列表
-        function renderStocks(stocks) {
+        function renderStocks(data) {
             const container = document.getElementById('stockList');
-            container.innerHTML = stocks.map(stock => `
+            container.innerHTML = data.map(stock => `
                 <div class="stock-card">
-                    <div class="stock-name">${stock.name}</div>
-                    <div class="stock-code">${stock.symbol}</div>
-                    <div class="change-percent ${stock.change > 0 ? 'positive' : 'negative'}">
-                        涨幅：${stock.change}%
+                    <div class="stock-header">
+                        <div>
+                            <div class="stock-name">${stock.name}</div>
+                            <div class="stock-code">${stock.code}</div>
+                        </div>
+                        <div class="change-percent ${stock.change > 0 ? 'positive' : 'negative'}">
+                            +${stock.change}%
+                        </div>
                     </div>
-                    <div>最新价：${stock.price}</div>
+                    <div style="margin-top: 8px; color: #7f8c8d; font-size: 0.9em;">
+                        连板数：${stock.streak} | 最新价：${stock.price}
+                    </div>
                 </div>
             `).join('');
         }
@@ -111,7 +127,10 @@
             container.innerHTML = '<p style="color: red;">数据加载失败，请刷新重试</p>';
         }
 
-        fetchData();
+        // 初始化加载
+        fetchStockData();
+        // 每60秒刷新
+        setInterval(fetchStockData, 60000);
     </script>
 </body>
 </html>
