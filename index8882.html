@@ -2,106 +2,134 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沪深涨停移动优化版</title>
+    <title>沪深涨停看盘</title>
+    <!-- 内联核心样式避免外链依赖 -->
     <style>
-        /* 保持之前的移动端样式 */
+        :root { --primary: #1677ff; --text: rgba(0,0,0,.85) }
+        body { 
+            margin: 0; 
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f0f2f5;
+            color: var(--text);
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+        .error-alert {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            padding: 12px;
+            border-radius: 4px;
+            color: #cf1322;
+            margin: 12px 0;
+        }
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            .container { padding: 8px }
+        }
     </style>
 </head>
 <body>
-    <!-- 保持之前的HTML结构 -->
+    <div class="container">
+        <div id="errorContainer"></div>
+        <div id="content">
+            <!-- 初始加载提示 -->
+            <div class="loading-placeholder">
+                <div class="ph-item">
+                    <div class="ph-col-12">
+                        <div class="ph-row">
+                            <div class="ph-col-6 big"></div>
+                        </div>
+                        <div class="ph-row">
+                            <div class="ph-col-4"></div>
+                            <div class="ph-col-8 empty"></div>
+                            <div class="ph-col-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        // 使用国际认可的代理服务
-        const PROXY_URL = 'https://api.allorigins.win/raw?url=';
-        const DATA_SOURCES = {
-            yahoo: 'https://query1.finance.yahoo.com/v8/finance/chart/',
-            tencent: 'http://qt.gtimg.cn/q=',
-            eastmoney: 'https://push2.eastmoney.com/api/qt/ulist.np/get'
-        };
+<script>
+// 极简兼容模式配置
+const SAFE_MODE = {
+    FALLBACK_DATA: [], // 空数据降级
+    MAX_RETRIES: 2,    // 最大重试次数
+    TIMEOUT: 5000      // 5秒超时
+};
 
-        // 新版数据获取方法
-        async function fetchStockData(code) {
-            try {
-                // 方案1：使用Yahoo Finance国际版
-                const yahooUrl = `${DATA_SOURCES.yahoo}${code}.SS`; // 沪股后缀.SS
-                const yahooResponse = await fetch(PROXY_URL + encodeURIComponent(yahooUrl), {
-                    headers: {'Referer': 'https://finance.yahoo.com'}
-                });
-                
-                if(yahooResponse.ok) {
-                    const data = await yahooResponse.json();
-                    return parseYahooData(data);
-                }
-
-                // 方案2：备用腾讯数据源（通过代理）
-                const tencentUrl = PROXY_URL + encodeURIComponent(DATA_SOURCES.tencent + code);
-                const tencentResponse = await fetch(tencentUrl);
-                if(tencentResponse.ok) {
-                    const text = await tencentResponse.text();
-                    return parseTencentData(text);
-                }
-
-                // 方案3：东方财富API（推荐）
-                const eastmoneyUrl = `${PROXY_URL}${encodeURIComponent(
-                    `${DATA_SOURCES.eastmoney}?fields=f2,f3,f12,f13,f14&secids=1.${code}`
-                )}`;
-                const emResponse = await fetch(eastmoneyUrl);
-                if(emResponse.ok) {
-                    const json = await emResponse.json();
-                    return parseEMData(json);
-                }
-
-                return null;
-            } catch (error) {
-                console.error('数据获取失败:', error);
-                return null;
-            }
+// 容错初始化函数
+function safeInit() {
+    try {
+        // 环境检测
+        if (typeof fetch === 'undefined') {
+            throw new Error('浏览器不支持Fetch API');
         }
+        
+        // 创建错误容器
+        const errorContainer = document.getElementById('errorContainer');
+        
+        // 主逻辑
+        loadData().catch(error => {
+            showError(error.message);
+        });
+        
+    } catch (e) {
+        document.body.innerHTML = `<div class="error-alert">初始化失败: ${e.message}</div>`;
+    }
+}
 
-        // 解析Yahoo数据
-        function parseYahooData(json) {
-            const { meta, timestamp } = json.chart.result[0];
-            return {
-                name: meta.symbol,
-                price: meta.regularMarketPrice.toFixed(2),
-                close: meta.previousClose.toFixed(2),
-                high: meta.regularMarketDayHigh.toFixed(2),
-                timestamp: new Date(timestamp*1000).toLocaleTimeString()
-            };
+// 增强版错误处理
+function showError(message) {
+    const template = `
+        <div class="error-alert">
+            <strong>数据加载失败</strong>
+            <p>${message}</p>
+            <button onclick="window.location.reload()">重试</button>
+        </div>
+    `;
+    document.getElementById('errorContainer').innerHTML = template;
+}
+
+// 安全数据请求
+async function fetchStockSafe(code) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), SAFE_MODE.TIMEOUT);
+    
+    try {
+        const response = await fetch(`/api/proxy?code=${code}`, { 
+            signal: controller.signal 
+        });
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
+        return await response.json();
+        
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('请求超时');
         }
+        throw error;
+    }
+}
 
-        // 解析腾讯数据
-        function parseTencentData(text) {
-            const data = text.split('~');
-            return {
-                name: data[1],
-                price: data[3],
-                close: data[4],
-                high: data[33]
-            };
-        }
+// 启动
+document.addEventListener('DOMContentLoaded', safeInit);
+</script>
 
-        // 解析东方财富数据
-        function parseEMData(json) {
-            const item = json.data.diff[0];
-            return {
-                name: item.f14,
-                price: item.f2/100,
-                close: (item.f2/(1 + item.f3/10000))/100, // 计算昨日收盘价
-                rise: item.f3/100
-            };
-        }
+<!-- 自建代理方案 -->
+<script>
+// 使用Cloudflare Workers代理示例
+const PROXY_WORKER = 'https://stock-proxy.yourname.workers.dev/?url=';
 
-        // 修改涨停判断逻辑
-        function isLimitUp(stock) {
-            // 统一处理不同数据源的精度问题
-            const close = parseFloat(stock.close);
-            const price = parseFloat(stock.price);
-            return (price / close >= 1.0995); // 考虑四舍五入
-        }
-
-        // 保持其他逻辑不变
-    </script>
+async function fetchViaProxy(code) {
+    const apiUrl = `http://qt.gtimg.cn/q=${code}`;
+    const res = await fetch(PROXY_WORKER + encodeURIComponent(apiUrl));
+    return res.text();
+}
+</script>
 </body>
 </html>
