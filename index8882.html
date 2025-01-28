@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>涨停股查询工具（基于Free-Stock-API）</title>
+    <title>涨停股查询工具（Ashare2024 API）</title>
     <meta charset="utf-8">
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .config-box { background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .config-box { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
         input, select, button { margin: 5px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #2196F3; color: white; cursor: pointer; }
+        button { background: #007bff; color: white; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #2196F3; color: white; }
+        th { background-color: #007bff; color: white; }
         .loading { display: none; color: #666; margin: 15px 0; }
-        .error { color: red; margin: 10px 0; }
+        .error { color: #dc3545; margin: 10px 0; }
     </style>
 </head>
 <body>
     <div class="config-box">
         <h2>📈 涨停股查询配置</h2>
-        <input type="date" id="dateInput" value="2023-11-01">
+        <input type="date" id="dateInput" value="2024-01-01">
         <select id="sessionSelect">
             <option value="all">全天</option>
-            <option value="am">早盘 (9:30-11:30)</option>
+            <option value="am">早盘 (09:30-11:30)</option>
             <option value="pm">午盘 (13:00-15:00)</option>
         </select>
         <input type="number" id="bigOrderInput" placeholder="大单最小金额(万)" value="500" min="0">
         <button onclick="loadData()">开始查询</button>
-        <div id="loading" class="loading">⏳ 数据加载中，请稍候...</div>
+        <div id="loading" class="loading">⏳ 数据加载中...</div>
         <div id="error" class="error"></div>
     </div>
 
@@ -38,37 +38,37 @@
                 <th>涨停时间</th>
                 <th>最新价</th>
                 <th>涨跌幅</th>
-                <th>大单净额(万)</th>
+                <th>大单净流入(万)</th>
             </tr>
         </thead>
         <tbody id="dataBody"></tbody>
     </table>
 
     <script>
-        // 核心API配置
-        const API_ENDPOINT = "https://api.itick.io/freeapi/stock/zt";
+        // 假设接口地址（需根据实际部署修改）
+        const API_BASE = "https://api.example.com/ashare";
         
-        // 加载数据主函数
+        // 核心数据加载函数
         async function loadData() {
             const date = document.getElementById('dateInput').value.replace(/-/g, '');
             const session = document.getElementById('sessionSelect').value;
-            const minBigOrder = document.getElementById('bigOrderInput').value || 0;
+            const minBigOrder = document.getElementById('bigOrderInput').value;
 
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').textContent = '';
 
             try {
-                // 调用API获取数据
-                const response = await fetch(`${API_ENDPOINT}?date=${date}`);
-                if (!response.ok) throw new Error(`API请求失败: ${response.status}`);
+                // 调用涨停股接口
+                const response = await fetch(`${API_BASE}/zt?date=${date}`);
+                if (!response.ok) throw new Error(`接口错误: ${response.status}`);
                 const data = await response.json();
-                
-                // 筛选符合条件的数据
-                const filteredData = data.data.filter(item => {
-                    const isZt = item.zt === 1;  // 涨停状态
-                    const timeMatch = checkTime(item.time, session);
-                    const bigOrderMatch = (item.ddje / 10000) >= minBigOrder;
-                    return isZt && timeMatch && bigOrderMatch;
+
+                // 筛选数据（假设接口返回字段如下）
+                const filteredData = data.filter(item => {
+                    const isZt = item.limit_status === '涨停';  // 涨停状态
+                    const timeValid = checkTime(item.limit_time, session);
+                    const bigOrderValid = (item.big_order_net / 10000) >= minBigOrder;
+                    return isZt && timeValid && bigOrderValid;
                 });
 
                 renderTable(filteredData);
@@ -79,11 +79,10 @@
             }
         }
 
-        // 时间筛选逻辑
+        // 时间段检查
         function checkTime(timeStr, session) {
             if (session === 'all') return true;
-            const time = timeStr.split(':').map(Number);
-            const hour = time[0];
+            const [hour] = timeStr.split(':').map(Number);
             if (session === 'am') return hour >= 9 && hour < 12;
             if (session === 'pm') return hour >= 13 && hour < 15;
             return false;
@@ -96,10 +95,10 @@
                 <tr>
                     <td>${item.symbol}</td>
                     <td>${item.name}</td>
-                    <td>${item.time}</td>
-                    <td>${item.price}</td>
-                    <td>${item.zdf}%</td>
-                    <td>${(item.ddje / 10000).toFixed(2)}</td>
+                    <td>${item.limit_time}</td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${item.change_percent}%</td>
+                    <td>${(item.big_order_net / 10000).toFixed(2)}</td>
                 </tr>
             `).join('');
         }
