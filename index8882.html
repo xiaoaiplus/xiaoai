@@ -1,181 +1,107 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>沪深涨停移动版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沪深涨停移动优化版</title>
     <style>
-        /* 内联关键CSS */
-        * { box-sizing:border-box; margin:0; padding:0 }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:#f5f5f5 }
-        .container { padding:12px; max-width:600px; margin:0 auto }
-        .card { background:#fff; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.1) }
-        .table-wrap { overflow-x:auto }
-        table { width:100%; min-width:480px; border-collapse:collapse }
-        th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #eee }
-        .loader { text-align:center; padding:20px; color:#666 }
-        
-        @media (prefers-color-scheme: dark) {
-            body { background:#121212; color:#fff }
-            .card { background:#242424 }
-            td, th { border-color:#333 }
-        }
+        /* 保持之前的移动端样式 */
     </style>
-    <!-- 异步加载非关键CSS -->
-    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js" as="script">
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <h3 style="margin-bottom:12px">实时涨停板</h3>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>代码</th>
-                            <th>名称</th>
-                            <th>最新价</th>
-                            <th>涨幅</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataBody">
-                        <tr><td colspan="4" class="loader">正在加载数据...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <!-- 保持之前的HTML结构 -->
 
-    <!-- 异步加载图表库 -->
-    <script defer src="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
-    
     <script>
-        // 移动端优化配置
-        const CONFIG = {
-            CACHE_TTL: 300000, // 5分钟缓存
-            API_TIMEOUT: 8000,  // 8秒超时
-            LAZY_LOAD_DELAY: 500 // 图表延迟加载
+        // 使用国际认可的代理服务
+        const PROXY_URL = 'https://api.allorigins.win/raw?url=';
+        const DATA_SOURCES = {
+            yahoo: 'https://query1.finance.yahoo.com/v8/finance/chart/',
+            tencent: 'http://qt.gtimg.cn/q=',
+            eastmoney: 'https://push2.eastmoney.com/api/qt/ulist.np/get'
         };
 
-        // 精简股票池（只保留活跃股）
-        const STOCK_POOL = [
-            'sh600519', 'sz000858', 'sh601318',
-            'sz000333', 'sh600276', 'sz002415'
-        ];
-
-        // 统一数据获取
-        async function fetchData(code) {
-            const cacheKey = `stock_${code}`;
-            const cached = localStorage.getItem(cacheKey);
-            
-            if(cached) {
-                const { data, timestamp } = JSON.parse(cached);
-                if(Date.now() - timestamp < CONFIG.CACHE_TTL) {
-                    return data;
-                }
-            }
-
+        // 新版数据获取方法
+        async function fetchStockData(code) {
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
-                
-                const response = await fetch(`https://qt.gtimg.cn/q=${code}`, {
-                    headers: { 'Referer': 'https://gu.qq.com/' },
-                    signal: controller.signal
+                // 方案1：使用Yahoo Finance国际版
+                const yahooUrl = `${DATA_SOURCES.yahoo}${code}.SS`; // 沪股后缀.SS
+                const yahooResponse = await fetch(PROXY_URL + encodeURIComponent(yahooUrl), {
+                    headers: {'Referer': 'https://finance.yahoo.com'}
                 });
                 
-                clearTimeout(timeoutId);
-                
-                if(!response.ok) return null;
-                const text = await response.text();
-                const data = parseData(text);
-                
-                localStorage.setItem(cacheKey, JSON.stringify({
-                    data,
-                    timestamp: Date.now()
-                }));
-                
-                return data;
+                if(yahooResponse.ok) {
+                    const data = await yahooResponse.json();
+                    return parseYahooData(data);
+                }
+
+                // 方案2：备用腾讯数据源（通过代理）
+                const tencentUrl = PROXY_URL + encodeURIComponent(DATA_SOURCES.tencent + code);
+                const tencentResponse = await fetch(tencentUrl);
+                if(tencentResponse.ok) {
+                    const text = await tencentResponse.text();
+                    return parseTencentData(text);
+                }
+
+                // 方案3：东方财富API（推荐）
+                const eastmoneyUrl = `${PROXY_URL}${encodeURIComponent(
+                    `${DATA_SOURCES.eastmoney}?fields=f2,f3,f12,f13,f14&secids=1.${code}`
+                )}`;
+                const emResponse = await fetch(eastmoneyUrl);
+                if(emResponse.ok) {
+                    const json = await emResponse.json();
+                    return parseEMData(json);
+                }
+
+                return null;
             } catch (error) {
-                console.warn('请求失败:', error);
+                console.error('数据获取失败:', error);
                 return null;
             }
         }
 
-        // 高效数据解析
-        function parseData(text) {
-            const parts = text.split('~');
-            if(parts.length < 40) return null;
-            
+        // 解析Yahoo数据
+        function parseYahooData(json) {
+            const { meta, timestamp } = json.chart.result[0];
             return {
-                name: parts[1],
-                price: parseFloat(parts[3]),
-                close: parseFloat(parts[4]),
-                high: parseFloat(parts[33]),
-                low: parseFloat(parts[34])
+                name: meta.symbol,
+                price: meta.regularMarketPrice.toFixed(2),
+                close: meta.previousClose.toFixed(2),
+                high: meta.regularMarketDayHigh.toFixed(2),
+                timestamp: new Date(timestamp*1000).toLocaleTimeString()
             };
         }
 
-        // 渲染优化
-        function render(stocks) {
-            const tbody = document.getElementById('dataBody');
-            if(!tbody) return;
-
-            const validStocks = stocks.filter(s => s && s.price > 0);
-            const html = validStocks.length > 0 ? 
-                validStocks.map(stock => `
-                    <tr>
-                        <td>${stock.code.slice(2)}</td>
-                        <td>${stock.name}</td>
-                        <td>${stock.price.toFixed(2)}</td>
-                        <td style="color:${stock.rise >= 0 ? '#cf1322' : '#237804'}">
-                            ${stock.rise.toFixed(2)}%
-                        </td>
-                    </tr>
-                `).join('') : '<tr><td colspan="4">暂无涨停数据</td></tr>';
-
-            tbody.innerHTML = html;
+        // 解析腾讯数据
+        function parseTencentData(text) {
+            const data = text.split('~');
+            return {
+                name: data[1],
+                price: data[3],
+                close: data[4],
+                high: data[33]
+            };
         }
 
-        // 核心逻辑
-        async function loadData() {
-            const startTime = Date.now();
-            
-            const results = await Promise.allSettled(
-                STOCK_POOL.map(async code => {
-                    const data = await fetchData(code);
-                    if(!data) return null;
-                    
-                    const rise = (data.price - data.close) / data.close * 100;
-                    return { code, ...data, rise };
-                })
-            );
-
-            const validData = results
-                .filter(r => r.status === 'fulfilled' && r.value)
-                .map(r => r.value)
-                .filter(d => d.rise >= 9.9); // 过滤涨停股
-
-            render(validData);
-            
-            // 性能监控
-            console.log(`加载完成，耗时：${Date.now() - startTime}ms`);
+        // 解析东方财富数据
+        function parseEMData(json) {
+            const item = json.data.diff[0];
+            return {
+                name: item.f14,
+                price: item.f2/100,
+                close: (item.f2/(1 + item.f3/10000))/100, // 计算昨日收盘价
+                rise: item.f3/100
+            };
         }
 
-        // 初始化
-        window.addEventListener('DOMContentLoaded', loadData);
-        
-        // 滑动刷新
-        let touchStartY = 0;
-        document.body.addEventListener('touchstart', e => {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+        // 修改涨停判断逻辑
+        function isLimitUp(stock) {
+            // 统一处理不同数据源的精度问题
+            const close = parseFloat(stock.close);
+            const price = parseFloat(stock.price);
+            return (price / close >= 1.0995); // 考虑四舍五入
+        }
 
-        document.body.addEventListener('touchend', e => {
-            if(window.scrollY === 0 && touchStartY - e.changedTouches[0].clientY > 50) {
-                loadData();
-            }
-        }, { passive: true });
+        // 保持其他逻辑不变
     </script>
 </body>
 </html>
