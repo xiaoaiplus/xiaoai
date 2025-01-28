@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沪深行情 - 增强版</title>
+    <title>沪深行情 - 完整版</title>
     <style>
-        /* 新增状态提示样式 */
+        /* 状态提示样式 */
         .status-alert {
             position: fixed;
             top: 20px;
@@ -18,68 +18,69 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .success {
-            background: #28a745;
+        .success { background: #28a745; }
+        .error { background: #dc3545; }
+
+        /* 表格样式 */
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
         }
-        .error {
-            background: #dc3545;
+        #stockTable {
+            width: 100%;
+            border-collapse: collapse;
         }
-        /* 原有样式保持不变 */
+        #stockTable th, #stockTable td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        #stockTable th {
+            background: #f8f9fa;
+        }
+        .positive { color: #dc3545; }
+        .negative { color: #28a745; }
     </style>
 </head>
 <body>
-    <!-- 在页面顶部添加状态提示容器 -->
     <div id="statusMessage" class="status-alert"></div>
 
-    <!-- 原有设置面板和内容保持不变 -->
+    <!-- 行情表格 -->
+    <div class="table-container">
+        <table id="stockTable">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>最新价</th>
+                    <th>涨跌额</th>
+                    <th>涨跌幅</th>
+                    <th>更新时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 数据将动态插入到这里 -->
+            </tbody>
+        </table>
+    </div>
 
 <script>
-// 使用腾讯财经API（支持跨域）
+// 使用腾讯财经API
 const API_ENDPOINT = 'https://qt.gtimg.cn/q=';
 
-// 显示状态消息的函数
+// 显示状态消息
 function showStatus(message, isSuccess) {
     const statusEl = document.getElementById('statusMessage');
     statusEl.textContent = message;
     statusEl.className = `status-alert ${isSuccess ? 'success' : 'error'}`;
     statusEl.style.opacity = '1';
-    
-    setTimeout(() => {
-        statusEl.style.opacity = '0';
-    }, 3000);
+    setTimeout(() => statusEl.style.opacity = '0', 3000);
 }
 
-// 改进的API请求函数
-async function fetchStockData(codes) {
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        const response = await fetch(`${API_ENDPOINT}${codes.join(',')}`, {
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) throw new Error(`HTTP错误! 状态码: ${response.status}`);
-
-        const data = await response.text();
-        const result = parseResponseData(data);
-        
-        showStatus('数据获取成功', true);
-        return result;
-
-    } catch (error) {
-        const errorMsg = error.name === 'AbortError' ? '请求超时' : `获取失败: ${error.message}`;
-        showStatus(errorMsg, false);
-        return null;
-    }
-}
-
-// 解析腾讯财经数据格式
+// 解析响应数据
 function parseResponseData(data) {
-    const pattern = /v_(\w+)="([^"]+)"/g;
     const stocks = {};
-
+    const pattern = /v_(\w+)="([^"]+)"/g;
+    
     let match;
     while ((match = pattern.exec(data)) !== null) {
         const [_, symbol, params] = match;
@@ -87,34 +88,73 @@ function parseResponseData(data) {
         
         stocks[symbol] = {
             name: fields[1],
-            price: fields[3],
-            change: fields[4],
-            changePercent: fields[5]
+            price: parseFloat(fields[3]).toFixed(2),
+            change: parseFloat(fields[4]).toFixed(2),
+            changePercent: parseFloat(fields[5]).toFixed(2),
+            time: `${fields[30].substr(0,2)}:${fields[30].substr(2,2)}:${fields[30].substr(4,2)}`
         };
-    }
-    
-    if (Object.keys(stocks).length === 0) {
-        throw new Error('无效的响应数据格式');
     }
     return stocks;
 }
 
-// 修改后的数据更新函数
+// 更新表格数据
+function updateTable(stockData) {
+    const tbody = document.querySelector('#stockTable tbody');
+    tbody.innerHTML = ''; // 清空旧数据
+
+    for (const [symbol, data] of Object.entries(stockData)) {
+        const row = document.createElement('tr');
+        
+        // 涨跌样式
+        const changeClass = data.change >= 0 ? 'positive' : 'negative';
+        const changeSign = data.change >= 0 ? '+' : '';
+
+        row.innerHTML = `
+            <td>${data.name}</td>
+            <td>${data.price}</td>
+            <td class="${changeClass}">${changeSign}${data.change}</td>
+            <td class="${changeClass}">${changeSign}${data.changePercent}%</td>
+            <td>${data.time}</td>
+        `;
+        
+        tbody.appendChild(row);
+    }
+}
+
+// 获取并更新数据
+async function fetchStockData(codes) {
+    try {
+        const response = await fetch(`${API_ENDPOINT}${codes.join(',')}`);
+        if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
+        
+        const data = await response.text();
+        const stockData = parseResponseData(data);
+        
+        if (Object.keys(stockData).length === 0) {
+            throw new Error('未获取到有效数据');
+        }
+        
+        showStatus('数据更新成功', true);
+        return stockData;
+    } catch (error) {
+        showStatus(`获取失败: ${error.message}`, false);
+        return null;
+    }
+}
+
+// 主更新函数
 async function updateStockData() {
     const codes = ['sh000001', 'sz399001']; // 上证指数和深证成指
     const stockData = await fetchStockData(codes);
     
-    if (!stockData) return;
-
-    // 更新表格逻辑（保持原有实现）
-    // ...
+    if (stockData) {
+        updateTable(stockData);
+    }
 }
 
 // 初始化定时器
 setInterval(updateStockData, 5000);
 updateStockData(); // 立即执行首次请求
-
-/* 原有其他函数保持不变 */
 </script>
 </body>
 </html>
