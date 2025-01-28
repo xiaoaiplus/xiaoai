@@ -1,226 +1,84 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沪深涨停看盘</title>
-    <!-- 内联核心样式保证首屏渲染 -->
+    <title>沪深股票数据</title>
     <style>
-        :root {
-            --color-primary: #1677ff;
-            --color-danger: #ff4d4f;
-            --color-success: #52c41a;
+        /* 移动端优化样式 */
+        .stock-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
         }
-        body {
-            margin: 0;
-            padding: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f5f5f5;
-        }
-        #fallback {
-            display: none;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .error-message {
-            color: var(--color-danger);
-            margin: 10px 0;
-        }
-        .loading-indicator {
-            animation: pulse 1.5s infinite;
-            text-align: center;
+        .stock-code {
             color: #666;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <!-- 降级展示容器 -->
-    <div id="fallback">
-        <h2>系统初始化中...</h2>
-        <div class="loading-indicator">加载必要资源</div>
-        <div class="error-message" id="errorDetail"></div>
-    </div>
-
-    <!-- 主内容容器 -->
-    <div id="app" style="display:none">
-        <!-- 实际内容 -->
+    <div id="app">
+        <div class="header">
+            <h2>实时股票数据</h2>
+            <button onclick="loadData()">刷新</button>
+        </div>
+        <div id="stockList"></div>
     </div>
 
 <script>
-// 第一阶段：环境检测 (立即执行)
-(function bootstrap() {
-    try {
-        // 关键功能检测
-        const requirements = {
-            fetch: typeof fetch === 'function',
-            promise: typeof Promise === 'function',
-            dom: typeof document !== 'undefined'
-        };
+// 股票代码列表
+const STOCK_CODES = ['sh600519', 'sz000858', 'sh601318'];
 
-        // 不满足最低要求
-        if (!requirements.fetch || !requirements.promise || !requirements.dom) {
-            throw new Error('浏览器不满足最低要求');
-        }
-
-        // 显示降级界面
-        document.getElementById('fallback').style.display = 'block';
-        
-        // 加载Polyfills
-        loadPolyfills().then(initApp).catch(showFatalError);
-    } catch (e) {
-        showFatalError(e);
-    }
-})();
-
-// 加载必要Polyfill
-function loadPolyfills() {
-    const polyfills = [];
-    
-    // 需要Polyfill检测
-    if (!window.AbortController) {
-        polyfills.push(loadScript('https://cdn.jsdelivr.net/npm/abortcontroller-polyfill@1.7.3/dist/abortcontroller-polyfill.min.js'));
-    }
-    
-    return Promise.all(polyfills);
-}
-
-// 第二阶段：应用初始化
-async function initApp() {
-    try {
-        // 确保DOM就绪
-        await waitForDOMReady();
-        
-        // 初始化核心模块
-        const [config, dataSource] = await Promise.all([
-            loadConfig(),
-            testDataSources()
-        ]);
-
-        // 第三阶段：渲染界面
-        renderApp();
-        
-        // 第四阶段：加载数据
-        loadData(dataSource).catch(handleDataError);
-        
-    } catch (e) {
-        showFatalError(e);
-    }
-}
-
-// 关键函数实现
-function waitForDOMReady() {
-    return new Promise(resolve => {
-        if (document.readyState === 'complete') {
-            resolve();
-        } else {
-            document.addEventListener('DOMContentLoaded', resolve);
-        }
-    });
-}
-
-async function testDataSources() {
-    // 测试可用数据源
-    const sources = [
-        {
-            name: '备用源1',
-            test: () => testAPI('https://api.example1.com'),
-            priority: 1
-        },
-        {
-            name: '备用源2', 
-            test: () => testAPI('https://api.example2.com'),
-            priority: 2
-        }
-    ];
-
-    for (const source of sources.sort((a,b) => a.priority - b.priority)) {
+// 智能数据获取
+async function fetchStockData(code) {
+    for (const endpoint of API_ENDPOINTS) {
         try {
-            await source.test();
-            return source;
+            const response = await fetch(endpoint.url(code));
+            if (!response.ok) continue;
+            
+            const data = await (endpoint.parser === 'json' 
+                ? response.json() 
+                : response.text());
+                
+            return endpoint.parser(data);
         } catch (e) {
-            console.warn(`${source.name} 不可用: ${e.message}`);
+            console.warn(`${endpoint.name} 失败: ${e.message}`);
         }
     }
     throw new Error('所有数据源不可用');
 }
 
-async function testAPI(url) {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(url, {
-        signal: controller.signal,
-        headers: {'Referer': 'https://yourdomain.com'}
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return true;
-}
-
-// 错误处理系统
-function showFatalError(error) {
-    console.error('致命错误:', error);
-    const fallback = document.getElementById('fallback');
-    const errorDetail = document.getElementById('errorDetail');
-    
-    fallback.style.display = 'block';
-    errorDetail.innerHTML = `
-        <p>错误类型: ${error.name}</p>
-        <p>错误信息: ${error.message}</p>
-        <p>建议操作: ${getErrorAdvice(error)}</p>
+// 渲染股票数据
+function renderStock(stock) {
+    return `
+        <div class="stock-item">
+            <div class="stock-name">${stock.name}</div>
+            <div class="stock-code">${stock.code}</div>
+            <div>最新价: ${stock.price}</div>
+            <div>最高价: ${stock.high}</div>
+        </div>
     `;
 }
 
-function getErrorAdvice(error) {
-    const adviceMap = {
-        'NetworkError': '请检查网络连接后刷新',
-        'TypeError': '建议清除浏览器缓存后重试',
-        'AbortError': '请求超时，请稍后再试'
-    };
-    return adviceMap[error.name] || '请截图联系管理员';
-}
-
-// 工具函数
-function loadScript(url) {
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
-}
-
-// 初始化完成后
-function renderApp() {
-    document.getElementById('fallback').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-}
-
-// 示例数据加载
-async function loadData(source) {
+// 主逻辑
+async function loadData() {
     try {
-        const response = await fetch(source.url);
-        const data = await response.json();
-        // 处理数据...
+        const stocks = await Promise.all(
+            STOCK_CODES.map(async code => {
+                const data = await fetchStockData(code);
+                return { code, ...data };
+            })
+        );
+        
+        document.getElementById('stockList').innerHTML = 
+            stocks.map(renderStock).join('');
+            
     } catch (e) {
-        throw new Error(`数据加载失败: ${e.message}`);
+        alert(`数据加载失败: ${e.message}`);
     }
 }
-</script>
 
-<!-- 终极降级：当所有JavaScript都失败时 -->
-<noscript>
-    <style>#fallback{display:block!important}</style>
-    <div class="error-message">
-        请启用JavaScript以获得完整功能
-    </div>
-</noscript>
+// 初始化加载
+loadData();
+</script>
 </body>
 </html>
