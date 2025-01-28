@@ -2,188 +2,180 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>沪深涨停股实时看盘</title>
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>沪深涨停移动版</title>
+    <style>
+        /* 内联关键CSS */
+        * { box-sizing:border-box; margin:0; padding:0 }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:#f5f5f5 }
+        .container { padding:12px; max-width:600px; margin:0 auto }
+        .card { background:#fff; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.1) }
+        .table-wrap { overflow-x:auto }
+        table { width:100%; min-width:480px; border-collapse:collapse }
+        th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #eee }
+        .loader { text-align:center; padding:20px; color:#666 }
+        
+        @media (prefers-color-scheme: dark) {
+            body { background:#121212; color:#fff }
+            .card { background:#242424 }
+            td, th { border-color:#333 }
+        }
+    </style>
+    <!-- 异步加载非关键CSS -->
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js" as="script">
 </head>
 <body>
-<div class="container mt-4">
-    <h3 class="mb-4">沪深实时涨停板分析</h3>
-    
-    <!-- 控制区域 -->
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <select class="form-select" id="marketSelect">
-                <option value="sh">上海主板</option>
-                <option value="sz">深圳主板</option>
-                <option value="bj">北交所</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <button class="btn btn-primary" onclick="loadData()">刷新数据</button>
+    <div class="container">
+        <div class="card">
+            <h3 style="margin-bottom:12px">实时涨停板</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th>最新价</th>
+                            <th>涨幅</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody">
+                        <tr><td colspan="4" class="loader">正在加载数据...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="row mb-4" id="stats"></div>
+    <!-- 异步加载图表库 -->
+    <script defer src="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    
+    <script>
+        // 移动端优化配置
+        const CONFIG = {
+            CACHE_TTL: 300000, // 5分钟缓存
+            API_TIMEOUT: 8000,  // 8秒超时
+            LAZY_LOAD_DELAY: 500 // 图表延迟加载
+        };
 
-    <!-- 图表容器 -->
-    <div id="mainChart" style="height:400px"></div>
-
-    <!-- 数据表格 -->
-    <table class="table table-hover mt-4">
-        <thead>
-            <tr>
-                <th>代码</th>
-                <th>名称</th>
-                <th>最新价</th>
-                <th>涨停价</th>
-                <th>涨幅</th>
-            </tr>
-        </thead>
-        <tbody id="dataBody"></tbody>
-    </table>
-</div>
-
-<script>
-// 支持的股票列表（示例）
-const stockPool = [
-    'sh600519',   // 贵州茅台
-    'sz000858',   // 五粮液 
-    'sh601318',   // 中国平安
-    'sz000333',   // 美的集团
-    'sh600276',   // 恒瑞医药
-    // 可继续添加更多股票代码...
-];
-
-// 核心数据获取函数
-async function fetchStockData(code) {
-    try {
-        const apiUrls = [
-            `https://api.fund.eastmoney.com/f10/jjjz?code=${code}`,
-            `https://hq.sinajs.cn/list=${code}`,
-            `https://qt.gtimg.cn/q=${code}`
+        // 精简股票池（只保留活跃股）
+        const STOCK_POOL = [
+            'sh600519', 'sz000858', 'sh601318',
+            'sz000333', 'sh600276', 'sz002415'
         ];
 
-        for (const url of apiUrls) {
-            const response = await fetch(url, {
-                headers: {'Referer': 'https://fund.eastmoney.com/'}
-            });
-            if(response.ok) {
-                const data = await response.text();
-                return parseData(data, url);
+        // 统一数据获取
+        async function fetchData(code) {
+            const cacheKey = `stock_${code}`;
+            const cached = localStorage.getItem(cacheKey);
+            
+            if(cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                if(Date.now() - timestamp < CONFIG.CACHE_TTL) {
+                    return data;
+                }
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
+                
+                const response = await fetch(`https://qt.gtimg.cn/q=${code}`, {
+                    headers: { 'Referer': 'https://gu.qq.com/' },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if(!response.ok) return null;
+                const text = await response.text();
+                const data = parseData(text);
+                
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    data,
+                    timestamp: Date.now()
+                }));
+                
+                return data;
+            } catch (error) {
+                console.warn('请求失败:', error);
+                return null;
             }
         }
-        return null;
-    } catch (error) {
-        console.error('数据获取失败:', error);
-        return null;
-    }
-}
 
-// 数据解析逻辑
-function parseData(rawData, sourceUrl) {
-    // 新浪数据格式示例：var hq_str_sh600519="茅台,1800.00,...";
-    if(sourceUrl.includes('sinajs')) {
-        const data = rawData.split('="')[1].split(',');
-        return {
-            name: data[0],
-            price: parseFloat(data[1]),
-            high: parseFloat(data[4]),
-            low: parseFloat(data[5],
-            close: parseFloat(data[2])
-        };
-    }
-    
-    // 腾讯数据格式示例：v_sh600519="1~茅台~600519~..."
-    if(sourceUrl.includes('gtimg')) {
-        const data = rawData.split('~');
-        return {
-            name: data[1],
-            price: parseFloat(data[3]),
-            high: parseFloat(data[33]),
-            low: parseFloat(data[34]),
-            close: parseFloat(data[4])
-        };
-    }
-}
+        // 高效数据解析
+        function parseData(text) {
+            const parts = text.split('~');
+            if(parts.length < 40) return null;
+            
+            return {
+                name: parts[1],
+                price: parseFloat(parts[3]),
+                close: parseFloat(parts[4]),
+                high: parseFloat(parts[33]),
+                low: parseFloat(parts[34])
+            };
+        }
 
-// 涨停判断逻辑
-function isLimitUp(stock) {
-    const limitPrice = Math.round(stock.close * 1.1 * 100)/100;
-    return stock.price >= limitPrice;
-}
+        // 渲染优化
+        function render(stocks) {
+            const tbody = document.getElementById('dataBody');
+            if(!tbody) return;
 
-// 页面渲染
-function renderUI(data) {
-    const tbody = document.getElementById('dataBody');
-    const stats = document.getElementById('stats');
-    const chartDom = document.getElementById('mainChart');
-    const chart = echarts.init(chartDom);
-    
-    // 清空旧数据
-    tbody.innerHTML = '';
-    
-    // 筛选涨停股票
-    const limitUpStocks = data.filter(d => d && isLimitUp(d));
-    
-    // 更新统计卡片
-    stats.innerHTML = `
-        <div class="col-md-3">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h5>涨停数量</h5>
-                    <h2>${limitUpStocks.length}</h2>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // 渲染表格
-    limitUpStocks.forEach(stock => {
-        const row = document.createElement('tr');
-        const rise = ((stock.price - stock.close)/stock.close*100).toFixed(2);
-        row.innerHTML = `
-            <td>${stock.code}</td>
-            <td>${stock.name}</td>
-            <td>${stock.price.toFixed(2)}</td>
-            <td>${(stock.close*1.1).toFixed(2)}</td>
-            <td class="${rise >= 0 ? 'text-danger' : 'text-success'}">${rise}%</td>
-        `;
-        tbody.appendChild(row);
-    });
-    
-    // 更新图表
-    const option = {
-        tooltip: { trigger: 'item' },
-        series: [{
-            type: 'pie',
-            data: limitUpStocks.map(stock => ({
-                name: stock.name,
-                value: stock.price
-            }))
-        }]
-    };
-    chart.setOption(option);
-}
+            const validStocks = stocks.filter(s => s && s.price > 0);
+            const html = validStocks.length > 0 ? 
+                validStocks.map(stock => `
+                    <tr>
+                        <td>${stock.code.slice(2)}</td>
+                        <td>${stock.name}</td>
+                        <td>${stock.price.toFixed(2)}</td>
+                        <td style="color:${stock.rise >= 0 ? '#cf1322' : '#237804'}">
+                            ${stock.rise.toFixed(2)}%
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="4">暂无涨停数据</td></tr>';
 
-// 主逻辑
-async function loadData() {
-    const market = document.getElementById('marketSelect').value;
-    const filteredCodes = stockPool.filter(code => code.startsWith(market));
-    
-    const allData = await Promise.all(
-        filteredCodes.map(async code => {
-            const data = await fetchStockData(code);
-            return data ? {...data, code} : null;
-        })
-    );
-    
-    renderUI(allData.filter(Boolean));
-}
+            tbody.innerHTML = html;
+        }
 
-// 初始化加载
-loadData();
-</script>
+        // 核心逻辑
+        async function loadData() {
+            const startTime = Date.now();
+            
+            const results = await Promise.allSettled(
+                STOCK_POOL.map(async code => {
+                    const data = await fetchData(code);
+                    if(!data) return null;
+                    
+                    const rise = (data.price - data.close) / data.close * 100;
+                    return { code, ...data, rise };
+                })
+            );
+
+            const validData = results
+                .filter(r => r.status === 'fulfilled' && r.value)
+                .map(r => r.value)
+                .filter(d => d.rise >= 9.9); // 过滤涨停股
+
+            render(validData);
+            
+            // 性能监控
+            console.log(`加载完成，耗时：${Date.now() - startTime}ms`);
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', loadData);
+        
+        // 滑动刷新
+        let touchStartY = 0;
+        document.body.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.body.addEventListener('touchend', e => {
+            if(window.scrollY === 0 && touchStartY - e.changedTouches[0].clientY > 50) {
+                loadData();
+            }
+        }, { passive: true });
+    </script>
 </body>
 </html>
