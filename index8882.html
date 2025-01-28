@@ -2,83 +2,98 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>沪深股票数据</title>
+    <title>沪深实时行情</title>
     <style>
-        /* 移动端优化样式 */
-        .stock-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        .stock-code {
-            color: #666;
-            font-size: 0.9em;
-        }
+        #timeRange { color: red; margin: 20px; }
+        table { border-collapse: collapse; width: 80%; margin: 20px auto; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
-    <div id="app">
-        <div class="header">
-            <h2>实时股票数据</h2>
-            <button onclick="loadData()">刷新</button>
-        </div>
-        <div id="stockList"></div>
-    </div>
+    <div id="timeRange">当前时段：计算中...</div>
+    <table id="stockTable">
+        <thead>
+            <tr>
+                <th>股票代码</th>
+                <th>名称</th>
+                <th>当前价</th>
+                <th>开盘价</th>
+                <th>最高价</th>
+                <th>最低价</th>
+                <th>成交量(万手)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
 <script>
-// 股票代码列表
-const STOCK_CODES = ['sh600519', 'sz000858', 'sh601318'];
+// 沪深股票代码示例（可自行扩展）
+const stocks = [
+    'sh600000',  // 浦发银行
+    'sz000001',  // 平安银行
+    'sh600519',  // 贵州茅台
+    'sz300750'   // 宁德时代
+];
 
-// 智能数据获取
-async function fetchStockData(code) {
-    for (const endpoint of API_ENDPOINTS) {
-        try {
-            const response = await fetch(endpoint.url(code));
-            if (!response.ok) continue;
-            
-            const data = await (endpoint.parser === 'json' 
-                ? response.json() 
-                : response.text());
-                
-            return endpoint.parser(data);
-        } catch (e) {
-            console.warn(`${endpoint.name} 失败: ${e.message}`);
-        }
+// 获取当前交易时段
+function getTradingPeriod() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    
+    // 早盘时间判断（9:30-11:30）
+    if ((hours === 9 && minutes >= 30) || (hours >= 10 && hours < 11) || (hours === 11 && minutes <= 30)) {
+        return '早盘';
     }
-    throw new Error('所有数据源不可用');
-}
-
-// 渲染股票数据
-function renderStock(stock) {
-    return `
-        <div class="stock-item">
-            <div class="stock-name">${stock.name}</div>
-            <div class="stock-code">${stock.code}</div>
-            <div>最新价: ${stock.price}</div>
-            <div>最高价: ${stock.high}</div>
-        </div>
-    `;
-}
-
-// 主逻辑
-async function loadData() {
-    try {
-        const stocks = await Promise.all(
-            STOCK_CODES.map(async code => {
-                const data = await fetchStockData(code);
-                return { code, ...data };
-            })
-        );
-        
-        document.getElementById('stockList').innerHTML = 
-            stocks.map(renderStock).join('');
-            
-    } catch (e) {
-        alert(`数据加载失败: ${e.message}`);
+    // 午盘时间判断（13:00-15:00）
+    else if ((hours >= 13 && hours < 15) || (hours === 15 && minutes === 0)) {
+        return '午盘';
     }
+    return '非交易时段';
 }
 
-// 初始化加载
-loadData();
+// 处理新浪返回数据
+function handleData(data) {
+    const tbody = document.querySelector('#stockTable tbody');
+    tbody.innerHTML = '';
+    
+    data.forEach(item => {
+        const fields = item.split(',');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.split('=')[0].slice(-8)}</td>
+            <td>${fields[0]}</td>
+            <td>${fields[3]}</td>
+            <td>${fields[1]}</td>
+            <td>${fields[4]}</td>
+            <td>${fields[5]}</td>
+            <td>${(fields[8]/10000).toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    document.getElementById('timeRange').textContent = 
+        `当前时段：${getTradingPeriod()} ${new Date().toLocaleTimeString()}`;
+}
+
+// JSONP跨域请求
+function fetchStocks() {
+    const script = document.createElement('script');
+    script.src = `https://hq.sinajs.cn/list=${stocks.join(',')}&_=${Date.now()}`;
+    document.body.appendChild(script);
+}
+
+// 新浪回调函数（需全局暴露）
+window.__jsonpCallback = data => {
+    const quoteKeys = Object.keys(data).filter(k => k.startsWith('hq_str_'));
+    handleData(quoteKeys.map(k => data[k]));
+    document.body.removeChild(document.querySelector('script[src*="sinajs.cn"]'));
+};
+
+// 每60秒更新一次
+setInterval(fetchStocks, 60000);
+fetchStocks(); // 初始加载
 </script>
 </body>
 </html>
