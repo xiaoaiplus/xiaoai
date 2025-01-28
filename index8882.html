@@ -2,33 +2,88 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>沪深实时行情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沪深行情查询</title>
     <style>
-        #timeRange { color: red; margin: 20px; }
-        table { border-collapse: collapse; width: 80%; margin: 20px auto; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
+        /* 移动端优化样式 */
+        body { 
+            margin: 0; 
+            padding: 10px; 
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            padding: 15px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        #timeRange {
+            color: #dc3545;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            border-collapse: collapse;
+            min-width: 600px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #e9ecef;
+            white-space: nowrap;
+        }
+        input[type="date"] {
+            padding: 6px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        @media (min-width: 768px) {
+            th, td { padding: 12px; font-size: 14px; }
+            #timeRange { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
-    <div id="timeRange">当前时段：计算中...</div>
-    <table id="stockTable">
-        <thead>
-            <tr>
-                <th>股票代码</th>
-                <th>名称</th>
-                <th>当前价</th>
-                <th>开盘价</th>
-                <th>最高价</th>
-                <th>最低价</th>
-                <th>成交量(万手)</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="header">
+        <input type="date" id="datePicker">
+        <div id="timeRange">当前时段：计算中...</div>
+    </div>
+    
+    <div class="table-container">
+        <table id="stockTable">
+            <thead>
+                <tr>
+                    <th>代码</th>
+                    <th>名称</th>
+                    <th>当前价</th>
+                    <th>开盘价</th>
+                    <th>最高价</th>
+                    <th>最低价</th>
+                    <th>成交量(万手)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
 <script>
-// 沪深股票代码示例（可自行扩展）
+// 初始化日期选择器
+const datePicker = document.getElementById('datePicker');
+datePicker.value = new Date().toISOString().split('T')[0];
+datePicker.max = new Date().toISOString().split('T')[0];
+
+// 沪深股票示例
 const stocks = [
     'sh600000',  // 浦发银行
     'sz000001',  // 平安银行
@@ -36,24 +91,27 @@ const stocks = [
     'sz300750'   // 宁德时代
 ];
 
-// 获取当前交易时段
+// 增强版交易时段判断
 function getTradingPeriod() {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     
-    // 早盘时间判断（9:30-11:30）
-    if ((hours === 9 && minutes >= 30) || (hours >= 10 && hours < 11) || (hours === 11 && minutes <= 30)) {
+    // 早盘判断（9:30-11:30）
+    if ((hours === 9 && minutes >= 30) || 
+        (hours >= 10 && hours < 11) || 
+        (hours === 11 && minutes <= 30)) {
         return '早盘';
     }
-    // 午盘时间判断（13:00-15:00）
-    else if ((hours >= 13 && hours < 15) || (hours === 15 && minutes === 0)) {
+    // 午盘判断（13:00-15:00）
+    if ((hours >= 13 && hours < 15) || 
+        (hours === 15 && minutes === 0)) {
         return '午盘';
     }
     return '非交易时段';
 }
 
-// 处理新浪返回数据
+// 优化数据处理
 function handleData(data) {
     const tbody = document.querySelector('#stockTable tbody');
     tbody.innerHTML = '';
@@ -73,26 +131,36 @@ function handleData(data) {
         tbody.appendChild(row);
     });
     
+    // 更新时间显示
+    const timeString = new Date().toLocaleTimeString('zh-CN', { 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
     document.getElementById('timeRange').textContent = 
-        `当前时段：${getTradingPeriod()} ${new Date().toLocaleTimeString()}`;
+        `当前时段：${getTradingPeriod()} ${timeString}`;
 }
 
-// JSONP跨域请求
+// 增强版JSONP请求
 function fetchStocks() {
+    const existingScript = document.querySelector('script[src*="sinajs.cn"]');
+    if (existingScript) document.body.removeChild(existingScript);
+
     const script = document.createElement('script');
     script.src = `https://hq.sinajs.cn/list=${stocks.join(',')}&_=${Date.now()}`;
+    script.onerror = () => console.error('数据加载失败');
     document.body.appendChild(script);
 }
 
-// 新浪回调函数（需全局暴露）
+// 全局回调函数
 window.__jsonpCallback = data => {
     const quoteKeys = Object.keys(data).filter(k => k.startsWith('hq_str_'));
     handleData(quoteKeys.map(k => data[k]));
-    document.body.removeChild(document.querySelector('script[src*="sinajs.cn"]'));
 };
 
-// 每60秒更新一次
+// 定时刷新
 setInterval(fetchStocks, 60000);
+datePicker.addEventListener('change', fetchStocks); // 日期变更监听
 fetchStocks(); // 初始加载
 </script>
 </body>
