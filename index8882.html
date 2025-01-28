@@ -1,135 +1,226 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>沪深涨停看盘</title>
-    <!-- 内联核心样式避免外链依赖 -->
+    <!-- 内联核心样式保证首屏渲染 -->
     <style>
-        :root { --primary: #1677ff; --text: rgba(0,0,0,.85) }
-        body { 
-            margin: 0; 
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #f0f2f5;
-            color: var(--text);
+        :root {
+            --color-primary: #1677ff;
+            --color-danger: #ff4d4f;
+            --color-success: #52c41a;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 12px;
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
         }
-        .error-alert {
-            background: #fff2f0;
-            border: 1px solid #ffccc7;
-            padding: 12px;
-            border-radius: 4px;
-            color: #cf1322;
-            margin: 12px 0;
+        #fallback {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        /* 移动端优化 */
-        @media (max-width: 480px) {
-            .container { padding: 8px }
+        .error-message {
+            color: var(--color-danger);
+            margin: 10px 0;
+        }
+        .loading-indicator {
+            animation: pulse 1.5s infinite;
+            text-align: center;
+            color: #666;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="errorContainer"></div>
-        <div id="content">
-            <!-- 初始加载提示 -->
-            <div class="loading-placeholder">
-                <div class="ph-item">
-                    <div class="ph-col-12">
-                        <div class="ph-row">
-                            <div class="ph-col-6 big"></div>
-                        </div>
-                        <div class="ph-row">
-                            <div class="ph-col-4"></div>
-                            <div class="ph-col-8 empty"></div>
-                            <div class="ph-col-3"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- 降级展示容器 -->
+    <div id="fallback">
+        <h2>系统初始化中...</h2>
+        <div class="loading-indicator">加载必要资源</div>
+        <div class="error-message" id="errorDetail"></div>
+    </div>
+
+    <!-- 主内容容器 -->
+    <div id="app" style="display:none">
+        <!-- 实际内容 -->
     </div>
 
 <script>
-// 极简兼容模式配置
-const SAFE_MODE = {
-    FALLBACK_DATA: [], // 空数据降级
-    MAX_RETRIES: 2,    // 最大重试次数
-    TIMEOUT: 5000      // 5秒超时
-};
-
-// 容错初始化函数
-function safeInit() {
+// 第一阶段：环境检测 (立即执行)
+(function bootstrap() {
     try {
-        // 环境检测
-        if (typeof fetch === 'undefined') {
-            throw new Error('浏览器不支持Fetch API');
+        // 关键功能检测
+        const requirements = {
+            fetch: typeof fetch === 'function',
+            promise: typeof Promise === 'function',
+            dom: typeof document !== 'undefined'
+        };
+
+        // 不满足最低要求
+        if (!requirements.fetch || !requirements.promise || !requirements.dom) {
+            throw new Error('浏览器不满足最低要求');
         }
+
+        // 显示降级界面
+        document.getElementById('fallback').style.display = 'block';
         
-        // 创建错误容器
-        const errorContainer = document.getElementById('errorContainer');
+        // 加载Polyfills
+        loadPolyfills().then(initApp).catch(showFatalError);
+    } catch (e) {
+        showFatalError(e);
+    }
+})();
+
+// 加载必要Polyfill
+function loadPolyfills() {
+    const polyfills = [];
+    
+    // 需要Polyfill检测
+    if (!window.AbortController) {
+        polyfills.push(loadScript('https://cdn.jsdelivr.net/npm/abortcontroller-polyfill@1.7.3/dist/abortcontroller-polyfill.min.js'));
+    }
+    
+    return Promise.all(polyfills);
+}
+
+// 第二阶段：应用初始化
+async function initApp() {
+    try {
+        // 确保DOM就绪
+        await waitForDOMReady();
         
-        // 主逻辑
-        loadData().catch(error => {
-            showError(error.message);
-        });
+        // 初始化核心模块
+        const [config, dataSource] = await Promise.all([
+            loadConfig(),
+            testDataSources()
+        ]);
+
+        // 第三阶段：渲染界面
+        renderApp();
+        
+        // 第四阶段：加载数据
+        loadData(dataSource).catch(handleDataError);
         
     } catch (e) {
-        document.body.innerHTML = `<div class="error-alert">初始化失败: ${e.message}</div>`;
+        showFatalError(e);
     }
 }
 
-// 增强版错误处理
-function showError(message) {
-    const template = `
-        <div class="error-alert">
-            <strong>数据加载失败</strong>
-            <p>${message}</p>
-            <button onclick="window.location.reload()">重试</button>
-        </div>
-    `;
-    document.getElementById('errorContainer').innerHTML = template;
-}
-
-// 安全数据请求
-async function fetchStockSafe(code) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), SAFE_MODE.TIMEOUT);
-    
-    try {
-        const response = await fetch(`/api/proxy?code=${code}`, { 
-            signal: controller.signal 
-        });
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
-        return await response.json();
-        
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            throw new Error('请求超时');
+// 关键函数实现
+function waitForDOMReady() {
+    return new Promise(resolve => {
+        if (document.readyState === 'complete') {
+            resolve();
+        } else {
+            document.addEventListener('DOMContentLoaded', resolve);
         }
-        throw error;
+    });
+}
+
+async function testDataSources() {
+    // 测试可用数据源
+    const sources = [
+        {
+            name: '备用源1',
+            test: () => testAPI('https://api.example1.com'),
+            priority: 1
+        },
+        {
+            name: '备用源2', 
+            test: () => testAPI('https://api.example2.com'),
+            priority: 2
+        }
+    ];
+
+    for (const source of sources.sort((a,b) => a.priority - b.priority)) {
+        try {
+            await source.test();
+            return source;
+        } catch (e) {
+            console.warn(`${source.name} 不可用: ${e.message}`);
+        }
+    }
+    throw new Error('所有数据源不可用');
+}
+
+async function testAPI(url) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {'Referer': 'https://yourdomain.com'}
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return true;
+}
+
+// 错误处理系统
+function showFatalError(error) {
+    console.error('致命错误:', error);
+    const fallback = document.getElementById('fallback');
+    const errorDetail = document.getElementById('errorDetail');
+    
+    fallback.style.display = 'block';
+    errorDetail.innerHTML = `
+        <p>错误类型: ${error.name}</p>
+        <p>错误信息: ${error.message}</p>
+        <p>建议操作: ${getErrorAdvice(error)}</p>
+    `;
+}
+
+function getErrorAdvice(error) {
+    const adviceMap = {
+        'NetworkError': '请检查网络连接后刷新',
+        'TypeError': '建议清除浏览器缓存后重试',
+        'AbortError': '请求超时，请稍后再试'
+    };
+    return adviceMap[error.name] || '请截图联系管理员';
+}
+
+// 工具函数
+function loadScript(url) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// 初始化完成后
+function renderApp() {
+    document.getElementById('fallback').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+}
+
+// 示例数据加载
+async function loadData(source) {
+    try {
+        const response = await fetch(source.url);
+        const data = await response.json();
+        // 处理数据...
+    } catch (e) {
+        throw new Error(`数据加载失败: ${e.message}`);
     }
 }
-
-// 启动
-document.addEventListener('DOMContentLoaded', safeInit);
 </script>
 
-<!-- 自建代理方案 -->
-<script>
-// 使用Cloudflare Workers代理示例
-const PROXY_WORKER = 'https://stock-proxy.yourname.workers.dev/?url=';
-
-async function fetchViaProxy(code) {
-    const apiUrl = `http://qt.gtimg.cn/q=${code}`;
-    const res = await fetch(PROXY_WORKER + encodeURIComponent(apiUrl));
-    return res.text();
-}
-</script>
+<!-- 终极降级：当所有JavaScript都失败时 -->
+<noscript>
+    <style>#fallback{display:block!important}</style>
+    <div class="error-message">
+        请启用JavaScript以获得完整功能
+    </div>
+</noscript>
 </body>
 </html>
