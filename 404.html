@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面未找到</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        .container::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #3a506b;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: #5d9cec;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #6c757d;
+        }
+        
+        .domain-sale {
+            background-color: rgba(93, 156, 236, 0.1);
+            border-left: 4px solid #5d9cec;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .domain-sale h3 {
+            color: #3a506b;
+            margin-bottom: 15px;
+        }
+        
+        .domain-sale p {
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #5d9cec;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 15px rgba(93, 156, 236, 0.3);
+        }
+        
+        .btn:hover {
+            background-color: #3a506b;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(93, 156, 236, 0.4);
+        }
+        
+        .btn-contact {
+            background-color: #3a506b;
+        }
+        
+        .btn-contact:hover {
+            background-color: #5d9cec;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+        
+        /* 简单的加载动画 */
+        .loader {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top: 3px solid #5d9cec;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader"></div>
+        <h1>404</h1>
+        <h2>哎呀，页面好像迷路了...</h2>
+        <p>您要找的页面可能已经被移动、删除或暂时不可用。</p>
+        
+        <div class="domain-sale">
+            <h3>喜欢这个域名吗？</h3>
+            <p>该域名正在出售！如果您对购买此域名感兴趣，请发送邮件至：</p>
+            <p><a href="mailto:xiaoaiplus@outlook.com" class="btn">xiaoaiplus@outlook.com</a></p>
+            <p>我们提供个性化定制服务，可以根据您的需求打造专属网站。</p>
+        </div>
+        
+        <p>© 2025 您的网站名称. 保留所有权利.</p>
+    </div>
+</body>
+</html>
