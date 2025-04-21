@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES 加密解密工具</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-bg: #2a2a2a;
+            --text-color: #ffffff;
+            --accent-color: #0099ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background-color: var(--secondary-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-top: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        textarea {
+            width: 100%;
+            background-color: var(--accent-bg);
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: var(--text-color);
+            padding: 12px;
+            font-size: 16px;
+            line-height: 1.4;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.2);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:last-child {
+            background-color: #333333;
+        }
+
+        button:hover {
+            background-color: #0077cc;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            textarea {
+                min-height: 80px;
+                padding: 10px;
+            }
+            button {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AES 加密解密工具</h1>
+        
+        <div class="input-group">
+            <label for="inputText">输入文字：</label>
+            <textarea id="inputText" placeholder="请输入要加密或解密的文字"></textarea>
+        </div>
+        
+        <div class="input-group">
+            <label for="key">密钥：</label>
+            <textarea id="key" placeholder="输入加密/解密密钥"></textarea>
+        </div>
+        
+        <div class="buttons">
+            <button onclick="encrypt()">加密</button>
+            <button onclick="decrypt()">解密</button>
+        </div>
+        
+        <div class="input-group">
+            <label for="resultText">结果：</label>
+            <textarea id="resultText" readonly></textarea>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        function encrypt() {
+            const inputText = document.getElementById("inputText").value;
+            const key = document.getElementById("key").value;
+            const encrypted = CryptoJS.AES.encrypt(inputText, key, {mode: CryptoJS.mode.ECB});
+            document.getElementById("resultText").value = encrypted.toString();
+        }
+
+        function decrypt() {
+            const inputText = document.getElementById("inputText").value;
+            const key = document.getElementById("key").value;
+            const decrypted = CryptoJS.AES.decrypt(inputText, key, {mode: CryptoJS.mode.ECB});
+            document.getElementById("resultText").value = decrypted.toString(CryptoJS.enc.Utf8);
+        }
+    </script>
+</body>
+</html>
