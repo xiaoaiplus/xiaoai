@@ -1,344 +1,414 @@
- 
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🦊</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    #calculator {
-      width: 300px;
-      margin: 0 auto;
-      background-color: #e0e0e0;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    #inputField {
-      width: 100%;
-      padding: 10px;
-      font-size: 18px;
-      border: 2px solid #9e9e9e;
-      border-radius: 5px;
-      background-color: #fafafa;
-      max-width: 260px; /* 限制输入框的最大宽度 */
-    }
-
-    #buttonContainer {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 20px;
-    }
-
- .button {
-      width: 50px;
-      height: 50px;
-      font-size: 20px;
-      background-color: #f5f5f5;
-      border: 2px solid #9e9e9e;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-      cursor: pointer;
-      transition: all 0.3 ease;
-    }
-
-.button:hover {
-      background-color: #bdbdbd;
-    }
-
-    #messageBoard {
-      width: 80%;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      display: none;
-    }
-
- .messageForm {
-      width: 80%;
-      margin: 0 auto;
-    }
-
- .messageForm label {
-      display: block;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-
- .messageForm input,
- .messageForm textarea {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 2px solid #9e9e9e;
-      border-radius: 5px;
-      background-color: #fafafa;
-    }
-
- .messageForm input[type="submit"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 18px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-
- .card {
-      border: 1px solid #9e9e9e;
-      padding: 15px;
-      margin-bottom: 15px;
-      background-color: #f9f9f9;
-      border-radius: 10px;
-    }
-
- .card h3 {
-      margin: 0 0 5px 0;
-      font-size: 20px;
-    }
-
- .card p {
-      margin: 0;
-      font-size: 16px;
-    }
-  </style>
-</head>
-
-<body>
-  <h1>🎈</h1>
-  <div id="calculator">
-    <input type="text" id="inputField" />
-    <div id="buttonContainer">
-      <button class="button" onclick="appendNumber(1)">1</button>
-      <button class="button" onclick="appendNumber(2)">2</button>
-      <button class="button" onclick="appendNumber(3)">3</button>
-      <button class="button" onclick="appendOperator('+')">+</button>
-      <button class="button" onclick="appendNumber(4)">4</button>
-      <button class="button" onclick="appendNumber(5)">5</button>
-      <button class="button" onclick="appendNumber(6)">6</button>
-      <button class="button" onclick="appendOperator('-')">-</button>
-      <button class="button" onclick="appendNumber(7)">7</button>
-      <button class="button" onclick="appendNumber(8)">8</button>
-      <button class="button" onclick="appendNumber(9)">9</button>
-      <button class="button" onclick="appendOperator('*')">*</button>
-      <button class="button" onclick="appendNumber(0)">0</button>
-      <button class="button" onclick="calculate()">=</button>
-      <button class="button" onclick="appendOperator('/')">/</button>
-      <button class="button" onclick="clearInput()">C</button>
-    </div>
-  </div>
-  <div id="messageBoard">
-    <form id="messageForm" class="hidden">
-      
-    </form>
-
-      <div class="card">
-      <h3>知行合一</h3>
-      <p style="color:black;">正确✔️一，精选威武。二，区间净额红排序。三，300W低于区间净额。四，注入概念，此概念主力净额红，再看全天主力净额高排序，看涨停概念A等于上方概念。五，B概念主力净额红</p>
-      </div>
-
-      <div class="card">
-      <h3>干它一个亿</h3>
-      <p style="color:blue;">错误❌一，精选威武。二，区间净额红排序。三，300W低于区间净额。四，红全天涨幅300W多排序。五，（或者威武涨停排序，如果多个股就看区间成交少的）。六，概念A等于当前概念涨停，该概念净额红。七，【“B概念关联多票板L1主力净额红”】</p>
-      </div>
-
-    <div class="card">
-      <h3>无人扶我凌云志</h3>
-      <p style="color:pink;">悟道打板篇🦊：强度排序，威武，区间净额绿，内涨幅威武区间净额少的，概念B是龙一选出来，增仓0轴线正附近的。。（最好是打板板）注:A概念也是龙一那就明天尾盘进。有独立概念也是后天尾盘进。/B概念是龙一但没龙一文字的尝试负五低吸吃板/🥩🥩🥩🥩🥩🥩🥩🥩</p>悟道ST篇🦊：【1.选概念（情绪市场，板块涨停，ST非回风其他概念，此st中个别概念和今日涨停原因某一概念相同，选此概念）2.此概念主力净额比300大隔天尾盘进或者涨停进。♥</p>
-    </div>
-
-
-   
-   <div class="card">
-      <h3>我自踏雪至山巅</h3>
-      <p style="color:red;">1.打板，2.市场情绪，3.涨停，4.涨停原因多排序【内净额红】，5.状态有首版有多板，6.看板块A概念【内净额红】，♥破板A概念去除。7.内概念A和概念B净额红非回封概念。♥</p>
-    </div>
-   
-    <div class="card">
-      <h3>老夫聊发少年狂</h3>
-      <p style="color:red;">1.精选，强度排序，去除分裂概念，打板进负五进。2.沪深创红【三百绿_增仓绿_三十今红昨红】第二天五个点走。3.沪深创绿【三百绿_增仓绿_三十今红昨红】4.内_威武，净额负排序，非首，次日进🌹🌹🌹🌹🌹♥开盘L打板♥市场情绪♥涨停时间负♥首板+原因1♥内涨停增仓少或0♥</p>
-    </div>
-
-       <div class="card">
-      <h3>左牵黄，右擎苍</h3>
-      <p style="color:red;">st威武净额负排序连续二板以上30双红看概念概念b，再看【内第一个2板以上威武净额负30双红】，没有的话退出看下一个ST。</p>
-       </div>
-   
-    <div class="card">
-     <h3>🥳昨夜参禅，今朝悟道</h3>
-     <p style="color:red;">同花一字看龙代码，去看盘盘概念B，内二板以上（内300有数据），主力净额非负，30有两天。无敌了##########某个交易日前dde大单净量(%)为正，某个交易日前涨停一字板缩量，某个交易日前散户数量，某个交易日前龙头个数，某个交易日前主力卖出资金排序</p>
-    </div>
-   
-    <div class="card">
-      <h3>🥳莫怕出身少年穷，只是浅水困蛟龙</h3>
-      <p style="color:red;">增仓蓝排序——找到概念里2板两个以上的首版好几个30红2天以上的— —还有高位板——明天打板这个2进3（30红2天的）记得封单流通股6亿以下X1.5，以上X1</p>
-   </div>
-   
-   <div class="card">
-      <h3>小目标赚10个太阳🌞</h3>
-      <p>🌹精选，强度排行，非裂变概念，每个概念威武区间净额负再根据同花看主力不出货的，隔天入场，出货换下一个概念。“第二天同花出货的未涨停的第三天最高第二天开盘价”</p>
-    </div>
-    
-    <div class="card">
-      <h3>♥Ⅳ年壹万倍</h3>
-      <p>⒈一字可以净额绿，大单绿☀️☀️☀️☀️☀️☀️⒉平时必须净额红，大单红☀️☀️☀️☀️☀️☀️⒊大单绿净额红，隔天必须一字☀️☀️☀️☀️☀️☀️⒋精选，强度，非独立，排序看，找同花主力上升，威武，非首，前日无虎，明天进☀️☀️☀️☀️☀️☀️⒌★同花主力上升，明天一字炸板回风，大单绿，后天封板，大后一字☀️☀️☀️☀️☀️☀️⒍深沪创红，当天收盘看强度，净额红，包含延伸概念，增仓红，威武，净倒排序非首☀️☀️☀️☀️☀️☀️⒎深沪创全红，当天看量比绿，威武，非首☀️☀️☀️☀️☀️☀️</p>
-    </div>
-
-   
-    <div class="card">
-      <h3>加油加油加油♥</h3>
-      <p>💎精选，强度排序去看量比，看沪深创三红，找量比红，有绿找量比绿，内威武，区间成交0排序，主力买有数据，沪深哪个高用哪个00/60，不选独立概念，首版亦可</p>
-    </div>
-    <div class="card">
-      <h3>🧧☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>🌸板块_精选_强度 _下面时间区间滑动看深沪哪个涨的多，内威武，区间净额负排序，根据哪个多选哪个开头票，非首版【 _连班  _非断 _非独立】🙃深：00_30 #沪:60</p>
-    </div>
-    <div class="card">
-      <h3>0️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♯强度排序_♯主力净额负的_♯内早全盘净额负排序非首板_“[(↗如区间净额负的比300负的多)_（↗如300红，区间净额绿，隔天尾盘进）_(↗300如果红净额也红，300要比区间净额红的多)]＝区间净额要比300小”</p>
-    </div>
-    <div class="card">
-      <h3>1️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♯【★市场情绪♯大单净最极端两个♯再看日均线大和净】 🎊🎊🎊🎊🎊🎊🎊🎊🎊★月★日3板涨停，★月★日尾盘5分钟区间净额流向倒叙，★月★日散户数量，非科创，非创业，非st，★月★日早盘大单净额</p>
-    </div>
-    <div class="card">
-      <h3>2️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♯精选💞强度排序♯主力净额负的♯内早(全)盘/净额负排序非首板/非破板</p>
-    </div>
-    <div class="card">
-      <h3>☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>3️⃣威武♯300排序♯量比绿♯内非首版♯量比绿断板涨停的尾盘进♯连班涨停开盘进</p>
-    </div>
-    <div class="card">
-      <h3>4️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>板块♯精选♯前五♯300排序♯内涨幅♯龙一/或量比绿非首板</p>
-    </div>
-    <div class="card">
-      <h3>5️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>板块♯强度排序1（分支跳过）♯内威武♯区间净绿排序♯非首</p>
-    </div>
-    <div class="card">
-      <h3>6️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>板块♯精选♯强度♯威武♯区间红=量比绿/区间绿=量比红♯内涨幅排序♯量比绿♯非首</p>
-    </div>
-    <div class="card">
-      <h3>7️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♯可转债，涨素排行，涨幅红，板块。</p>
-    </div>
-    <div class="card">
-      <h3>8️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♯ø市场情绪，打板，自然涨停板，最后涨停时间晚排序，回风首版股。涨停原因，涨停板(优)非首版比较，非断板，威武，区间最高。（首版也能比较）</p>
-    </div>
-    <div class="card">
-      <h3>9️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♯当日市场情绪 ♯竞价 ♯换手低排序*涨停（ˣ委买最多） ♯概念a ，♯关联内 ♯当日 (ˣ上一日) ♯尾五 ♯主力卖灵 ♯区成交最高 ♯次日打板进</p>
-    </div>
-    <div class="card">
-      <h3>🔟☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>市场情绪♯找个连班率高的几板♯尾五净额负♯散户多的♯散户少的。♣T♣H♣S{♯月♯日♯板涨停，♯月♯日尾盘某分钟区间净额流向倒叙，♯月♯日散户数量}</p>
-    </div>
-    <div class="card">
-      <h3>1️⃣1️⃣☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>♣T♣H♣S♯1个交易日前反包涨停股概念，1个交易日前尾盘5分钟区间净额流向倒叙（次日挂涨停）</p>
-    </div>
-      <div class="card">
-      <h3>☀️☀️☀️☀️☀️☀️☀️☀️☀️</h3>
-      <p>无人扶我青云志，我自踏雪至山巅。</p>
-    </div>
-  </div>
-
-  <script>
-    var expression = '';
-
-    function appendNumber(number) {
-      expression += number;
-      document.getElementById('inputField').value = expression;
-    }
-
-    function appendOperator(operator) {
-      if (expression.length > 0) {
-        expression += operator;
-        document.getElementById('inputField').value = expression;
-      }
-    }
-
-    function calculate() {
-      var inputValue = expression;
-      if (inputValue === '1024') {
-        document.getElementById('calculator').style.display = 'none';
-        document.getElementById('messageBoard').style.display = 'block';
-        document.getElementById('messageForm').classList.remove('hidden');
-      } else {
-        var operators = ['+', '-', '*', '/'];
-        var operator = '';
-        for (var i = 0; i < inputValue.length; i++) {
-          if (operators.includes(inputValue[i])) {
-            operator = inputValue[i];
-            break;
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🦊🦊🦊🦊🦊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        if (operator) {
-          var values = inputValue.split(operator);
-          var num1 = parseInt(values[0]);
-          var num2 = parseInt(values[1]);
-          if (isNaN(num1) || isNaN(num2)) {
-            alert('请输入有效的数字进行计算！');
-          } else {
-            var result;
-            switch (operator) {
-              case '+':
-                result = num1 + num2;
-                break;
-              case '-':
-                result = num1 - num2;
-                break;
-              case '*':
-                result = num1 * num2;
-                break;
-              case '/':
-                if (num2 === 0) {
-                  alert('除数不能为 0！');
-                  return;
-                }
-                result = num1 / num2;
-                break;
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.5s ease;
+        }
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 20px;
+        }
+        .calculator {
+            background: linear-gradient(135deg, #0a0e17 0%, #1a1f2c 100%);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+        .screen {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #fff;
+            font-size: 36px;
+            text-align: right;
+            min-height: 80px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            word-break: break-all;
+            transition: all 0.5s ease;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 12px;
+            transition: all 0.5s ease;
+        }
+        .btn {
+            background: #262b3d;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 0;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .btn:active {
+            transform: scale(0.95);
+            background: #1f2536;
+        }
+        .btn-operator {
+            background: #1976d2;
+        }
+        .btn-operator:active {
+            background: #1565c0;
+        }
+        .btn-clear {
+            background: #ff5252;
+        }
+        .btn-clear:active {
+            background: #ff1744;
+        }
+        .btn-equals {
+            background: #4caf50;
+        }
+        .btn-equals:active {
+            background: #388e3c;
+        }
+        @media screen and (max-width: 480px) {
+            .screen {
+                font-size: 32px;
+                padding: 15px;
             }
-            expression = result.toString();
-            document.getElementById('inputField').value = expression;
-          }
-        } else {
-          alert('请输入有效的计算表达式（如：2 + 3）');
+            .btn {
+                font-size: 20px;
+                padding: 12px 0;
+            }
         }
-      }
-    }
 
-    function clearInput() {
-      expression = '';
-      document.getElementById('inputField').value = '';
-    }
-  </script>
+        /* 文件夹样式 */
+        .folder-view {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(135deg, #0a0e17 0%, #1a1f2c 100%);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .folder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .folder-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .back-btn {
+            background: #262b3d;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+        }
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .file-item {
+            background: #1f2536;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .file-item:hover {
+            background: #2a3042;
+        }
+        .file-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .file-date {
+            color: #9e9e9e;
+            font-size: 14px;
+        }
+        .file-content {
+            margin-top: 10px;
+            color: #e0e0e0;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator" id="calculator">
+            <div class="screen" id="screen">0</div>
+            <div class="buttons">
+                <button class="btn btn-clear" onclick="clearDisplay()">C</button>
+                <button class="btn" onclick="appendValue('(')">(</button>
+                <button class="btn" onclick="appendValue(')')">)</button>
+                <button class="btn btn-operator" onclick="appendValue('/')">÷</button>
+                <button class="btn" onclick="appendValue('7')">7</button>
+                <button class="btn" onclick="appendValue('8')">8</button>
+                <button class="btn" onclick="appendValue('9')">9</button>
+                <button class="btn btn-operator" onclick="appendValue('*')">×</button>
+                <button class="btn" onclick="appendValue('4')">4</button>
+                <button class="btn" onclick="appendValue('5')">5</button>
+                <button class="btn" onclick="appendValue('6')">6</button>
+                <button class="btn btn-operator" onclick="appendValue('-')">−</button>
+                <button class="btn" onclick="appendValue('1')">1</button>
+                <button class="btn" onclick="appendValue('2')">2</button>
+                <button class="btn" onclick="appendValue('3')">3</button>
+                <button class="btn btn-operator" onclick="appendValue('+')">+</button>
+                <button class="btn" onclick="appendValue('0')">0</button>
+                <button class="btn" onclick="appendValue('.')">.</button>
+                <button class="btn btn-operator" onclick="deleteLastChar()">⌫</button>
+                <button class="btn btn-equals" onclick="calculate()">=</button>
+            </div>
+        </div>
+
+        <div class="folder-view" id="folderView">
+            <div class="folder-header">
+                <div class="folder-title">历程记事本</div>
+                <button class="back-btn" onclick="backToCalculator()">返回</button>
+            </div>
+            <div class="file-list" id="fileList">
+                <!-- 文件将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 逻辑
+        let displayValue = '0';
+        const screen = document.getElementById('screen');
+        const calculator = document.getElementById('calculator');
+        const folderView = document.getElementById('folderView');
+        const fileList = document.getElementById('fileList');
+
+        function updateScreen() {
+            screen.textContent = displayValue;
+        }
+
+        function appendValue(value) {
+            if (displayValue === '0') {
+                displayValue = value;
+            } else {
+                displayValue += value;
+            }
+            updateScreen();
+        }
+
+        function clearDisplay() {
+            displayValue = '0';
+            updateScreen();
+        }
+
+        function deleteLastChar() {
+            if (displayValue.length > 1) {
+                displayValue = displayValue.slice(0, -1);
+            } else {
+                displayValue = '0';
+            }
+            updateScreen();
+        }
+
+        // 这里简单模拟计算过程和隐藏文件夹功能
+        // 实际应用中应该使用安全的计算方式
+        function calculate() {
+            try {
+                displayValue = eval(displayValue.replace(/÷/g, '/').replace(/×/g, '*').replace(/−/g, '-')) + '';
+                updateScreen();
+
+                // 如果结果是1024，切换到文件夹视图
+                if (displayValue === '1024') {
+                    setTimeout(() => {
+                        calculator.style.display = 'none';
+                        folderView.style.display = 'flex';
+                        loadFiles();
+                    }, 500);
+                }
+            } catch (error) {
+                displayValue = '错误';
+                updateScreen();
+            }
+        }
+
+        // 返回
+        function backToCalculator() {
+            folderView.style.display = 'none';
+            calculator.style.display = 'block';
+            clearDisplay();
+        }
+
+        // 模拟的文件内容
+        const files = [
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2025-05-18",
+                content: "正确✔️一，精选威武。二，区间净额红排序。三，300W低于区间净额。四，注入概念，此概念主力净额红，再看全天主力净额高排序，看涨停概念A等于上方概念。五，B概念主力净额红"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-05",
+                content: "错误❌一，精选威武。二，区间净额红排序。三，300W低于区间净额。四，红全天涨幅300W多排序。五，（或者威武涨停排序，如果多个股就看区间成交少的）。六，概念A等于当前概念涨停，该概念净额红。七，【“B概念关联多票板L1主力净额红”】"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "悟道打板篇🦊：强度排序，威武，区间净额绿，内涨幅威武区间净额少的，概念B是龙一选出来，增仓0轴线正附近的。。（最好是打板板）注:A概念也是龙一那就明天尾盘进。有独立概念也是后天尾盘进。/B概念是龙一但没龙一文字的尝试负五低吸吃板/🥩🥩🥩🥩🥩🥩🥩🥩悟道ST篇🦊：【1.选概念（情绪市场，板块涨停，ST非回风其他概念，此st中个别概念和今日涨停原因某一概念相同，选此概念）2.此概念主力净额比300大隔天尾盘进或者涨停进。♥"
+            },
+                        {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "1.打板，2.市场情绪，3.涨停，4.涨停原因多排序【内净额红】，5.状态有首版有多板，6.看板块A概念【内净额红】，♥破板A概念去除。7.内概念A和概念B净额红非回封概念。♥♥"
+            },
+                        {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "1.精选，强度排序，去除分裂概念，打板进负五进。2.沪深创红【三百绿_增仓绿_三十今红昨红】第二天五个点走。3.沪深创绿【三百绿_增仓绿_三十今红昨红】4.内_威武，净额负排序，非首，次日进🌹🌹🌹🌹🌹♥开盘L打板♥市场情绪♥涨停时间负♥首板+原因1♥内涨停增仓少或0♥"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "st威武净额负排序连续二板以上30双红看概念概念b，再看【内第一个2板以上威武净额负30双红】，没有的话退出看下一个ST。"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "同花一字看龙代码，去看盘盘概念B，内二板以上（内300有数据），主力净额非负，30有两天。无敌了##########某个交易日前dde大单净量(%)为正，某个交易日前涨停一字板缩量，某个交易日前散户数量，某个交易日前龙头个数，某个交易日前主力卖出资金排序"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "增仓蓝排序——找到概念里2板两个以上的首版好几个30红2天以上的— —还有高位板——明天打板这个2进3（30红2天的）记得封单流通股6亿以下X1.5，以上X1"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "🌞🌹精选，强度排行，非裂变概念，每个概念威武区间净额负再根据同花看主力不出货的，隔天入场，出货换下一个概念。“第二天同花出货的未涨停的第三天最高第二天开盘价”"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "⒈一字可以净额绿，大单绿☀️☀️☀️☀️☀️☀️⒉平时必须净额红，大单红☀️☀️☀️☀️☀️☀️⒊大单绿净额红，隔天必须一字☀️☀️☀️☀️☀️☀️⒋精选，强度，非独立，排序看，找同花主力上升，威武，非首，前日无虎，明天进☀️☀️☀️☀️☀️☀️⒌★同花主力上升，明天一字炸板回风，大单绿，后天封板，大后一字☀️☀️☀️☀️☀️☀️⒍深沪创红，当天收盘看强度，净额红，包含延伸概念，增仓红，威武，净倒排序非首☀️☀️☀️☀️☀️☀️⒎深沪创全红，当天看量比绿，威武，非首☀️☀️☀️☀️☀️☀️"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♥💎精选，强度排序去看量比，看沪深创三红，找量比红，有绿找量比绿，内威武，区间成交0排序，主力买有数据，沪深哪个高用哪个00/60，不选独立概念，首版亦可"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "🌸板块_精选_强度 _下面时间区间滑动看深沪哪个涨的多，内威武，区间净额负排序，根据哪个多选哪个开头票，非首版【 _连班 _非断 _非独立】🙃深：00_30 #沪:60"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♯强度排序_♯主力净额负的_♯内早全盘净额负排序非首板_“[(↗如区间净额负的比300负的多)_（↗如300红，区间净额绿，隔天尾盘进）_(↗300如果红净额也红，300要比区间净额红的多)]＝区间净额要比300小”"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♯【★市场情绪♯大单净最极端两个♯再看日均线大和净】 🎊🎊🎊🎊🎊🎊🎊🎊🎊★月★日3板涨停，★月★日尾盘5分钟区间净额流向倒叙，★月★日散户数量，非科创，非创业，非st，★月★日早盘大单净额"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♯精选💞强度排序♯主力净额负的♯内早(全)盘/净额负排序非首板/非破板"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "威武♯300排序♯量比绿♯内非首版♯量比绿断板涨停的尾盘进♯连班涨停开盘进"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "板块♯精选♯前五♯300排序♯内涨幅♯龙一/或量比绿非首板"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "板块♯强度排序1（分支跳过）♯内威武♯区间净绿排序♯非首"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "板块♯精选♯强度♯威武♯区间红=量比绿/区间绿=量比红♯内涨幅排序♯量比绿♯非首"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♯可转债，涨素排行，涨幅红，板块。"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♯ø市场情绪，打板，自然涨停板，最后涨停时间晚排序，回风首版股。涨停原因，涨停板(优)非首版比较，非断板，威武，区间最高。（首版也能比较）"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♯当日市场情绪 ♯竞价 ♯换手低排序*涨停（ˣ委买最多） ♯概念a ，♯关联内 ♯当日 (ˣ上一日) ♯尾五 ♯主力卖灵 ♯区成交最高 ♯次日打板进"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "市场情绪♯找个连班率高的几板♯尾五净额负♯散户多的♯散户少的。♣T♣H♣S{♯月♯日♯板涨停，♯月♯日尾盘某分钟区间净额流向倒叙，♯月♯日散户数量}"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "♣T♣H♣S♯1个交易日前反包涨停股概念，1个交易日前尾盘5分钟区间净额流向倒叙（次日挂涨停）"
+            },
+            {
+                title: "☀️☀️☀️☀️☀️☀️☀️☀️☀️",
+                date: "2023-10-10",
+                content: "无人扶我青云志，我自踏雪至山巅。"
+            }
+
+            
+        ];
+
+        // 加载文件
+        function loadFiles() {
+            fileList.innerHTML = '';
+            files.forEach(file => {
+                const fileElement = document.createElement('div');
+                fileElement.className = 'file-item';
+                fileElement.innerHTML = `
+                    <div class="file-title">${file.title}</div>
+                    <div class="file-date">${file.date}</div>
+                    <div class="file-content">${file.content}</div>
+                `;
+                fileList.appendChild(fileElement);
+            });
+        }
+    </script>
 </body>
-
 </html>
