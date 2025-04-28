@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频加密解密工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        #videoPlayer {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .success {
+            color: #27ae60;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .download-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .download-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            input, textarea, button {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>视频加密解密工具</h1>
+
+        <!-- 视频加密部分 -->
+        <div class="section">
+            <h2 class="section-title">1. 视频加密</h2>
+            <input type="file" id="videoFile" accept="video/*">
+            <input type="password" id="encryptKey" placeholder="请输入加密密钥">
+            <button onclick="encryptVideo()">加密视频</button>
+            <textarea id="encryptedText" placeholder="加密后的文本将显示在这里" readonly></textarea>
+            <a id="downloadLink" class="download-link" style="display: none;">下载加密文件 (.bin)</a>
+            <div id="encryptStatus" class="success"></div>
+        </div>
+
+        <!-- 文本下载部分 -->
+        <div class="section">
+            <h2 class="section-title">2. 加密文本下载</h2>
+            <input type="file" id="encryptedFileUpload" accept=".bin">
+            <button onclick="uploadEncryptedFile()">上传加密文件</button>
+            <div id="uploadStatus" class="success"></div>
+        </div>
+
+        <!-- 视频解密部分 -->
+        <div class="section">
+            <h2 class="section-title">3. 视频解密</h2>
+            <textarea id="decryptInput" placeholder="请输入加密文本或通过上传获取"></textarea>
+            <input type="password" id="decryptKey" placeholder="请输入解密密钥">
+            <button onclick="decryptVideo()">解密播放</button>
+            <div id="decryptStatus" class="success"></div>
+            <video id="videoPlayer" controls style="display: none;"></video>
+        </div>
+    </div>
+
+    <script>
+        function encryptVideo() {
+            const videoFile = document.getElementById('videoFile').files[0];
+            const encryptKey = document.getElementById('encryptKey').value;
+            const encryptStatus = document.getElementById('encryptStatus');
+            const encryptedText = document.getElementById('encryptedText');
+            const downloadLink = document.getElementById('downloadLink');
+
+            encryptStatus.textContent = '';
+            encryptedText.value = '';
+            downloadLink.style.display = 'none';
+
+            if (!videoFile || !encryptKey) {
+                showError('encryptStatus', '请选择视频文件并输入加密密钥');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const videoData = e.target.result;
+                try {
+                    // 使用 AES 算法加密视频数据
+                    const encryptedData = CryptoJS.AES.encrypt(videoData, encryptKey).toString();
+                    encryptedText.value = encryptedData;
+                    showSuccess('encryptStatus', '加密成功！');
+                    downloadLink.href = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(encryptedData);
+                    downloadLink.download = 'encrypted_video.bin';
+                    downloadLink.style.display = 'block';
+                } catch (error) {
+                    showError('encryptStatus', '加密失败: ' + error.message);
+                }
+            };
+            reader.readAsDataURL(videoFile);
+        }
+
+        function uploadEncryptedFile() {
+            const encryptedFile = document.getElementById('encryptedFileUpload').files[0];
+            const decryptInput = document.getElementById('decryptInput');
+            const uploadStatus = document.getElementById('uploadStatus');
+
+            uploadStatus.textContent = '';
+            decryptInput.value = '';
+
+            if (!encryptedFile) {
+                showError('uploadStatus', '请选择加密文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileContent = e.target.result;
+                try {
+                    // 解析文件内容
+                    const textContent = atob(fileContent.split(',')[1]);
+                    decryptInput.value = textContent;
+                    showSuccess('uploadStatus', '文件上传成功！');
+                } catch (error) {
+                    showError('uploadStatus', '文件读取失败: ' + error.message);
+                }
+            };
+            reader.readAsDataURL(encryptedFile);
+        }
+
+        function decryptVideo() {
+            const encryptedText = document.getElementById('decryptInput').value;
+            const decryptKey = document.getElementById('decryptKey').value;
+            const videoPlayer = document.getElementById('videoPlayer');
+            const decryptStatus = document.getElementById('decryptStatus');
+
+            decryptStatus.textContent = '';
+            videoPlayer.style.display = 'none';
+
+            if (!encryptedText || !decryptKey) {
+                showError('decryptStatus', '请输入加密文本和解密密钥');
+                return;
+            }
+
+            try {
+                // 使用 AES 算法解密文本数据
+                const decryptedData = CryptoJS.AES.decrypt(encryptedText, decryptKey).toString(CryptoJS.enc.Utf8);
+                if (!decryptedData) {
+                    throw new Error('解密失败');
+                }
+                // 显示解密后的视频
+                videoPlayer.src = decryptedData;
+                videoPlayer.style.display = 'block';
+                videoPlayer.load();
+                showSuccess('decryptStatus', '解密成功！');
+            } catch (error) {
+                showError('decryptStatus', '解密失败: ' + error.message);
+            }
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'error';
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'success';
+        }
+    </script>
+</body>
+</html>
