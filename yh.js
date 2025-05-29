@@ -29,63 +29,6 @@
         logs: []           // 日志记录
     };
 
-    // 自动下单配置
-    const betConfig = {
-        enabled: false,           // 是否启用自动下单
-        minOdds: 1.5,            // 最小赔率
-        maxOdds: 3.0,            // 最大赔率
-        betAmount: 10,           // 默认下注金额
-        confidenceThreshold: 70, // 置信度阈值(百分比)
-        autoConfirm: false,      // 自动确认下单
-        riskLevel: 'medium',     // 风险等级: low, medium, high
-
-        // 赔率调整配置
-        oddsAdjustment: {
-            enabled: true,
-            thresholds: [
-                { threshold: 2.0, betPercentage: 100 },  // 赔率<=2.0，下注100%
-                { threshold: 3.0, betPercentage: 50 }    // 赔率<=3.0，下注50%
-            ]
-        },
-
-        // 游戏规则配置
-        gameRules: {
-            // 最小游戏时间(分钟)，低于此时间的比赛不下注
-            minGameTime: {
-                LOL: 5,
-                DOTA2: 5,
-                CSGO: 3,
-                KOG: 3,
-                WildRift: 3
-            },
-            // 开始时间赔率限制
-            startTimeOddsLimit: {
-                LOL: { maxOdds: 2.5 },
-                DOTA2: { maxOdds: 2.5 },
-                CSGO: { maxOdds: 2.2 },
-                KOG: { maxOdds: 2.0 },
-                WildRift: { maxOdds: 2.0 }
-            }
-        }
-    };
-
-    // 更新配置
-    const updateConfig = {
-        enabled: true,              // 是否启用实时数据更新
-        matchInterval: 30,         // 比赛数据更新间隔(秒)
-        oddsInterval: 15,          // 赔率更新间隔(秒)
-        analysisInterval: 60,      // 分析更新间隔(秒)
-        showNotifications: true,   // 是否显示更新通知
-        highlightChanges: true,    // 是否高亮显示变化
-        autoRefreshDOM: true,      // 是否自动刷新DOM元素
-        lastMatchUpdate: null,     // 上次比赛数据更新时间
-        lastOddsUpdate: null,      // 上次赔率更新时间
-        lastAnalysisUpdate: null   // 上次分析更新时间
-    };
-
-    // 创建一个全局的bettingPanel变量
-    let bettingPanel;
-
     // 创建日志弹窗
     function createLogPopup() {
         // 检查是否已存在日志弹窗
@@ -525,6 +468,73 @@
                 }
             });
         });
+    }
+
+    // 加载保存的数据
+    try {
+        const savedData = GM_getValue('esportsData');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            // 只恢复部分数据，避免覆盖当前会话的实时数据
+            if (parsedData.teamStats) collectedData.teamStats = parsedData.teamStats;
+            if (parsedData.betHistory) collectedData.betHistory = parsedData.betHistory;
+            console.log('已加载保存的数据');
+        }
+
+        // 加载保存的设置
+        const savedBetConfig = GM_getValue('betConfig');
+        if (savedBetConfig) {
+            try {
+                const parsedBetConfig = JSON.parse(savedBetConfig);
+                // 合并保存的设置到当前设置
+                if (parsedBetConfig.enabled !== undefined) betConfig.enabled = parsedBetConfig.enabled;
+                if (parsedBetConfig.minOdds !== undefined) betConfig.minOdds = parsedBetConfig.minOdds;
+                if (parsedBetConfig.maxOdds !== undefined) betConfig.maxOdds = parsedBetConfig.maxOdds;
+                if (parsedBetConfig.betAmount !== undefined) betConfig.betAmount = parsedBetConfig.betAmount;
+                if (parsedBetConfig.confidenceThreshold !== undefined) betConfig.confidenceThreshold = parsedBetConfig.confidenceThreshold;
+                if (parsedBetConfig.autoConfirm !== undefined) betConfig.autoConfirm = parsedBetConfig.autoConfirm;
+                if (parsedBetConfig.riskLevel !== undefined) betConfig.riskLevel = parsedBetConfig.riskLevel;
+
+                // 加载赔率调整设置
+                if (parsedBetConfig.oddsAdjustment) {
+                    if (parsedBetConfig.oddsAdjustment.enabled !== undefined) {
+                        betConfig.oddsAdjustment.enabled = parsedBetConfig.oddsAdjustment.enabled;
+                    }
+                    if (parsedBetConfig.oddsAdjustment.thresholds && Array.isArray(parsedBetConfig.oddsAdjustment.thresholds)) {
+                        betConfig.oddsAdjustment.thresholds = parsedBetConfig.oddsAdjustment.thresholds;
+                    }
+                }
+
+                // 加载游戏规则设置
+                if (parsedBetConfig.gameRules) {
+                    if (parsedBetConfig.gameRules.minGameTime) {
+                        betConfig.gameRules.minGameTime = {...betConfig.gameRules.minGameTime, ...parsedBetConfig.gameRules.minGameTime};
+                    }
+                    if (parsedBetConfig.gameRules.startTimeOddsLimit) {
+                        betConfig.gameRules.startTimeOddsLimit = {...betConfig.gameRules.startTimeOddsLimit, ...parsedBetConfig.gameRules.startTimeOddsLimit};
+                    }
+                }
+
+                console.log('已加载保存的下注设置');
+            } catch (e) {
+                console.error('解析保存的下注设置失败:', e);
+            }
+        }
+
+        // 加载更新配置
+        const savedUpdateConfig = GM_getValue('updateConfig');
+        if (savedUpdateConfig) {
+            try {
+                const parsedUpdateConfig = JSON.parse(savedUpdateConfig);
+                // 合并保存的设置到当前设置
+                updateConfig = {...updateConfig, ...parsedUpdateConfig};
+                console.log('已加载保存的更新设置');
+            } catch (e) {
+                console.error('解析保存的更新设置失败:', e);
+            }
+        }
+    } catch (e) {
+        console.error('加载保存数据失败:', e);
     }
 
     // 自动下单配置
