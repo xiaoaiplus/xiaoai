@@ -1112,6 +1112,22 @@
         if (!contentContainer) return;
 
         let html = '';
+        
+        // 定义每个标签页的保存按钮HTML
+        const saveButtonHtml = `
+            <div class="settings-save-container" style="margin-top: 20px; text-align: center;">
+                <button id="tab-save-button" style="
+                    background-color: #00aa00;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 8px 15px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    width: 120px;
+                ">保存设置</button>
+            </div>
+        `;
 
         // 根据当前激活的选项卡显示不同内容
         switch (settingsConfig.activeTab) {
@@ -1274,6 +1290,9 @@
                 break;
         }
 
+        // 添加当前标签页的保存按钮
+        html += saveButtonHtml;
+        
         // 添加样式
         html += `
             <style>
@@ -1319,6 +1338,18 @@
         `;
 
         contentContainer.innerHTML = html;
+        
+        // 为当前标签页的保存按钮添加点击事件
+        const tabSaveButton = document.getElementById('tab-save-button');
+        if (tabSaveButton) {
+            tabSaveButton.onclick = function() {
+                saveSettings();
+                logToUI(`${settingsConfig.activeTab === 'general' ? '常规' : 
+                          settingsConfig.activeTab === 'betting' ? '下注' : 
+                          settingsConfig.activeTab === 'odds' ? '赔率调整' : 
+                          '游戏规则'}设置已保存`, 'success');
+            };
+        }
     }
 
     // 保存设置
@@ -2744,9 +2775,11 @@ function updateMatchesDisplay() {
 
         // 5. 检查是否有连胜/连败
         if (team1Stats.streakCount >= 3 || team2Stats.streakCount >= 3) {
-            const streakTeam = team1Stats.streakCount >= 3 ? match.teams[0].name : match.teams[1].name;
-            const streakType = team1Stats.streakCount >= 3 ? team1Stats.streakType : team2Stats.streakType;
-            riskFactors.push(`${streakTeam}正处于${streakCount}场连${streakType === 'win' ? '胜' : '负'}`);
+            const isTeam1Streak = team1Stats.streakCount >= 3;
+            const streakTeam = isTeam1Streak ? match.teams[0].name : match.teams[1].name;
+            const streakType = isTeam1Streak ? team1Stats.streakType : team2Stats.streakType;
+            const currentStreakCount = isTeam1Streak ? team1Stats.streakCount : team2Stats.streakCount;
+            riskFactors.push(`${streakTeam}正处于${currentStreakCount}场连${streakType === 'win' ? '胜' : '负'}`);
             riskScore += 10;
         }
 
@@ -2799,11 +2832,41 @@ function updateMatchesDisplay() {
             team1Stats.recentForm.push(1);
             team2Stats.losses++;
             team2Stats.recentForm.push(0);
+            
+            // 更新连胜/连败计数
+            if (team1Stats.streakType === 'win') {
+                team1Stats.streakCount++;
+            } else {
+                team1Stats.streakCount = 1;
+                team1Stats.streakType = 'win';
+            }
+            
+            if (team2Stats.streakType === 'loss') {
+                team2Stats.streakCount++;
+            } else {
+                team2Stats.streakCount = 1;
+                team2Stats.streakType = 'loss';
+            }
         } else if (match.result.winner === team2.id) {
             team2Stats.wins++;
             team2Stats.recentForm.push(1);
             team1Stats.losses++;
             team1Stats.recentForm.push(0);
+            
+            // 更新连胜/连败计数
+            if (team2Stats.streakType === 'win') {
+                team2Stats.streakCount++;
+            } else {
+                team2Stats.streakCount = 1;
+                team2Stats.streakType = 'win';
+            }
+            
+            if (team1Stats.streakType === 'loss') {
+                team1Stats.streakCount++;
+            } else {
+                team1Stats.streakCount = 1;
+                team1Stats.streakType = 'loss';
+            }
         }
 
         // 更新总场次
@@ -2864,14 +2927,39 @@ function updateMatchesDisplay() {
         // 确定预测胜者
         let predictedWinner, confidence, reason;
 
+        // 计算总分，用于计算置信度
+        const totalScore = team1Score + team2Score;
+        
         if (team1Score > team2Score) {
             predictedWinner = team1.id;
-            confidence = Math.round((team1Score / (team1Score + team2Score)) * 100);
+            confidence = Math.round((team1Score / totalScore) * 100);
             reason = `${team1.name}最近表现更好(${Math.round(recentWinRateTeam1*100)}%胜率 vs ${Math.round(recentWinRateTeam2*100)}%)，总体胜率${Math.round(winRateTeam1*100)}%`;
-        } else {
+        } else if (team2Score > team1Score) {
             predictedWinner = team2.id;
-            confidence = Math.round((team2Score / (team1Score + team2Score)) * 100);
+            confidence = Math.round((team2Score / totalScore) * 100);
             reason = `${team2.name}最近表现更好(${Math.round(recentWinRateTeam2*100)}%胜率 vs ${Math.round(recentWinRateTeam1*100)}%)，总体胜率${Math.round(winRateTeam2*100)}%`;
+        } else {
+            // 如果评分相等，比较最近的表现
+            if (recentWinRateTeam1 > recentWinRateTeam2) {
+                predictedWinner = team1.id;
+                confidence = 55; // 略微倾向
+                reason = `${team1.name}和${team2.name}整体实力相当，但${team1.name}最近状态略好(${Math.round(recentWinRateTeam1*100)}%胜率 vs ${Math.round(recentWinRateTeam2*100)}%)`;
+            } else if (recentWinRateTeam2 > recentWinRateTeam1) {
+                predictedWinner = team2.id;
+                confidence = 55; // 略微倾向
+                reason = `${team1.name}和${team2.name}整体实力相当，但${team2.name}最近状态略好(${Math.round(recentWinRateTeam2*100)}%胜率 vs ${Math.round(recentWinRateTeam1*100)}%)`;
+            } else {
+                // 如果最近表现也相等，比较总胜率
+                if (winRateTeam1 >= winRateTeam2) {
+                    predictedWinner = team1.id;
+                    confidence = 51; // 非常接近
+                    reason = `${team1.name}和${team2.name}实力非常接近，历史总胜率${Math.round(winRateTeam1*100)}% vs ${Math.round(winRateTeam2*100)}%`;
+                } else {
+                    predictedWinner = team2.id;
+                    confidence = 51; // 非常接近
+                    reason = `${team1.name}和${team2.name}实力非常接近，历史总胜率${Math.round(winRateTeam1*100)}% vs ${Math.round(winRateTeam2*100)}%`;
+                }
+            }
         }
 
         // 获取赔率
