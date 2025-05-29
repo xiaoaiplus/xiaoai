@@ -1425,26 +1425,16 @@
             backdrop-filter: blur(3px);
         `;
 
-        // 创建右侧下注面板
+        // 右侧下注面板已移除，保留变量以避免代码错误
         const bettingPanel = document.createElement('div');
         bettingPanel.id = 'betting-panel';
         bettingPanel.style.cssText = `
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 280px;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85);
-            color: white;
-            z-index: 9998;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            font-size: 12px;
-            overflow: hidden;
-            border-left: 1px solid #444;
             display: none;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(3px);
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+            visibility: hidden;
         `;
 
         // 创建下注容器
@@ -1669,7 +1659,7 @@
         // 不需要将matchesContainer添加到matchesDisplay，因为已经添加到matchesPanel中了
 
         document.body.appendChild(matchesPanel);
-        document.body.appendChild(bettingPanel);
+        // 不再添加bettingPanel到body
 
         // 添加导出按钮
         const exportBtn = document.createElement('button');
@@ -2904,27 +2894,39 @@ function updateMatchesDisplay() {
 
     // 执行下单
     function placeBet(match, prediction, roundNumber = 1) {
-        if (!betConfig.enabled || !prediction || !prediction.predictedWinner) return;
+        if (!betConfig.enabled || !prediction || !prediction.predictedWinner) {
+            console.log('下注条件不满足，无法下单');
+            return;
+        }
 
         console.log(`尝试对比赛 ${match.id} 第${roundNumber}局下单，预测 ${prediction.prediction} 获胜，置信度 ${prediction.confidence}%`);
+        logToUI(`尝试下注: ${prediction.teams ? prediction.teams.join(' vs ') : match.teams[0].name + ' vs ' + match.teams[1].name}`, 'info');
 
         // 生成唯一的下注ID，包含比赛ID和局数
         const betId = `${match.id}-round-${roundNumber}`;
 
         // 检查是否已经对该比赛的该局下单
-        const alreadyBet = collectedData.betHistory.some(bet => bet.betId === betId);
+        const alreadyBet = (collectedData.betHistory || []).some(bet => bet.betId === betId);
         if (alreadyBet) {
             console.log(`已经对该比赛的第${roundNumber}局下单，跳过`);
+            logToUI(`已经对该比赛下单，跳过`, 'warning');
             return;
         }
+
+        // 确保teams字段存在
+        const teams = prediction.teams || [
+            match.teams[0].name,
+            match.teams[1].name
+        ];
 
         // 构建下单记录
         const betRecord = {
             betId: betId,
             matchId: match.id,
+            match: match, // 添加完整的比赛信息，确保submitBet可以访问
             matchRound: `第${roundNumber}局`,
             roundNumber: roundNumber,
-            teams: prediction.teams,
+            teams: teams,
             selectedTeam: prediction.prediction,
             selectedTeamId: prediction.predictedWinner,
             odds: prediction.odds,
@@ -2933,8 +2935,14 @@ function updateMatchesDisplay() {
             confidence: prediction.confidence,
             status: 'pending',
             placedAt: new Date(),
-            result: null
+            result: null,
+            reasoning: prediction.reason || ''
         };
+
+        // 确保betHistory数组存在
+        if (!collectedData.betHistory) {
+            collectedData.betHistory = [];
+        }
 
         // 添加到下单历史
         collectedData.betHistory.push(betRecord);
@@ -2944,9 +2952,13 @@ function updateMatchesDisplay() {
 
         // 如果启用了自动确认，直接提交下单
         if (betConfig.autoConfirm) {
+            console.log('自动确认已启用，直接提交下单');
+            logToUI('自动确认已启用，直接提交下单', 'info');
             submitBet(betRecord);
         } else {
             // 否则显示确认对话框
+            console.log('显示下单确认对话框');
+            logToUI('请确认下单', 'info');
             showBetConfirmation(betRecord);
         }
 
@@ -2954,6 +2966,8 @@ function updateMatchesDisplay() {
         updateUI();
         // 更新下注显示
         updateBettingDisplay();
+        
+        return betRecord; // 返回下注记录，方便调用者使用
     }
 
     // 更新下注显示
@@ -3196,8 +3210,12 @@ function updateMatchesDisplay() {
         console.log('提交下单:', betRecord);
         logToUI('提交下单: ' + betRecord.selectedTeam + ' 金额: ' + betRecord.amount);
 
-        // 使用增强的选择器查找下单按钮
-        const betButtons = Array.from(document.querySelectorAll('.bet-button, .place-bet, [data-bet="true"], div.btBtn, div.odds, #singleBet'));
+        // 使用更全面的选择器查找下单按钮
+        const betButtons = Array.from(document.querySelectorAll(
+            '.bet-button, .place-bet, [data-bet="true"], div.btBtn, div.odds, #singleBet, ' +
+            'div.oddItem, div.oddNum, div.teamInfoGrp, div.marketRow, div.teamName, ' +
+            '[class*="odd"], [class*="bet"], [class*="team"]'
+        ));
         let targetButton = null;
 
         // 尝试找到匹配的下单按钮
@@ -3216,6 +3234,20 @@ function updateMatchesDisplay() {
             }
         }
 
+        // 如果没有找到匹配的按钮，尝试查找所有可能的下注元素
+        if (!targetButton) {
+            logToUI('未找到精确匹配的下单按钮，尝试查找所有可能的下注元素', 'warning');
+            
+            // 查找所有可能的下注元素
+            const allPossibleElements = document.querySelectorAll('div.oddItem, div.oddNum, div.teamInfoGrp, div.marketRow');
+            
+            if (allPossibleElements.length > 0) {
+                // 选择第一个元素作为目标
+                targetButton = allPossibleElements[0];
+                logToUI('找到可能的下单元素: ' + targetButton.textContent, 'info');
+            }
+        }
+
         if (targetButton) {
             // 更新下单状态
             betRecord.status = 'submitted';
@@ -3228,19 +3260,56 @@ function updateMatchesDisplay() {
 
             // 尝试填写金额
             setTimeout(() => {
-                const amountInputs = document.querySelectorAll('input[type="number"], .bet-amount, [placeholder*="金额"]');
+                // 使用更广泛的选择器查找金额输入框
+                const amountInputs = document.querySelectorAll(
+                    'input[type="number"], input[type="text"], .bet-amount, [placeholder*="金额"], ' +
+                    '[class*="amount"], [class*="stake"], [class*="bet"], input'
+                );
+                
                 if (amountInputs.length > 0) {
                     const amountInput = amountInputs[0];
+                    // 保存原始值
+                    const originalValue = amountInput.value;
+                    
+                    // 设置新值
                     amountInput.value = betRecord.amount;
+                    // 触发多种事件以确保值被正确更新
                     amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    amountInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    amountInput.dispatchEvent(new Event('blur', { bubbles: true }));
+                    
                     console.log('已填写下单金额:', betRecord.amount);
                     logToUI('已填写下单金额: ' + betRecord.amount);
 
                     // 尝试点击确认按钮
                     setTimeout(() => {
-                        const confirmButtons = document.querySelectorAll('.confirm-bet, .submit-bet, [type="submit"], div.btBtn');
+                        // 使用更广泛的选择器查找确认按钮
+                        const confirmButtons = document.querySelectorAll(
+                            '.confirm-bet, .submit-bet, [type="submit"], div.btBtn, ' +
+                            'button, [class*="confirm"], [class*="submit"], [class*="bet"], ' +
+                            '[class*="place"], [class*="ok"], [class*="yes"]'
+                        );
+                        
                         if (confirmButtons.length > 0) {
-                            confirmButtons[0].click();
+                            // 找到最可能的确认按钮
+                            let confirmButton = null;
+                            for (const btn of confirmButtons) {
+                                const btnText = btn.textContent.toLowerCase();
+                                if (btnText.includes('确认') || btnText.includes('提交') || 
+                                    btnText.includes('下单') || btnText.includes('确定') || 
+                                    btnText.includes('confirm') || btnText.includes('submit') || 
+                                    btnText.includes('place bet')) {
+                                    confirmButton = btn;
+                                    break;
+                                }
+                            }
+                            
+                            // 如果没有找到明确的确认按钮，使用第一个按钮
+                            if (!confirmButton) {
+                                confirmButton = confirmButtons[0];
+                            }
+                            
+                            confirmButton.click();
                             console.log('已点击确认下单按钮');
                             logToUI('已点击确认下单按钮');
                             betRecord.status = 'placed';
@@ -3248,20 +3317,266 @@ function updateMatchesDisplay() {
 
                             // 更新下注显示
                             updateBettingDisplay();
+                            
+                            // 监听下注结果
+                            setTimeout(() => {
+                                checkBetResult(betRecord);
+                            }, 1500);
+                        } else {
+                            logToUI('未找到确认下单按钮，尝试直接提交', 'warning');
+                            // 如果没有找到确认按钮，尝试按回车键提交
+                            amountInput.dispatchEvent(new KeyboardEvent('keydown', {
+                                key: 'Enter',
+                                code: 'Enter',
+                                keyCode: 13,
+                                which: 13,
+                                bubbles: true
+                            }));
+                            
+                            betRecord.status = 'placed';
+                            saveData();
+                            updateBettingDisplay();
+                            
+                            // 监听下注结果
+                            setTimeout(() => {
+                                checkBetResult(betRecord);
+                            }, 1500);
+                        }
+                    }, 800);
+                } else {
+                    logToUI('未找到金额输入框，尝试直接确认下单', 'warning');
+                    // 如果没有找到金额输入框，尝试直接点击确认按钮
+                    setTimeout(() => {
+                        const confirmButtons = document.querySelectorAll(
+                            'button, [class*="confirm"], [class*="submit"], [class*="bet"], ' +
+                            '[class*="place"], [class*="ok"], [class*="yes"]'
+                        );
+                        
+                        if (confirmButtons.length > 0) {
+                            confirmButtons[0].click();
+                            logToUI('已尝试直接确认下单', 'info');
+                            betRecord.status = 'placed';
+                            saveData();
+                            updateBettingDisplay();
+                            
+                            // 监听下注结果
+                            setTimeout(() => {
+                                checkBetResult(betRecord);
+                            }, 1500);
+                        } else {
+                            logToUI('未找到任何可用的确认按钮', 'error');
+                            betRecord.status = 'failed';
+                            betRecord.result = '未找到确认按钮';
+                            saveData();
+                            updateBettingDisplay();
+                            
+                            // 显示下注失败提示
+                            showBetNotification('下注失败', '未找到确认按钮', 'error');
                         }
                     }, 500);
                 }
-            }, 500);
+            }, 800);
         } else {
-            console.log('未找到匹配的下单按钮');
-            logToUI('未找到匹配的下单按钮', 'error');
+            console.log('未找到任何可能的下单元素');
+            logToUI('未找到任何可能的下单元素', 'error');
             betRecord.status = 'failed';
-            betRecord.result = '未找到下单按钮';
+            betRecord.result = '未找到下单元素';
             saveData();
 
             // 更新下注显示
             updateBettingDisplay();
+            
+            // 显示下注失败提示
+            showBetNotification('下注失败', '未找到下单元素', 'error');
         }
+    }
+    
+    // 检查下注结果
+    function checkBetResult(betRecord) {
+        // 检查页面上是否有成功或失败的提示信息
+        const successElements = document.querySelectorAll(
+            '.success-message, .bet-success, [class*="success"], ' +
+            'div:contains("下注成功"), div:contains("投注成功"), div:contains("已接受")'
+        );
+        
+        const errorElements = document.querySelectorAll(
+            '.error-message, .bet-error, [class*="error"], ' +
+            'div:contains("余额不足"), div:contains("下注失败"), div:contains("投注失败"), ' +
+            'div:contains("错误"), div:contains("失败")'
+        );
+        
+        // 检查DOM中的文本内容
+        const pageText = document.body.textContent.toLowerCase();
+        const hasSuccessText = pageText.includes('下注成功') || pageText.includes('投注成功') || 
+                              pageText.includes('已接受') || pageText.includes('bet accepted');
+        
+        const hasErrorText = pageText.includes('余额不足') || pageText.includes('下注失败') || 
+                            pageText.includes('投注失败') || pageText.includes('insufficient balance');
+        
+        if (successElements.length > 0 || hasSuccessText) {
+            // 下注成功
+            betRecord.status = 'placed';
+            betRecord.result = '下注成功';
+            saveData();
+            updateBettingDisplay();
+            
+            // 显示下注成功提示
+            showBetNotification('下注成功', `已成功对 ${betRecord.selectedTeam} 下注 ${betRecord.amount}`, 'success');
+            logToUI(`下注成功: ${betRecord.selectedTeam} 金额: ${betRecord.amount}`, 'success');
+        } else if (errorElements.length > 0 || hasErrorText) {
+            // 下注失败
+            betRecord.status = 'failed';
+            
+            // 尝试确定失败原因
+            let failReason = '未知原因';
+            
+            if (pageText.includes('余额不足') || pageText.includes('insufficient balance')) {
+                failReason = '余额不足';
+            } else if (pageText.includes('赔率变化') || pageText.includes('odds changed')) {
+                failReason = '赔率已变化';
+            } else if (pageText.includes('已关闭') || pageText.includes('closed')) {
+                failReason = '投注已关闭';
+            }
+            
+            betRecord.result = `下注失败: ${failReason}`;
+            saveData();
+            updateBettingDisplay();
+            
+            // 显示下注失败提示
+            showBetNotification('下注失败', failReason, 'error');
+            logToUI(`下注失败: ${failReason}`, 'error');
+        } else {
+            // 无法确定结果，可能需要再次检查
+            console.log('无法确定下注结果，将再次检查');
+            
+            // 如果已经重试过，则标记为未知状态
+            if (betRecord.checkCount && betRecord.checkCount >= 2) {
+                betRecord.status = 'unknown';
+                betRecord.result = '无法确定下注结果';
+                saveData();
+                updateBettingDisplay();
+                
+                // 显示未知结果提示
+                showBetNotification('下注状态未知', '请手动检查下注是否成功', 'warning');
+                logToUI('下注状态未知，请手动检查', 'warning');
+            } else {
+                // 增加检查计数并再次尝试
+                betRecord.checkCount = (betRecord.checkCount || 0) + 1;
+                saveData();
+                
+                // 再次检查
+                setTimeout(() => {
+                    checkBetResult(betRecord);
+                }, 1500);
+            }
+        }
+    }
+    
+    // 显示下注通知
+    function showBetNotification(title, message, type = 'info') {
+        // 创建通知元素
+        const notification = document.createElement('div');
+        
+        // 根据类型设置样式
+        let bgColor, borderColor, iconColor;
+        
+        switch(type) {
+            case 'success':
+                bgColor = 'rgba(0, 128, 0, 0.9)';
+                borderColor = '#00ff00';
+                iconColor = '#00ff00';
+                break;
+            case 'error':
+                bgColor = 'rgba(128, 0, 0, 0.9)';
+                borderColor = '#ff0000';
+                iconColor = '#ff0000';
+                break;
+            case 'warning':
+                bgColor = 'rgba(128, 128, 0, 0.9)';
+                borderColor = '#ffff00';
+                iconColor = '#ffff00';
+                break;
+            default: // info
+                bgColor = 'rgba(0, 0, 128, 0.9)';
+                borderColor = '#0000ff';
+                iconColor = '#0000ff';
+        }
+        
+        // 设置通知样式
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 400px;
+            background-color: ${bgColor};
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            border-left: 4px solid ${borderColor};
+            animation: slideInRight 0.5s, fadeOut 0.5s 5s forwards;
+        `;
+        
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 设置通知内容
+        let icon = '';
+        
+        switch(type) {
+            case 'success':
+                icon = '✓';
+                break;
+            case 'error':
+                icon = '✗';
+                break;
+            case 'warning':
+                icon = '⚠';
+                break;
+            default: // info
+                icon = 'ℹ';
+        }
+        
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <div style="font-size: 24px; margin-right: 15px; color: ${iconColor};">${icon}</div>
+                <div>
+                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${title}</div>
+                    <div style="font-size: 14px;">${message}</div>
+                </div>
+            </div>
+        `;
+        
+        // 添加到页面
+        document.body.appendChild(notification);
+        
+        // 自动移除通知
+        setTimeout(() => {
+            if (notification && notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5500); // 5.5秒后移除（包括0.5秒的淡出动画）
+        
+        // 添加点击关闭功能
+        notification.addEventListener('click', function() {
+            if (notification && notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        });
     }
 
     // 显示下单确认对话框
@@ -3638,78 +3953,153 @@ function updateMatchesDisplay() {
         setInterval(function() {
             updateUI();
             updateBettingDisplay();
+        }, 5000);
+        
+        // 单独设置自动下注检查定时器，确保正常运行
+        setInterval(function() {
             // 检查是否需要自动下注
             if (betConfig.enabled) {
                 checkAutoBetting();
             }
-        }, 5000);
+        }, 10000);
 
     // 检查是否需要自动下注
     function checkAutoBetting() {
-        if (!betConfig.enabled || !collectedData.predictions || collectedData.predictions.length === 0) {
+        if (!betConfig.enabled) {
+            console.log('自动下注功能已禁用');
             return;
         }
 
-        console.log('检查自动下注条件...');
+        console.log('执行自动下注检查...');
+        logToUI('执行自动下注检查...', 'info');
 
-        // 遍历所有预测
-        collectedData.predictions.forEach(prediction => {
-            // 查找对应的比赛
-            const match = collectedData.matches.find(m => m.id === prediction.matchId);
-            if (!match) return;
+        // 检查是否有可下注的比赛
+        const now = new Date();
+        const currentHour = now.getHours();
 
-            // 检查是否已经对该比赛下单
-            const alreadyBet = collectedData.betHistory.some(bet => bet.matchId === match.id);
-            if (alreadyBet) {
-                console.log(`已经对比赛 ${match.id} 下单，跳过`);
-                return;
-            }
+        // 检查时间限制 (默认只在9:00-23:00之间下注)
+        if (currentHour < 9 || currentHour >= 23) {
+            console.log('当前时间不在下注时间范围内');
+            logToUI('当前时间不在下注时间范围内 (9:00-23:00)', 'info');
+            return;
+        }
 
-            // 获取比赛类型
-            const gameType = getGameType(match);
-            console.log(`比赛 ${match.id} 的游戏类型: ${gameType}`);
-
-            // 检查比赛时间限制
-            if (!checkGameTimeLimit(match, gameType)) {
-                console.log(`比赛 ${match.id} 不满足最小开局时间限制，跳过`);
-                return;
-            }
-
-            // 检查开局时间+赔率限制
-            if (!checkStartTimeOddsLimit(match, gameType, prediction.odds)) {
-                console.log(`比赛 ${match.id} 不满足开局时间+赔率限制，跳过`);
-                return;
-            }
-
-            // 检查基本下注条件
-            if (prediction.confidence >= betConfig.confidenceThreshold &&
-                prediction.odds >= betConfig.minOdds &&
-                prediction.odds <= betConfig.maxOdds) {
-
-                // 根据风险等级过滤
-                if ((betConfig.riskLevel === 'high') ||
-                    (betConfig.riskLevel === 'medium' && prediction.riskLevel !== 'high') ||
-                    (betConfig.riskLevel === 'low' && prediction.riskLevel === 'low')) {
-
-                    // 调整下注金额
-                    const adjustedAmount = adjustBetAmount(prediction.odds);
-
-                    // 临时修改下注金额
-                    const originalAmount = betConfig.betAmount;
-                    betConfig.betAmount = adjustedAmount;
-
-                    // 执行下单
-                    console.log(`对比赛 ${match.id} 自动下单，预测 ${prediction.prediction} 获胜，置信度 ${prediction.confidence}%，调整后下注金额: ${adjustedAmount}`);
-                    placeBet(match, prediction);
-
-                    // 恢复原始下注金额
-                    betConfig.betAmount = originalAmount;
-
-                    // 记录日志
-                    logToUI(`自动下单: ${prediction.teams.join(' vs ')}，选择 ${prediction.prediction}，赔率 ${prediction.odds.toFixed(2)}，金额 ${adjustedAmount}`, 'success');
-                }
+        // 获取所有今天的比赛
+        const todayMatches = Object.values(collectedData.matches).filter(match => {
+            if (!match || !match.startTime) return false;
+            try {
+                const matchDate = new Date(match.startTime);
+                return matchDate.toDateString() === now.toDateString();
+            } catch (e) {
+                console.error('解析比赛时间出错:', e);
+                return false;
             }
         });
+
+        console.log(`找到今天的比赛: ${todayMatches.length}场`);
+        logToUI(`找到今天的比赛: ${todayMatches.length}场`, 'info');
+
+        if (todayMatches.length === 0) {
+            logToUI('没有找到今天的比赛，尝试更新比赛数据', 'warning');
+            // 尝试更新比赛数据
+            updateMatchData();
+            return;
+        }
+
+        // 检查每个比赛
+        let betPlaced = false;
+        for (const match of todayMatches) {
+            if (betPlaced) break; // 如果已经下注，跳出循环
+
+            // 跳过已经下注的比赛
+            const alreadyBet = Object.values(collectedData.betHistory || []).some(bet => 
+                bet.matchId === match.id && ['pending', 'submitted', 'placed', 'won', 'lost'].includes(bet.status)
+            );
+
+            if (alreadyBet) {
+                console.log(`比赛 ${match.id} (${match.teams[0].name} vs ${match.teams[1].name}) 已经下注过`);
+                continue;
+            }
+
+            // 检查比赛状态
+            if (match.status !== 'upcoming' && match.status !== 'live') {
+                console.log(`比赛 ${match.id} 状态不符合要求: ${match.status}`);
+                continue;
+            }
+
+            // 检查赔率是否在配置范围内
+            const odds = match.odds;
+            if (!odds || !odds[match.teams[0].id] || !odds[match.teams[1].id]) {
+                console.log(`比赛 ${match.id} 赔率数据不完整`);
+                continue;
+            }
+
+            // 分析比赛并获取预测
+            console.log(`分析比赛: ${match.teams[0].name} vs ${match.teams[1].name}`);
+            const prediction = predictMatch(match);
+            if (!prediction || !prediction.predictedWinner) {
+                console.log(`比赛 ${match.id} 无法生成预测`);
+                continue;
+            }
+            
+            if (prediction.confidence < betConfig.confidenceThreshold) {
+                console.log(`比赛 ${match.id} 预测置信度不足: ${prediction.confidence}`);
+                continue;
+            }
+
+            // 评估风险
+            const risk = assessRisk(match, prediction);
+            if (risk > getRiskLevelValue(betConfig.riskLevel)) {
+                console.log(`比赛 ${match.id} 风险过高: ${risk}`);
+                continue;
+            }
+
+            // 确定下注金额
+            let betAmount = betConfig.defaultAmount || 10;
+
+            // 根据赔率调整下注金额
+            const selectedTeam = prediction.prediction;
+            const selectedOdds = prediction.odds;
+            
+            // 检查赔率是否在允许范围内
+            if (selectedOdds < betConfig.minOdds || selectedOdds > betConfig.maxOdds) {
+                console.log(`比赛 ${match.id} 赔率不在允许范围内: ${selectedOdds}`);
+                continue;
+            }
+
+            // 根据赔率阈值调整下注金额
+            betAmount = adjustBetAmount(selectedOdds);
+
+            // 临时修改下注金额
+            const originalAmount = betConfig.betAmount;
+            betConfig.betAmount = betAmount;
+
+            logToUI(`准备下注: ${match.teams[0].name} vs ${match.teams[1].name}, 选择: ${selectedTeam}, 金额: ${betAmount}, 赔率: ${selectedOdds}`, 'success');
+
+            // 执行下单
+            console.log(`对比赛 ${match.id} 自动下单，预测 ${prediction.prediction} 获胜，置信度 ${prediction.confidence}%，调整后下注金额: ${betAmount}`);
+            placeBet(match, prediction);
+
+            // 恢复原始下注金额
+            betConfig.betAmount = originalAmount;
+
+            betPlaced = true;
+            logToUI(`已自动提交下注: ${selectedTeam}`, 'success');
+        }
+
+        if (!betPlaced) {
+            logToUI('没有找到符合条件的比赛进行下注', 'info');
+        }
+    }
+    
+    // 获取风险等级数值
+    function getRiskLevelValue(riskLevel) {
+        switch(riskLevel) {
+            case 'low': return 1;
+            case 'medium': return 2;
+            case 'high': return 3;
+            default: return 2;
+        }
     }
 
     // 获取比赛的游戏类型
