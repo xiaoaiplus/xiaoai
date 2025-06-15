@@ -1995,11 +1995,15 @@
         let html = '';
 
         if (collectedData.logs && collectedData.logs.length > 0) {
-            collectedData.logs.slice().reverse().forEach((log, index) => {
+            // 按时间排序，最近的日志显示在最上面
+            const sortedLogs = [...collectedData.logs].sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            
+            sortedLogs.forEach((log) => {
                 // 根据日志类型设置颜色和图标
                 let logColor = '#ffffff';
                 let logIcon = '🔵';
-                let bgColor = 'rgba(20,20,20,0.7)';
                 let borderColor = '#444';
                 let borderStyle = 'solid';
 
@@ -2007,26 +2011,22 @@
                     case 'info':
                         logColor = '#00ccff';
                         logIcon = 'ℹ️';
-                        bgColor = 'rgba(0,50,80,0.3)';
                         borderColor = '#0088cc';
                         break;
                     case 'success':
                         logColor = '#00ff99';
                         logIcon = '✅';
-                        bgColor = 'rgba(0,80,40,0.3)';
                         borderColor = '#00cc66';
                         break;
                     case 'warning':
                         logColor = '#ffcc00';
                         logIcon = '⚠️';
-                        bgColor = 'rgba(80,60,0,0.3)';
                         borderColor = '#cc9900';
                         borderStyle = 'dashed';
                         break;
                     case 'error':
                         logColor = '#ff3333';
                         logIcon = '❌';
-                        bgColor = 'rgba(80,0,0,0.3)';
                         borderColor = '#cc0000';
                         borderStyle = 'dashed';
                         break;
@@ -2037,38 +2037,26 @@
                 // 格式化日期为 YYYY-MM-DD
                 const date = new Date(log.timestamp).toLocaleDateString();
 
-                // 计算动画延迟，使日志逐个显示
-                const animDelay = index * 0.05;
-
-                // 构建日志条目HTML - 使用更现代的设计
+                // 构建日志条目HTML - 简洁样式，无卡片效果
                 html += `<div class="log-entry" style="
-                    margin-bottom: 10px;
-                    padding: 10px 12px;
-                    border-left: 3px ${borderStyle} ${borderColor};
-                    background-color: ${bgColor};
+                    margin-bottom: 5px;
+                    padding: 5px 8px;
+                    border-left: 2px ${borderStyle} ${borderColor};
                     font-size: 12px;
-                    border-radius: 8px;
-                    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-                    transition: all 0.3s ease;
-                    animation: fadeIn 0.4s ease-out ${animDelay}s both;
-                    position: relative;
-                    overflow: hidden;
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center;">
-                            <span style="margin-right: 8px; font-size: 14px;">${logIcon}</span>
-                            <span style="color: #dddddd; font-weight: bold; font-size: 12px;">${log.type.toUpperCase()}</span>
+                            <span style="margin-right: 5px; font-size: 12px;">${logIcon}</span>
+                            <span style="font-weight: bold; font-size: 12px;">${log.type.toUpperCase()}</span>
                         </div>
-                        <span style="color: #bbbbbb; font-size: 11px;">${date} ${time}</span>
+                        <span style="font-size: 11px;">${date} ${time}</span>
                     </div>
                     <div style="
                         color: ${logColor};
-                        margin-top: 6px;
-                        line-height: 1.5;
+                        margin-top: 3px;
+                        line-height: 1.4;
                         word-break: break-word;
-                        font-size: 13px;
-                        padding: 2px 0;
-                        text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+                        font-size: 12px;
                     ">${log.message}</div>
                 </div>`;
             });
@@ -2076,27 +2064,13 @@
 
         // 如果没有日志，显示提示信息
         if (!html) {
-            html = '<div style="color: #aaaaaa; font-style: italic; text-align: center; padding: 15px; background-color: rgba(30,30,30,0.5); border-radius: 8px;">暂无日志记录</div>';
-        }
-
-        // 添加淡入动画样式
-        const animStyle = document.getElementById('log-animations');
-        if (!animStyle) {
-            const style = document.createElement('style');
-            style.id = 'log-animations';
-            style.textContent = `
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `;
-            document.head.appendChild(style);
+            html = '<div style="color: #aaaaaa; font-style: italic; text-align: center; padding: 10px;">暂无日志记录</div>';
         }
 
         // 只更新左侧操作日志面板中的日志
         leftLogsContainer.innerHTML = html;
-        // 滚动到底部
-        leftLogsContainer.scrollTop = leftLogsContainer.scrollHeight;
+        // 滚动到顶部，因为最新的日志在顶部
+        leftLogsContainer.scrollTop = 0;
 
         // 添加鼠标悬停效果
         function addHoverEffects(container) {
@@ -3720,245 +3694,235 @@ function updateMatchesDisplay() {
         console.log('提交下单:', betRecord);
         logToUI('提交下单: ' + betRecord.selectedTeam + ' 金额: ' + betRecord.amount);
 
-        // 使用更精确的选择器查找下单按钮
-        const betButtons = Array.from(document.querySelectorAll(
-            '.bet-button, .place-bet, [data-bet="true"], div.btBtn, div.odds, #singleBet, ' +
-            'div.oddItem, div.oddNum, div.teamInfoGrp, div.marketRow, div.teamName, ' +
-            '[class*="odd"], [class*="bet"], [class*="team"], ' +
-            // 添加更多可能的选择器
-            '.oddNum, .oddItem, .teamInfoGrp, .marketRow, .teamName, ' +
-            // 添加更通用的元素选择器
-            'button, div[role="button"], span[role="button"]'
-        ));
-        let targetButton = null;
-
-        // 尝试找到匹配的下单按钮
-        for (const button of betButtons) {
-            const buttonText = (button.textContent || '').toLowerCase();
-            const buttonId = button.id || '';
-            const buttonClass = button.className || '';
-
-            // 检查按钮是否与我们要下注的队伍相关
-            if (buttonText.includes(betRecord.selectedTeam.toLowerCase()) ||
-                buttonId.includes(betRecord.selectedTeamId) ||
-                button.getAttribute('data-team-id') === betRecord.selectedTeamId) {
-                targetButton = button;
-                logToUI('找到匹配的下单按钮: ' + buttonText);
+        // 1. 首先点击赔率元素
+        const oddsElements = document.querySelectorAll('div.odds');
+        let targetOdds = null;
+        
+        for (const odds of oddsElements) {
+            const oddsText = (odds.textContent || '').toLowerCase();
+            if (oddsText.includes(betRecord.selectedTeam.toLowerCase())) {
+                targetOdds = odds;
+                logToUI('找到匹配的赔率元素: ' + oddsText);
                 break;
             }
         }
-
-        // 如果没有找到匹配的按钮，尝试查找所有可能的下注元素
-        if (!targetButton) {
-            logToUI('未找到精确匹配的下单按钮，尝试查找所有可能的下注元素', 'warning');
-
-            // 查找所有可能的下注元素
-            const allPossibleElements = document.querySelectorAll('div.oddItem, div.oddNum, div.teamInfoGrp, div.marketRow, div.teamName, div.btBtn');
-
-            if (allPossibleElements.length > 0) {
-                // 尝试找到最匹配的元素
-                for (const element of allPossibleElements) {
-                    const elementText = (element.textContent || '').toLowerCase();
-                    if (elementText.includes(betRecord.selectedTeam.toLowerCase())) {
-                        targetButton = element;
-                        logToUI('找到可能的下单元素: ' + elementText, 'info');
-                        break;
-                    }
-                }
-                
-                // 如果仍然没找到，使用第一个元素
-                if (!targetButton) {
-                    targetButton = allPossibleElements[0];
-                    logToUI('未找到匹配元素，使用第一个可能的下单元素: ' + targetButton.textContent, 'info');
-                }
-            }
+        
+        if (!targetOdds && oddsElements.length > 0) {
+            // 如果没找到匹配的，尝试使用第一个
+            targetOdds = oddsElements[0];
+            logToUI('未找到匹配的赔率元素，使用第一个可用的赔率元素');
         }
-
-        if (targetButton) {
-            // 更新下单状态
-            betRecord.status = 'submitted';
-            saveData();
-
-            // 模拟点击下单按钮
-            targetButton.click();
-            console.log('已点击下单按钮');
-            logToUI('已点击下单按钮');
-
-            // 尝试填写金额
+        
+        if (targetOdds) {
+            // 点击赔率元素
+            targetOdds.click();
+            logToUI('已点击赔率元素');
+            console.log('已点击赔率元素:', targetOdds.textContent);
+            
+            // 2. 等待注单列表出现
             setTimeout(() => {
-                // 使用更广泛的选择器查找金额输入框
-                const amountInputs = document.querySelectorAll(
-                    'input[type="number"], input[type="text"], .bet-amount, [placeholder*="金额"], ' +
-                    '[class*="amount"], [class*="stake"], [class*="bet"], input, ' +
-                    // 添加更多可能的选择器
-                    'input.amount, input.betAmount, input.stake, input[name="amount"], input[name="stake"]'
-                );
-
-                let amountInput = null;
+                // 查找注单详情元素
+                const betItemElements = document.querySelectorAll('div.btItm');
                 
-                // 尝试找到最匹配的金额输入框
-                for (const input of amountInputs) {
-                    const placeholder = input.placeholder || '';
-                    const name = input.name || '';
-                    const id = input.id || '';
+                if (betItemElements.length > 0) {
+                    logToUI('已找到注单详情元素');
+                    console.log('找到注单详情元素数量:', betItemElements.length);
                     
-                    if (placeholder.includes('金额') || placeholder.includes('amount') || 
-                        name.includes('amount') || name.includes('stake') || 
-                        id.includes('amount') || id.includes('stake')) {
-                        amountInput = input;
-                        break;
-                    }
-                }
-                
-                // 如果没找到特定的，使用第一个
-                if (!amountInput && amountInputs.length > 0) {
-                    amountInput = amountInputs[0];
-                }
-
-                if (amountInput) {
-                    // 保存原始值
-                    const originalValue = amountInput.value;
-
-                    // 设置新值
-                    amountInput.value = betRecord.amount;
-                    // 触发多种事件以确保值被正确更新
-                    amountInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    amountInput.dispatchEvent(new Event('change', { bubbles: true }));
-                    amountInput.dispatchEvent(new Event('blur', { bubbles: true }));
-
-                    console.log('已填写下单金额:', betRecord.amount);
-                    logToUI('已填写下单金额: ' + betRecord.amount);
-
-                    // 尝试点击确认按钮
+                    // 3. 查找并填写金额输入框
                     setTimeout(() => {
-                        // 使用更广泛的选择器查找确认按钮
-                        const confirmButtons = document.querySelectorAll(
-                            '.confirm-bet, .submit-bet, [type="submit"], div.btBtn, ' +
-                            'button, [class*="confirm"], [class*="submit"], [class*="bet"], ' +
-                            '[class*="place"], [class*="ok"], [class*="yes"], ' +
-                            // 添加更多可能的选择器
-                            'button.confirm, button.submit, button.ok, button.yes, ' +
-                            'div[role="button"]'
-                        );
-
-                        if (confirmButtons.length > 0) {
-                            // 找到最可能的确认按钮
-                            let confirmButton = null;
-                            for (const btn of confirmButtons) {
-                                const btnText = (btn.textContent || '').toLowerCase();
-                                if (btnText.includes('确认') || btnText.includes('提交') ||
-                                    btnText.includes('下单') || btnText.includes('确定') ||
-                                    btnText.includes('confirm') || btnText.includes('submit') ||
-                                    btnText.includes('place bet') || btnText.includes('bet') ||
-                                    btnText.includes('ok') || btnText.includes('yes')) {
-                                    confirmButton = btn;
-                                    break;
-                                }
+                        // 优先使用#singleBet选择器
+                        let amountInput = document.querySelector('#singleBet');
+                        
+                        // 如果没找到，尝试在btItm元素内查找输入框
+                        if (!amountInput && betItemElements.length > 0) {
+                            const inputs = betItemElements[0].querySelectorAll('input[type="number"], input[type="text"]');
+                            if (inputs.length > 0) {
+                                amountInput = inputs[0];
+                                logToUI('在注单详情中找到金额输入框');
                             }
-
-                            // 如果没有找到明确的确认按钮，使用第一个按钮
-                            if (!confirmButton) {
-                                confirmButton = confirmButtons[0];
-                            }
-
-                            confirmButton.click();
-                            console.log('已点击确认下单按钮');
-                            logToUI('已点击确认下单按钮');
-                            betRecord.status = 'placed';
-                            saveData();
-
-                            // 更新下注显示
-                            updateBettingDisplay();
-
-                            // 监听下注结果
-                            setTimeout(() => {
-                                checkBetResult(betRecord);
-                            }, 1500);
-                        } else {
-                            logToUI('未找到确认下单按钮，尝试直接提交', 'warning');
-                            // 如果没有找到确认按钮，尝试按回车键提交
-                            amountInput.dispatchEvent(new KeyboardEvent('keydown', {
-                                key: 'Enter',
-                                code: 'Enter',
-                                keyCode: 13,
-                                which: 13,
-                                bubbles: true
-                            }));
-
-                            betRecord.status = 'placed';
-                            saveData();
-                            updateBettingDisplay();
-
-                            // 监听下注结果
-                            setTimeout(() => {
-                                checkBetResult(betRecord);
-                            }, 1500);
                         }
-                    }, 800);
-                } else {
-                    logToUI('未找到金额输入框，尝试直接确认下单', 'warning');
-                    // 如果没有找到金额输入框，尝试直接点击确认按钮
-                    setTimeout(() => {
-                        const confirmButtons = document.querySelectorAll(
-                            'button, [class*="confirm"], [class*="submit"], [class*="bet"], ' +
-                            '[class*="place"], [class*="ok"], [class*="yes"], ' +
-                            'div[role="button"]'
-                        );
-
-                        if (confirmButtons.length > 0) {
-                            // 尝试找到最匹配的确认按钮
-                            let confirmButton = null;
-                            for (const btn of confirmButtons) {
-                                const btnText = (btn.textContent || '').toLowerCase();
-                                if (btnText.includes('确认') || btnText.includes('提交') ||
-                                    btnText.includes('下单') || btnText.includes('确定') ||
-                                    btnText.includes('confirm') || btnText.includes('submit') ||
-                                    btnText.includes('place bet')) {
-                                    confirmButton = btn;
+                        
+                        // 如果仍然没找到，使用更广泛的选择器
+                        if (!amountInput) {
+                            const amountInputs = document.querySelectorAll(
+                                'input[type="number"], input[type="text"], .bet-amount, [placeholder*="金额"], ' +
+                                '[class*="amount"], [class*="stake"], [class*="bet"], input'
+                            );
+                            
+                            // 尝试找到最匹配的金额输入框
+                            for (const input of amountInputs) {
+                                const placeholder = input.placeholder || '';
+                                const name = input.name || '';
+                                const id = input.id || '';
+                                
+                                if (placeholder.includes('金额') || placeholder.includes('amount') || 
+                                    name.includes('amount') || name.includes('stake') || 
+                                    id.includes('amount') || id.includes('stake')) {
+                                    amountInput = input;
+                                    logToUI('找到可能的金额输入框: ' + id);
                                     break;
                                 }
                             }
                             
                             // 如果没找到特定的，使用第一个
-                            if (!confirmButton) {
-                                confirmButton = confirmButtons[0];
+                            if (!amountInput && amountInputs.length > 0) {
+                                amountInput = amountInputs[0];
+                                logToUI('使用第一个可用的输入框');
                             }
-                            
-                            confirmButton.click();
-                            logToUI('已尝试直接确认下单', 'info');
-                            betRecord.status = 'placed';
-                            saveData();
-                            updateBettingDisplay();
-
-                            // 监听下注结果
-                            setTimeout(() => {
-                                checkBetResult(betRecord);
-                            }, 1500);
-                        } else {
-                            logToUI('未找到任何可用的确认按钮', 'error');
-                            betRecord.status = 'failed';
-                            betRecord.result = '未找到确认按钮';
-                            saveData();
-                            updateBettingDisplay();
-
-                            // 显示下注失败提示
-                            showBetNotification('下注失败', '未找到确认按钮', 'error');
                         }
-                    }, 500);
+                        
+                        if (amountInput) {
+                            // 清空输入框
+                            amountInput.value = '';
+                            amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            
+                            // 设置新值
+                            amountInput.value = betRecord.amount;
+                            // 触发多种事件以确保值被正确更新
+                            amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            amountInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            amountInput.dispatchEvent(new Event('blur', { bubbles: true }));
+                            amountInput.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+                            
+                            console.log('已填写下单金额:', betRecord.amount);
+                            logToUI('已填写下单金额: ' + betRecord.amount);
+                            
+                            // 4. 等待确认按钮激活并点击
+                            setTimeout(() => {
+                                // 首先查找特定的确认按钮（包括禁用状态的按钮）
+                                let confirmBtn = document.querySelector('div.btBtn.disabled, div.btBtn');
+                                
+                                // 如果没找到，尝试在btItm元素内查找按钮
+                                if (!confirmBtn && betItemElements.length > 0) {
+                                    const buttons = betItemElements[0].querySelectorAll('button, div[role="button"]');
+                                    if (buttons.length > 0) {
+                                        confirmBtn = buttons[0];
+                                        logToUI('在注单详情中找到确认按钮');
+                                    }
+                                }
+                                
+                                // 如果仍然没找到，使用更广泛的选择器
+                                if (!confirmBtn) {
+                                    const confirmButtons = document.querySelectorAll(
+                                        '.confirm-bet, .submit-bet, [type="submit"], div.btBtn, ' +
+                                        'button, [class*="confirm"], [class*="submit"], [class*="bet"], ' +
+                                        '[class*="place"], [class*="ok"], [class*="yes"]'
+                                    );
+                                    
+                                    if (confirmButtons.length > 0) {
+                                        // 找到最可能的确认按钮
+                                        for (const btn of confirmButtons) {
+                                            const btnText = (btn.textContent || '').toLowerCase();
+                                            if (btnText.includes('确认') || btnText.includes('提交') ||
+                                                btnText.includes('下单') || btnText.includes('确定') ||
+                                                btnText.includes('confirm') || btnText.includes('submit') ||
+                                                btnText.includes('place bet') || btnText.includes('bet')) {
+                                                confirmBtn = btn;
+                                                logToUI('找到可能的确认按钮: ' + btnText);
+                                                break;
+                                            }
+                                        }
+                                        
+                                        // 如果没找到特定的，使用第一个
+                                        if (!confirmBtn) {
+                                            confirmBtn = confirmButtons[0];
+                                            logToUI('使用第一个可用的按钮作为确认按钮');
+                                        }
+                                    }
+                                }
+                                
+                                if (confirmBtn) {
+                                    // 如果按钮是禁用状态，尝试移除禁用类
+                                    if (confirmBtn.classList && confirmBtn.classList.contains('disabled')) {
+                                        logToUI('发现按钮处于禁用状态，尝试移除禁用类');
+                                        confirmBtn.classList.remove('disabled');
+                                    }
+                                    
+                                    // 如果按钮有disabled属性，移除它
+                                    if (confirmBtn.hasAttribute('disabled')) {
+                                        logToUI('发现按钮有disabled属性，尝试移除');
+                                        confirmBtn.removeAttribute('disabled');
+                                    }
+                                    
+                                    // 点击确认按钮
+                                    confirmBtn.click();
+                                    console.log('已点击确认下单按钮');
+                                    logToUI('已点击确认下单按钮');
+                                    
+                                    betRecord.status = 'placed';
+                                    saveData();
+                                    updateBettingDisplay();
+                                    
+                                    // 监听下注结果
+                                    setTimeout(() => {
+                                        checkBetResult(betRecord);
+                                    }, 2000);
+                                } else {
+                                    logToUI('未找到确认下单按钮，尝试按回车键提交', 'warning');
+                                    // 如果没有找到确认按钮，尝试按回车键提交
+                                    amountInput.dispatchEvent(new KeyboardEvent('keydown', {
+                                        key: 'Enter',
+                                        code: 'Enter',
+                                        keyCode: 13,
+                                        which: 13,
+                                        bubbles: true
+                                    }));
+                                    
+                                    betRecord.status = 'placed';
+                                    saveData();
+                                    updateBettingDisplay();
+                                    
+                                    // 监听下注结果
+                                    setTimeout(() => {
+                                        checkBetResult(betRecord);
+                                    }, 2000);
+                                }
+                            }, 1000); // 等待更长时间让按钮激活
+                        } else {
+                            logToUI('未找到金额输入框', 'error');
+                            betRecord.status = 'failed';
+                            betRecord.result = '未找到金额输入框';
+                            saveData();
+                            updateBettingDisplay();
+                            
+                            // 显示下注失败提示
+                            showBetNotification('下注失败', '未找到金额输入框', 'error');
+                        }
+                    }, 1000); // 增加等待时间
+                } else {
+                    logToUI('未找到注单详情元素 div.btItm', 'error');
+                    
+                    // 尝试再次点击赔率元素
+                    logToUI('尝试再次点击赔率元素', 'warning');
+                    targetOdds.click();
+                    
+                    setTimeout(() => {
+                        const retryBetItems = document.querySelectorAll('div.btItm');
+                        if (retryBetItems.length > 0) {
+                            logToUI('重试成功，找到注单详情元素');
+                            // 递归调用自身，重新开始下注流程
+                            submitBet(betRecord);
+                        } else {
+                            betRecord.status = 'failed';
+                            betRecord.result = '未找到注单详情';
+                            saveData();
+                            updateBettingDisplay();
+                            
+                            // 显示下注失败提示
+                            showBetNotification('下注失败', '未找到注单详情', 'error');
+                        }
+                    }, 1000);
                 }
-            }, 800);
+            }, 1000); // 增加等待时间
         } else {
-            console.log('未找到任何可能的下单元素');
-            logToUI('未找到任何可能的下单元素', 'error');
+            logToUI('未找到赔率元素 div.odds', 'error');
             betRecord.status = 'failed';
-            betRecord.result = '未找到下单元素';
+            betRecord.result = '未找到赔率元素';
             saveData();
-
-            // 更新下注显示
             updateBettingDisplay();
-
+            
             // 显示下注失败提示
-            showBetNotification('下注失败', '未找到下单元素', 'error');
+            showBetNotification('下注失败', '未找到赔率元素', 'error');
         }
     }
 
