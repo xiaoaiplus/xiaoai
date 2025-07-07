@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         电竞自动下注脚本
 // @namespace    http://tampermonkey.net/
-// @version      0.6成功
+// @version      0.8
 // @description  电竞网站自动下注脚本，可以自动选择比赛并下注，专注于odds元素的超强适应性赔率检测，修复金额验证问题，支持快速金额选择
 // @author       AI助手
 // @match        https://imes-0hloh.takatakz.xyz/esportsitev2/index.html*
@@ -944,6 +944,46 @@
         }
     }
 
+    // 关闭成功提示框
+    async function closeSuccessPopup() {
+        debugLog('检查是否出现成功提示框');
+        try {
+            // 等待成功提示框出现
+            for (let i = 0; i < 10; i++) { // 尝试10次，每次等待200ms
+                // 尝试多种可能的选择器
+                const successPopup = document.querySelector('.btBtn.btBtn3, div.btBtn.btBtn3, button.btBtn.btBtn3, .btBtn3, [class*="btBtn3"]');
+                if (successPopup) {
+                    debugLog(`找到成功提示框，点击关闭按钮: ${successPopup.outerHTML}`);
+                    // 模拟完整的点击事件
+                    successPopup.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    successPopup.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+                    successPopup.click();
+                    await new Promise(resolve => setTimeout(resolve, 300)); // 等待关闭动画完成
+                    return true;
+                }
+
+                // 尝试查找其他可能的成功提示框
+                const otherPopups = document.querySelectorAll('div[class*="popup"], div[class*="modal"], div[class*="dialog"], div[class*="message"]');
+                for (const popup of otherPopups) {
+                    // 检查是否包含关闭按钮或确认按钮
+                    const closeButtons = popup.querySelectorAll('button, div[role="button"], div[class*="close"], div[class*="confirm"], div[class*="ok"]');
+                    if (closeButtons.length > 0) {
+                        debugLog(`找到可能的提示框，点击关闭按钮: ${closeButtons[0].outerHTML}`);
+                        closeButtons[0].click();
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        return true;
+                    }
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            return false;
+        } catch (error) {
+            debugLog(`关闭成功提示框时出错: ${error.message}`);
+            return false;
+        }
+    }
+
     // 确认下注
     async function confirmBet() {
         debugLog('尝试查找确认下注按钮');
@@ -1037,6 +1077,9 @@
         // 等待一段时间，确保下注操作完成
         await new Promise(resolve => setTimeout(resolve, 500));
 
+        // 检查是否出现成功提示框并关闭
+        await closeSuccessPopup();
+
         return true;
     }
 
@@ -1079,6 +1122,10 @@
         }
 
         updateStatus('下注成功!');
+
+        // 再次检查并关闭可能出现的成功提示框
+        await closeSuccessPopup();
+
         return true;
     }
 
