@@ -14,15 +14,15 @@
 
 (function() {
     'use strict';
-    
+
     // 用于跟踪比赛下注次数的对象
     const matchBetCounts = {};
-    
+
     // 获取比赛的唯一标识符
     function getMatchIdentifier(matchElement) {
         // 获取游戏名称
         let gameName = '未知游戏';
-        
+
         // 尝试从左侧面板获取游戏名称
         const leftPanel = document.querySelector('.leftPanel, .leftPanel.dom-collector-highlight');
         if (leftPanel) {
@@ -44,21 +44,21 @@
                 }
             }
         }
-        
+
         // 获取比赛名称/联赛名称
         let leagueName = '未知联赛';
         const leagueElement = matchElement.querySelector('[class*="league"], [class*="tournament"], [class*="competition"]');
         if (leagueElement) {
             leagueName = leagueElement.textContent.trim();
         }
-        
+
         // 获取队伍名称
         let teamNames = '';
         const teamElements = matchElement.querySelectorAll('[class*="team"], [class*="competitor"], [class*="player"]');
         if (teamElements.length >= 2) {
             teamNames = `${teamElements[0].textContent.trim()}_vs_${teamElements[1].textContent.trim()}`;
         }
-        
+
         // 获取比赛局数信息
         let gameCount = '未知局数';
         const gameCountElement = matchElement.querySelector('[class*="bo"], [class*="best-of"], [class*="series"]');
@@ -83,10 +83,10 @@
                 }
             }
         }
-        
+
         // 获取当前比分，用于确定当前是第几局
         let currentRound = '1';
-        
+
         // 尝试查找明确标注当前局数的元素
         const roundElements = matchElement.querySelectorAll('[class*="round"], [class*="map"], [class*="game"]');
         for (const element of roundElements) {
@@ -102,7 +102,7 @@
                 if (currentRound !== '1') break; // 如果找到非默认值，则停止查找
             }
         }
-        
+
         // 如果没有找到明确的局数标注，则通过比分推断
         if (currentRound === '1') {
             const scoreElements = matchElement.querySelectorAll('[class*="score"]');
@@ -125,14 +125,14 @@
                 }
             }
         }
-        
+
         // 组合成唯一标识符: 游戏名称_联赛名称_队伍名称_比赛局数_当前局
         const identifier = `${gameName}_${leagueName}_${teamNames}_${gameCount}_${currentRound}`;
         debugLog(`生成比赛标识符: ${identifier}`);
-        
+
         return identifier;
     }
-    
+
     // 简单的字符串哈希函数
     function hashString(str) {
         let hash = 0;
@@ -148,7 +148,7 @@
     // 添加样式
     GM_addStyle(`
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-        
+
         :root {
             --primary-color: #3b82f6;
             --primary-hover: #2563eb;
@@ -174,7 +174,7 @@
             --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .auto-bet-panel {
             position: fixed;
             top: 20px;
@@ -194,7 +194,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
-        
+
         .auto-bet-panel-header {
             display: flex;
             align-items: center;
@@ -203,7 +203,7 @@
             border-bottom: 1px solid var(--border-color);
             position: relative;
         }
-        
+
         .auto-bet-panel-logo {
             width: 36px;
             height: 36px;
@@ -219,7 +219,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .auto-bet-panel-logo::after {
             content: '';
             position: absolute;
@@ -230,7 +230,7 @@
             background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent);
             border-radius: 50%;
         }
-        
+
         .auto-bet-panel-title {
             flex: 1;
             font-size: 18px;
@@ -243,12 +243,12 @@
             background-clip: text;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        
+
         .auto-bet-panel-controls {
             display: flex;
             gap: 8px;
         }
-        
+
         .auto-bet-panel-control-btn {
             background: none;
             border: none;
@@ -264,14 +264,14 @@
             padding: 0;
             font-size: 16px;
         }
-        
+
         .auto-bet-panel-control-btn:hover {
             background-color: var(--card-bg);
             color: var(--text-primary);
             transform: translateY(-1px);
             box-shadow: var(--shadow-sm);
         }
-        
+
         .auto-bet-panel-tabs {
             display: flex;
             justify-content: center; /* 居中显示标签 */
@@ -280,7 +280,7 @@
             position: relative;
             z-index: 1;
         }
-        
+
         .auto-bet-panel-tab {
             padding: 10px 18px;
             cursor: pointer;
@@ -291,12 +291,12 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .auto-bet-panel-tab.active {
             color: var(--primary-color);
             border-bottom: 2px solid var(--primary-color);
         }
-        
+
         .auto-bet-panel-tab.active::after {
             content: '';
             position: absolute;
@@ -307,16 +307,16 @@
             background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
             box-shadow: 0 0 8px var(--primary-color);
         }
-        
+
         .auto-bet-panel-tab:hover:not(.active) {
             color: var(--text-primary);
             background-color: var(--primary-light);
         }
-        
+
         .auto-bet-panel-tab:active {
             transform: translateY(1px);
         }
-        
+
         .auto-bet-panel-content {
             max-height: 650px;
             overflow-y: hidden; /* 内容区域不需要滚动条，由各标签页自行处理 */
@@ -327,7 +327,7 @@
             justify-content: space-between; /* 均匀分布 */
             align-items: flex-start; /* 顶部对齐 */
         }
-        
+
         .auto-bet-panel-tab-content {
             display: block !important; /* 始终显示所有标签内容 */
             width: 32%; /* 平均分配宽度，留一点间距 */
@@ -341,53 +341,53 @@
             scrollbar-width: thin;
             scrollbar-color: var(--border-color) var(--panel-bg);
         }
-        
+
         .auto-bet-panel-tab-content::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .auto-bet-panel-tab-content::-webkit-scrollbar-track {
             background: var(--panel-bg);
             border-radius: 10px;
         }
-        
+
         .auto-bet-panel-tab-content::-webkit-scrollbar-thumb {
             background-color: var(--border-color);
             border-radius: 10px;
             border: 2px solid transparent;
             background-clip: padding-box;
         }
-        
+
         .auto-bet-panel-tab-content.active {
             opacity: 1;
             box-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.3);
         }
-        
+
         .auto-bet-panel-content::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .auto-bet-panel-content::-webkit-scrollbar-track {
             background: var(--panel-bg);
             border-radius: 10px;
         }
-        
+
         .auto-bet-panel-content::-webkit-scrollbar-thumb {
             background-color: var(--border-color);
             border-radius: 10px;
             border: 2px solid transparent;
             background-clip: padding-box;
         }
-        
+
         .auto-bet-panel-content::-webkit-scrollbar-thumb:hover {
             background-color: var(--text-muted);
         }
-        
+
         .auto-bet-panel-section {
             margin-bottom: 20px;
             position: relative;
         }
-        
+
         .auto-bet-panel-section-title {
             font-size: 15px;
             font-weight: 600;
@@ -397,7 +397,7 @@
             align-items: center;
             letter-spacing: 0.5px;
         }
-        
+
         .auto-bet-panel-section-title::after {
             content: '';
             flex: 1;
@@ -405,12 +405,12 @@
             background: linear-gradient(90deg, var(--border-color), transparent);
             margin-left: 10px;
         }
-        
+
         .auto-bet-panel-form-group {
             margin-bottom: 14px;
             position: relative;
         }
-        
+
         .auto-bet-panel label {
             display: block;
             margin-bottom: 6px;
@@ -418,7 +418,7 @@
             color: var(--text-secondary);
             font-weight: 500;
         }
-        
+
         .auto-bet-panel input, .auto-bet-panel select {
             width: 100%;
             padding: 10px 14px;
@@ -430,24 +430,24 @@
             transition: var(--transition);
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        
+
         .auto-bet-panel input:hover, .auto-bet-panel select:hover {
             border-color: var(--text-muted);
         }
-        
+
         .auto-bet-panel input:focus, .auto-bet-panel select:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px var(--primary-light);
         }
-        
+
         .auto-bet-panel-button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 20px;
         }
-        
+
         .auto-bet-panel button {
             padding: 12px 16px;
             border: none;
@@ -464,7 +464,7 @@
             box-shadow: var(--shadow-sm);
             letter-spacing: 0.3px;
         }
-        
+
         .auto-bet-panel button::before {
             content: '';
             position: absolute;
@@ -476,72 +476,72 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .auto-bet-panel button:hover::before {
             opacity: 1;
         }
-        
+
         .auto-bet-panel button:active {
             transform: translateY(1px);
             box-shadow: none;
         }
-        
+
         .auto-bet-panel button.primary {
             background: linear-gradient(to bottom, var(--primary-color), var(--primary-hover));
             color: white;
         }
-        
+
         .auto-bet-panel button.primary:hover {
             background: linear-gradient(to bottom, var(--primary-hover), var(--primary-hover));
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
-        
+
         .auto-bet-panel button.secondary {
             background: linear-gradient(to bottom, var(--card-bg), var(--card-hover));
             color: var(--text-primary);
         }
-        
+
         .auto-bet-panel button.secondary:hover {
             background: linear-gradient(to bottom, var(--card-hover), var(--card-hover));
         }
-        
+
         .auto-bet-panel button.success {
             background: linear-gradient(to bottom, var(--success-color), var(--success-hover));
             color: white;
         }
-        
+
         .auto-bet-panel button.success:hover {
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
-        
+
         .auto-bet-panel button.danger {
             background: linear-gradient(to bottom, var(--danger-color), var(--danger-hover));
             color: white;
         }
-        
+
         .auto-bet-panel button.danger:hover {
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
-        
+
         .auto-bet-panel button.warning {
             background: linear-gradient(to bottom, var(--warning-color), var(--warning-hover));
             color: white;
         }
-        
+
         .auto-bet-panel button.warning:hover {
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
-        
+
         .auto-bet-panel button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             box-shadow: none;
         }
-        
+
         .auto-bet-panel button:disabled::before {
             display: none;
         }
-        
+
         .auto-bet-panel .status {
             padding: 12px;
             background-color: var(--dark-bg);
@@ -558,7 +558,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .auto-bet-panel .status::before {
             content: '';
             display: inline-block;
@@ -569,22 +569,22 @@
             box-shadow: 0 0 5px var(--text-muted);
             animation: pulse 2s infinite;
         }
-        
+
         .auto-bet-panel .status.active::before {
             background-color: var(--success-color);
             box-shadow: 0 0 8px var(--success-color);
         }
-        
+
         .auto-bet-panel .status.error::before {
             background-color: var(--danger-color);
             box-shadow: 0 0 8px var(--danger-color);
         }
-        
+
         .auto-bet-panel .status.warning::before {
             background-color: var(--warning-color);
             box-shadow: 0 0 8px var(--warning-color);
         }
-        
+
         .auto-bet-panel .bet-counts {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -597,7 +597,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .auto-bet-panel .bet-counts::after {
             content: '';
             position: absolute;
@@ -608,7 +608,7 @@
             background: linear-gradient(90deg, var(--primary-color), transparent);
             opacity: 0.7;
         }
-        
+
         .auto-bet-panel .bet-count-item {
             text-align: center;
             position: relative;
@@ -618,28 +618,28 @@
             border: 1px solid var(--border-color);
             transition: var(--transition);
         }
-        
+
         .auto-bet-panel .bet-count-item:hover {
             background-color: rgba(0, 0, 0, 0.3);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        
+
         .auto-bet-panel .bet-count-value {
             font-size: 20px;
             font-weight: 700;
             color: var(--primary-color);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
-        
+
         .auto-bet-panel .bet-count-item:nth-child(3) .bet-count-value {
             color: var(--success-color);
         }
-        
+
         .auto-bet-panel .bet-count-item:nth-child(4) .bet-count-value {
             color: var(--danger-color);
         }
-        
+
         .auto-bet-panel .bet-count-label {
             font-size: 12px;
             color: var(--text-muted);
@@ -647,7 +647,7 @@
             font-weight: 500;
             letter-spacing: 0.5px;
         }
-        
+
         /* 比赛列表卡片样式 */
         .match-list-container {
             margin-top: 16px;
@@ -656,33 +656,33 @@
             padding-right: 4px;
             border-radius: var(--border-radius);
         }
-        
+
         .match-list-container::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .match-list-container::-webkit-scrollbar-track {
             background: var(--panel-bg);
         }
-        
+
         .match-list-container::-webkit-scrollbar-thumb {
             background-color: var(--border-color);
             border-radius: 20px;
         }
-        
+
         .match-list-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
-        
+
         .match-list-title {
             font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
         }
-        
+
         .match-list-refresh {
             background: none;
             border: none;
@@ -693,7 +693,7 @@
             align-items: center;
             gap: 4px;
         }
-        
+
         .match-card {
             background-color: var(--card-bg);
             border-radius: var(--border-radius);
@@ -708,7 +708,7 @@
             width: 100%;
             max-height: 160px;
         }
-        
+
         .match-card::before {
             content: '';
             position: absolute;
@@ -719,36 +719,36 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%);
             pointer-events: none;
         }
-        
+
         .match-card:hover {
             background-color: var(--card-hover);
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
         }
-        
+
         .match-card.live {
             border-left-color: var(--danger-color);
         }
-        
+
         .match-card.soon {
             border-left-color: var(--success-color);
         }
-        
+
         .match-card.upcoming {
             border-left-color: var(--primary-color);
         }
-        
+
         .match-card.highlighted {
             box-shadow: 0 0 0 2px var(--primary-color), 0 6px 12px rgba(0, 0, 0, 0.25);
             animation: highlight-pulse 2s infinite;
         }
-        
+
         @keyframes highlight-pulse {
             0% { box-shadow: 0 0 0 2px var(--primary-color), 0 6px 12px rgba(0, 0, 0, 0.25); }
             50% { box-shadow: 0 0 0 3px var(--primary-light), 0 6px 12px rgba(0, 0, 0, 0.25); }
             100% { box-shadow: 0 0 0 2px var(--primary-color), 0 6px 12px rgba(0, 0, 0, 0.25); }
         }
-        
+
         .match-card-header {
             display: flex;
             justify-content: space-between;
@@ -757,7 +757,7 @@
             padding-bottom: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .match-card-league {
             display: flex;
             align-items: center;
@@ -771,7 +771,7 @@
             max-width: 200px;
             letter-spacing: 0.3px;
         }
-        
+
         .match-card-league::before {
             content: '';
             display: inline-block;
@@ -782,7 +782,7 @@
             opacity: 0.8;
             box-shadow: 0 0 4px rgba(var(--primary-color-rgb), 0.5);
         }
-        
+
         .match-card-status {
             display: flex;
             align-items: center;
@@ -796,23 +796,23 @@
             background-color: var(--dark-bg);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        
+
         .match-card-status.live {
             color: white;
             background: linear-gradient(to right, var(--danger-color), var(--danger-hover));
             animation: pulse 2s infinite;
         }
-        
+
         .match-card-status.soon {
             color: white;
             background: linear-gradient(to right, var(--success-color), var(--success-hover));
         }
-        
+
         .match-card-status.upcoming {
             color: white;
             background: linear-gradient(to right, var(--primary-color), var(--primary-light));
         }
-        
+
         .match-card-game-name {
             display: flex;
             align-items: center;
@@ -827,7 +827,7 @@
             letter-spacing: 0.3px;
             margin-bottom: 2px;
         }
-        
+
         .match-card-game-name::before {
             content: '🎮';
             display: inline-block;
@@ -835,7 +835,7 @@
             height: 14px;
             opacity: 0.8;
         }
-        
+
         .match-card-current-round {
             display: flex;
             align-items: center;
@@ -850,7 +850,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             margin-right: 8px;
         }
-        
+
         .match-card-teams {
             display: flex;
             justify-content: space-between;
@@ -859,7 +859,7 @@
             position: relative;
             width: 100%;
         }
-        
+
         .match-card-teams::after {
             content: '';
             position: absolute;
@@ -869,7 +869,7 @@
             height: 1px;
             background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
         }
-        
+
         .match-card-team-container {
             display: flex;
             flex-direction: column;
@@ -877,7 +877,7 @@
             max-width: 45%;
             min-width: 120px;
         }
-        
+
         .match-card-team {
             white-space: nowrap;
             overflow: hidden;
@@ -890,7 +890,7 @@
             transition: var(--transition);
             text-align: center;
         }
-        
+
         .match-card-odds {
             font-size: 12px;
             font-weight: 700;
@@ -901,29 +901,29 @@
             color: var(--success-color);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-        
+
         .match-card-odds.home {
             color: var(--primary-color);
         }
-        
+
         .match-card-odds.away {
             color: var(--warning-color);
         }
-        
+
         .match-card:hover .match-card-team {
             color: var(--primary-color);
         }
-        
+
         .match-card-team.home {
             text-align: left;
             padding-right: 10px;
         }
-        
+
         .match-card-team.away {
             text-align: right;
             padding-left: 10px;
         }
-        
+
         .match-card-vs {
             position: relative;
             width: 34px;
@@ -938,7 +938,7 @@
             font-weight: 700;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(255, 255, 255, 0.05);
         }
-        
+
         .match-card-vs::after {
             content: '';
             position: absolute;
@@ -950,7 +950,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: none;
         }
-        
+
         .match-card-score {
             display: flex;
             justify-content: center;
@@ -962,13 +962,13 @@
             color: var(--text-primary);
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
-        
+
         .match-card-score-divider {
             color: var(--text-muted);
             font-weight: 400;
             opacity: 0.7;
         }
-        
+
         .match-card-footer {
             display: flex;
             justify-content: space-between;
@@ -980,7 +980,7 @@
             color: var(--text-muted);
             position: relative;
         }
-        
+
         .match-card-footer::before {
             content: '';
             position: absolute;
@@ -991,7 +991,7 @@
             background: linear-gradient(to right, var(--primary-color), transparent);
             opacity: 0.5;
         }
-        
+
         .match-card-game-count {
             display: flex;
             align-items: center;
@@ -1007,13 +1007,13 @@
             font-weight: 600;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-        
+
         .match-card-game-count::before {
             content: '🎮';
             font-size: 14px;
             opacity: 0.8;
         }
-        
+
         .match-card-bet-count {
             display: flex;
             align-items: center;
@@ -1022,13 +1022,13 @@
             font-weight: 600;
             letter-spacing: 0.3px;
         }
-        
+
         .match-card-bet-count::before {
             content: '💰';
             font-size: 14px;
             opacity: 0.8;
         }
-        
+
         .match-card-bet-status {
             position: absolute;
             top: 14px;
@@ -1040,7 +1040,7 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
             z-index: 1;
         }
-        
+
         .match-card-bet-status::after {
             content: '';
             position: absolute;
@@ -1053,23 +1053,23 @@
             opacity: 0.3;
             z-index: 0;
         }
-        
+
         .match-card-bet-status.win {
             background-color: var(--success-color);
             box-shadow: 0 0 8px var(--success-color);
         }
-        
+
         .match-card-bet-status.lose {
             background-color: var(--danger-color);
             box-shadow: 0 0 8px var(--danger-color);
         }
-        
+
         .match-card-bet-status.pending {
             background-color: var(--warning-color);
             box-shadow: 0 0 8px var(--warning-color);
             animation: pulse 2s infinite;
         }
-        
+
         .match-card-bet-button {
             background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
             color: white;
@@ -1081,16 +1081,16 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .match-card-bet-button:hover {
             background-color: var(--primary-hover);
         }
-        
+
         /* 统计面板样式 */
         #bet-stats-container {
             margin-top: 16px;
         }
-        
+
         .statistics-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1099,7 +1099,7 @@
             max-height: 520px;
             overflow-y: auto;
         }
-        
+
         .statistics-card {
             background-color: var(--dark-bg);
             border-radius: var(--border-radius);
@@ -1110,13 +1110,13 @@
             border: 1px solid var(--border-color);
             transition: var(--transition);
         }
-        
+
         .statistics-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             border-color: var(--primary-color);
         }
-        
+
         .statistics-card::before {
             content: '';
             position: absolute;
@@ -1127,7 +1127,7 @@
             background: linear-gradient(90deg, var(--primary-color), transparent);
             opacity: 0.7;
         }
-        
+
         .statistics-card-title {
             font-size: 14px;
             font-weight: 600;
@@ -1137,7 +1137,7 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .statistics-card-title::before {
             content: '';
             display: inline-block;
@@ -1147,7 +1147,7 @@
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             opacity: 0.8;
         }
-        
+
         .statistics-card-value {
             font-size: 24px;
             font-weight: 700;
@@ -1155,7 +1155,7 @@
             margin-bottom: 8px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
-        
+
         .statistics-card-subtitle {
             font-size: 12px;
             color: var(--text-muted);
@@ -1163,7 +1163,7 @@
             align-items: center;
             gap: 4px;
         }
-        
+
         .statistics-progress {
             height: 6px;
             background-color: rgba(0, 0, 0, 0.2);
@@ -1171,41 +1171,41 @@
             margin-top: 12px;
             overflow: hidden;
         }
-        
+
         .statistics-progress-bar {
             height: 100%;
             background: linear-gradient(to right, var(--primary-color), var(--primary-light));
             border-radius: 3px;
             transition: width 0.3s ease;
         }
-        
+
         .statistics-progress-bar.success {
             background: linear-gradient(to right, var(--success-color), var(--success-hover));
         }
-        
+
         .statistics-progress-bar.danger {
             background: linear-gradient(to right, var(--danger-color), var(--danger-hover));
         }
-        
+
         /* 状态样式 */
         .status-live {
             color: var(--danger-color);
             font-weight: 700;
             text-shadow: 0 0 5px rgba(var(--danger-color-rgb), 0.3);
         }
-        
+
         .status-soon {
             color: var(--success-color);
             font-weight: 700;
             text-shadow: 0 0 5px rgba(var(--success-color-rgb), 0.3);
         }
-        
+
         .status-upcoming {
             color: var(--primary-color);
             font-weight: 700;
             text-shadow: 0 0 5px rgba(var(--primary-color-rgb), 0.3);
         }
-        
+
         /* 最小化样式 */
         .auto-bet-panel.minimized {
             width: 64px;
@@ -1222,12 +1222,12 @@
             transform: translateZ(0);
             cursor: pointer;
         }
-        
+
         .auto-bet-panel.minimized:hover {
             transform: translateY(-5px) scale(1.05);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
         }
-        
+
         .auto-bet-panel.minimized::before {
             content: "⚽";
             font-size: 28px;
@@ -1235,50 +1235,50 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             animation: float 3s ease-in-out infinite;
         }
-        
+
         @keyframes float {
             0% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
             100% { transform: translateY(0); }
         }
-        
+
         .auto-bet-panel.minimized > * {
             display: none;
         }
-        
+
         /* 动画效果 */
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.8; transform: scale(1.05); }
             100% { opacity: 1; transform: scale(1); }
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         @keyframes status-change-pulse {
             0% { box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0.7); }
             50% { box-shadow: 0 0 0 15px rgba(var(--success-rgb), 0.3); }
             100% { box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0); }
         }
-        
+
         .pulse {
             animation: pulse 2s infinite;
         }
-        
+
         .fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
-        
+
         /* 状态变化高亮 */
         .status-changed {
             animation: status-change-pulse 1.5s ease-in-out 3;
             position: relative;
             z-index: 10;
         }
-        
+
         /* 添加一个闪烁边框效果 */
         .match-card.highlighted {
             animation: status-change-pulse 1.5s ease-in-out 3;
@@ -1286,7 +1286,7 @@
             z-index: 10;
             border: 1px solid var(--success-color);
         }
-        
+
         /* 响应式调整 */
         @media (max-width: 768px) {
             .auto-bet-panel {
@@ -1294,11 +1294,11 @@
                 right: 10px;
                 top: 10px;
             }
-            
+
             .statistics-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .match-card-team {
                 font-size: 13px;
             }
@@ -1352,22 +1352,21 @@
                 <h3 class="auto-bet-panel-title">电竞自动下注</h3>
                 <div class="auto-bet-panel-controls">
                     <button class="auto-bet-panel-control-btn" id="toggle-minimize">_</button>
-                    <button class="auto-bet-panel-control-btn" id="close-btn">×</button>
                 </div>
             </div>
-            
+
             <div class="auto-bet-panel-tabs">
                 <div class="auto-bet-panel-tab active" data-tab="settings">设置</div>
                 <div class="auto-bet-panel-tab" data-tab="matches">比赛</div>
                 <div class="auto-bet-panel-tab" data-tab="stats">统计</div>
             </div>
-            
+
             <div class="auto-bet-panel-content">
                 <!-- 设置选项卡 -->
                 <div class="auto-bet-panel-tab-content active" id="settings-tab">
                     <div class="auto-bet-panel-section">
                         <div class="auto-bet-panel-section-title">基本设置</div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-type">下注类型:</label>
                             <select id="bet-type">
@@ -1375,7 +1374,7 @@
                                 <option value="parlay">过关</option>
                             </select>
                         </div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-mode">下注模式:</label>
                             <select id="bet-mode">
@@ -1383,12 +1382,12 @@
                                 <option value="auto">自动选择</option>
                             </select>
                         </div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-amount">下注金额:</label>
                             <input type="number" id="bet-amount" value="10" min="1">
                         </div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-team">下注选项:</label>
                             <select id="bet-team">
@@ -1397,21 +1396,21 @@
                                 <option value="random">随机选择</option>
                             </select>
                         </div>
-                    
+
                         <div class="auto-bet-panel-section-title">赔率设置</div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-odds-min">最低赔率:</label>
                             <input type="number" id="bet-odds-min" value="1.5" min="1" step="0.1">
                         </div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-odds-max">最高赔率:</label>
                             <input type="number" id="bet-odds-max" value="3.0" min="1" step="0.1">
                         </div>
-                    
+
                         <div class="auto-bet-panel-section-title">筛选设置</div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="bet-upcoming-matches">下注即将开始的比赛:</label>
                             <select id="bet-upcoming-matches">
@@ -1419,7 +1418,7 @@
                                 <option value="true">是 (包含即将开始)</option>
                             </select>
                         </div>
-                        
+
                         <div class="auto-bet-panel-form-group">
                             <label for="max-bets-per-match">单场比赛最大下注次数:</label>
                             <select id="max-bets-per-match">
@@ -1430,22 +1429,22 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="auto-bet-panel-button-group">
                         <button id="start-auto-bet" class="primary">开始自动下注</button>
                         <button id="stop-auto-bet" class="danger" disabled>停止自动下注</button>
                     </div>
-                    
+
                     <div class="auto-bet-panel-button-group">
                         <button id="place-single-bet" class="secondary">立即下注一次</button>
                         <button id="reset-bet-counts" class="secondary">重置下注计数</button>
                     </div>
-                    
+
                     <button id="refresh-bet-history" class="secondary">刷新投注记录</button>
-                    
+
                     <div class="status" id="bet-status">准备就绪</div>
                 </div>
-                
+
                 <!-- 比赛选项卡 -->
                 <div class="auto-bet-panel-tab-content" id="matches-tab">
                     <div class="match-list-header">
@@ -1456,7 +1455,7 @@
                         <!-- 比赛卡片将在这里动态生成 -->
                     </div>
                 </div>
-                
+
                 <!-- 统计选项卡 -->
                 <div class="auto-bet-panel-tab-content" id="stats-tab">
                     <div class="bet-counts">
@@ -1477,7 +1476,7 @@
                             <div class="bet-count-label">输</div>
                         </div>
                     </div>
-                    
+
                     <div class="auto-bet-panel-section">
                         <div class="auto-bet-panel-section-title">下注统计</div>
                         <div id="bet-stats-container">
@@ -1491,7 +1490,7 @@
                                         <div class="statistics-progress-bar" style="width: 0%"></div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="statistics-card fade-in">
                                     <div class="statistics-card-title">胜率</div>
                                     <div class="statistics-card-value">0%</div>
@@ -1500,17 +1499,17 @@
                                         <div class="statistics-progress-bar danger" style="width: 0%"></div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="statistics-card fade-in">
                                     <div class="statistics-card-title">下注结果</div>
                                     <div class="statistics-card-value">
-                                        <span style="color: var(--success-color)">0</span> / 
-                                        <span style="color: var(--danger-color)">0</span> / 
+                                        <span style="color: var(--success-color)">0</span> /
+                                        <span style="color: var(--danger-color)">0</span> /
                                         <span style="color: var(--warning-color)">0</span>
                                     </div>
                                     <div class="statistics-card-subtitle">胜 / 负 / 待定</div>
                                 </div>
-                                
+
                                 <div class="statistics-card fade-in">
                                     <div class="statistics-card-title">比赛覆盖率</div>
                                     <div class="statistics-card-value">0</div>
@@ -1524,13 +1523,7 @@
         `;
         document.body.appendChild(panel);
 
-        // 关闭按钮事件
-        panel.querySelector('#close-btn').addEventListener('click', () => {
-            if (confirm('确定要关闭自动下注面板吗？')) {
-                panel.style.display = 'none';
-                GM_setValue('panelState', 'hidden');
-            }
-        });
+        // 关闭按钮已移除，不再需要事件监听
 
         // 最小化/展开按钮事件
         panel.querySelector('#toggle-minimize').addEventListener('click', () => {
@@ -1549,26 +1542,26 @@
                 GM_setValue('panelState', 'expanded');
             }
         });
-        
+
         // 添加标签页切换功能
         const tabs = panel.querySelectorAll('.auto-bet-panel-tab');
         const tabContents = panel.querySelectorAll('.auto-bet-panel-tab-content');
-        
+
         tabs.forEach(tab => {
             tab.addEventListener('click', function() {
                 // 移除所有标签页的active类
                 tabs.forEach(t => t.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
-                
+
                 // 添加当前标签页的active类
                 this.classList.add('active');
                 const tabId = this.getAttribute('data-tab') + '-tab';
                 document.getElementById(tabId).classList.add('active');
-                
+
                 // 注意：我们不再隐藏非活动标签页，只改变透明度
             });
         });
-        
+
         // 添加自动刷新提示样式
         const autoRefreshElement = panel.querySelector('.match-list-auto-refresh');
         if (autoRefreshElement) {
@@ -1576,7 +1569,7 @@
             autoRefreshElement.style.fontSize = '13px';
             autoRefreshElement.style.display = 'flex';
             autoRefreshElement.style.alignItems = 'center';
-            
+
             // 添加脉动动画效果
             const pulseStyle = document.createElement('style');
             pulseStyle.textContent = `
@@ -1621,7 +1614,7 @@
                 document.getElementById('max-bets-per-match').value = settings.maxBetsPerMatch || '2';
             }
         }
-        
+
         // 重置下注计数
         function resetBetCounts() {
             // 清空下注计数对象
@@ -1629,7 +1622,7 @@
                 delete matchBetCounts[key];
             });
             updateBetCountsDisplay();
-            
+
             // 清除本地存储中的下注记录
             try {
                 localStorage.removeItem('matchBetCounts');
@@ -1637,7 +1630,7 @@
             } catch (error) {
                 debugLog('清除本地存储中的下注记录失败: ' + error.message);
             }
-            
+
             // 在控制面板中显示提示
             const statusElement = document.getElementById('autoBetStatus');
             if (statusElement) {
@@ -1648,10 +1641,10 @@
                     statusElement.style.color = '';
                 }, 3000);
             }
-            
+
             updateStatus('已重置所有比赛的下注计数');
         }
-        
+
         // 更新下注计数显示
     function updateBetCountsDisplay() {
         const betCountsElement = document.getElementById('bet-counts');
@@ -1661,7 +1654,7 @@
             betCountsElement.textContent = `比赛数: ${totalMatches}, 总下注次数: ${totalBets}`;
             debugLog(`更新下注计数显示: 比赛数=${totalMatches}, 总下注次数=${totalBets}`);
             debugLog('当前matchBetCounts对象:', matchBetCounts);
-            
+
             // 将最新的下注计数保存到本地存储
             try {
                 localStorage.setItem('matchBetCounts', JSON.stringify(matchBetCounts));
@@ -1669,7 +1662,7 @@
             } catch (error) {
                 debugLog('保存下注计数到本地存储失败: ' + error.message);
             }
-            
+
             // 更新比赛列表卡片
             if (typeof updateMatchCards === 'function') {
                 updateMatchCards();
@@ -1680,12 +1673,12 @@
             debugLog('找不到bet-counts元素，无法更新下注计数显示');
         }
     }
-    
+
     // 获取比赛结果状态（赢、输、未结算）
     function getMatchBetResult(match) {
         // 默认为未结算
         let result = 'pending';
-        
+
         // 检查比赛是否已结束
         const matchStatus = getMatchStatus(match);
         if (matchStatus !== '进行中' && matchStatus !== '即将开始' && matchStatus !== '未开赛') {
@@ -1694,11 +1687,11 @@
             if (scoreElements.length >= 2) {
                 const homeScore = parseInt(scoreElements[0].textContent.trim());
                 const awayScore = parseInt(scoreElements[1].textContent.trim());
-                
+
                 if (!isNaN(homeScore) && !isNaN(awayScore)) {
                     // 获取我们下注的队伍（假设我们总是下注主队/左边）
                     const betTeam = document.getElementById('bet-team').value;
-                    
+
                     if (betTeam === 'home' || (betTeam === 'random' && Math.random() < 0.5)) {
                         // 下注主队
                         result = homeScore > awayScore ? 'win' : 'lose';
@@ -1714,11 +1707,11 @@
                 if (scores.length === 2) {
                     const homeScore = parseInt(scores[0]);
                     const awayScore = parseInt(scores[1]);
-                    
+
                     if (!isNaN(homeScore) && !isNaN(awayScore)) {
                         // 获取我们下注的队伍
                         const betTeam = document.getElementById('bet-team').value;
-                        
+
                         if (betTeam === 'home' || (betTeam === 'random' && Math.random() < 0.5)) {
                             // 下注主队
                             result = homeScore > awayScore ? 'win' : 'lose';
@@ -1729,7 +1722,7 @@
                     }
                 }
             }
-            
+
             // 检查是否有明确的结果标识
             const resultElement = match.querySelector('[class*="result"], [class*="outcome"], [class*="winner"]');
             if (resultElement) {
@@ -1741,36 +1734,36 @@
                 }
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * 从DOM中提取比赛信息的增强函数
      * 结合了原有功能和改进的比赛数据获取.js的优点
      */
     function enhancedExtractMatchesFromDOM() {
         debugLog('[增强数据采集] 开始从DOM中提取比赛信息');
-        
+
         let matches = [];
-        
+
         // 1. 首先尝试查找用户提到的matchInfoLeft和teamInfoGrp元素
         const matchInfoLeftElements = document.querySelectorAll('.matchInfoLeft, [class*="matchInfoLeft"], [class*="match-info-left"]');
         const teamInfoGrpElements = document.querySelectorAll('.teamInfoGrp, [class*="teamInfoGrp"], [class*="team-info-grp"]');
-        
+
         if (matchInfoLeftElements.length > 0 && teamInfoGrpElements.length > 0) {
             debugLog(`[增强数据采集] 找到 ${matchInfoLeftElements.length} 个matchInfoLeft元素和 ${teamInfoGrpElements.length} 个teamInfoGrp元素`);
-            
+
             // 尝试将matchInfoLeft和teamInfoGrp元素配对
             const matchPairs = [];
-            
+
             // 方法1: 尝试查找相邻的元素或兄弟元素
             for (const matchInfo of matchInfoLeftElements) {
                 // 检查下一个兄弟元素
                 let nextSibling = matchInfo.nextElementSibling;
                 while (nextSibling) {
-                    if (nextSibling.classList.contains('teamInfoGrp') || 
-                        nextSibling.className.includes('teamInfoGrp') || 
+                    if (nextSibling.classList.contains('teamInfoGrp') ||
+                        nextSibling.className.includes('teamInfoGrp') ||
                         nextSibling.className.includes('team-info-grp')) {
                         // 创建一个虚拟的比赛元素
                         const matchElement = document.createElement('div');
@@ -1782,14 +1775,14 @@
                     }
                     nextSibling = nextSibling.nextElementSibling;
                 }
-                
+
                 // 如果没有找到，检查父元素的其他子元素
                 if (!nextSibling && matchInfo.parentElement) {
                     const siblings = matchInfo.parentElement.children;
                     for (const sibling of siblings) {
-                        if (sibling !== matchInfo && 
-                            (sibling.classList.contains('teamInfoGrp') || 
-                             sibling.className.includes('teamInfoGrp') || 
+                        if (sibling !== matchInfo &&
+                            (sibling.classList.contains('teamInfoGrp') ||
+                             sibling.className.includes('teamInfoGrp') ||
                              sibling.className.includes('team-info-grp'))) {
                             // 创建一个虚拟的比赛元素
                             const matchElement = document.createElement('div');
@@ -1802,7 +1795,7 @@
                     }
                 }
             }
-            
+
             // 方法2: 尝试查找共同的父元素
             if (matchPairs.length === 0) {
                 // 为每个matchInfoLeft创建一个映射，记录它的所有父元素
@@ -1816,12 +1809,12 @@
                     }
                     matchInfoParents.set(matchInfo, parents);
                 });
-                
+
                 // 检查每个teamInfoGrp，看它是否与某个matchInfoLeft共享父元素
                 for (const teamInfo of teamInfoGrpElements) {
                     let parent = teamInfo.parentElement;
                     let found = false;
-                    
+
                     while (parent && !found) {
                         // 检查每个matchInfoLeft的父元素列表
                         for (const [matchInfo, parents] of matchInfoParents.entries()) {
@@ -1840,14 +1833,14 @@
                     }
                 }
             }
-            
+
             // 如果找到了配对的元素，使用它们
             if (matchPairs.length > 0) {
                 debugLog(`[增强数据采集] 成功配对 ${matchPairs.length} 个比赛元素`);
                 matches = matchPairs;
                 return matches;
             }
-            
+
             // 方法3: 如果无法配对，则创建虚拟元素，将所有matchInfoLeft和teamInfoGrp组合
             if (matchInfoLeftElements.length === teamInfoGrpElements.length) {
                 debugLog(`[增强数据采集] 尝试一对一配对 ${matchInfoLeftElements.length} 个元素`);
@@ -1861,23 +1854,23 @@
                 matches = matchPairs;
                 return matches;
             }
-            
+
             // 方法4: 如果无法配对，则单独使用teamInfoGrp元素
             debugLog(`[增强数据采集] 无法配对元素，使用 ${teamInfoGrpElements.length} 个teamInfoGrp元素`);
             matches = Array.from(teamInfoGrpElements);
             return matches;
         }
-        
+
         // 2. 如果没有找到特定元素，尝试多种选择器查找比赛元素
         const matchSelectors = [
-            'div[class*="match"]', 
-            'div[class*="event"]', 
-            'div[class*="game"]', 
+            'div[class*="match"]',
+            'div[class*="event"]',
+            'div[class*="game"]',
             'div[class*="contest"]',
             'div.teamInfoGrp',
             'div.marketRow'
         ];
-        
+
         // 尝试每一个选择器
         for (const selector of matchSelectors) {
             const elements = document.querySelectorAll(selector);
@@ -1887,7 +1880,7 @@
                 break;
             }
         }
-        
+
         // 如果仍然没有找到比赛元素，尝试更多的方法
         if (matches.length === 0) {
             debugLog('[增强数据采集] 未找到任何比赛元素，尝试更多的选择器或DOM遍历方法');
@@ -1897,23 +1890,23 @@
                 matches = alternativeMatches;
             }
         }
-        
+
         debugLog(`[增强数据采集] 开始处理 ${matches.length} 个比赛元素`);
         return matches;
     }
-    
+
     /**
      * 尝试更多的方法提取比赛信息
      */
     function tryAlternativeMatchExtraction() {
         debugLog('[增强数据采集] 尝试替代方法提取比赛信息');
-        
+
         // 尝试查找包含队伍名称和赔率的元素
         const allElements = document.querySelectorAll('*');
         const teamAndOddsRegex = /([一-龥\w\s]+)[^\w]+(\d+\.\d+)[^\w]+([一-龥\w\s]+)[^\w]+(\d+\.\d+)/;
-        
+
         let matchCandidates = [];
-        
+
         // 遍历所有元素，查找可能包含比赛信息的元素
         allElements.forEach(element => {
             const text = element.textContent.trim();
@@ -1921,9 +1914,9 @@
                 matchCandidates.push(element);
             }
         });
-        
+
         debugLog(`[增强数据采集] 找到 ${matchCandidates.length} 个可能的比赛元素`);
-        
+
         // 处理找到的候选元素
         if (matchCandidates.length > 0) {
             // 过滤掉嵌套的元素，只保留最外层的元素
@@ -1932,14 +1925,14 @@
                     return other !== element && other.contains(element);
                 });
             });
-            
+
             debugLog(`[增强数据采集] 过滤后剩余 ${filteredCandidates.length} 个比赛元素`);
             return filteredCandidates;
         }
-        
+
         return [];
     }
-    
+
     /**
      * 生成唯一的比赛ID
      */
@@ -1950,48 +1943,48 @@
         const teamInfo = getTeamNames(match);
         const gameCount = getGameCount(match);
         const currentRound = getCurrentRound(match);
-        
+
         // 组合成唯一标识符
         const identifier = `${gameName}-${leagueName}-${teamInfo.homeTeam}-${teamInfo.awayTeam}-${gameCount}-${currentRound}`;
-        
+
         // 使用简单的哈希函数生成ID
         return hashString(identifier);
     }
-    
+
     /**
      * 简单的字符串哈希函数
      */
     function hashString(str) {
         let hash = 0;
         if (str.length === 0) return hash;
-        
+
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
             hash = hash & hash; // Convert to 32bit integer
         }
-        
+
         return 'match-' + Math.abs(hash).toString(16);
     }
-    
+
     /**
      * 获取游戏名称
      */
     function getGameName(match) {
         let gameName = '未知游戏';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element' && match.originalMatchInfo) {
             // 从matchInfoLeft元素中提取游戏名称
             const matchInfoLeft = match.originalMatchInfo;
-            
+
             // 尝试从matchInfoLeft元素中获取游戏名称
             const gameNameElement = matchInfoLeft.querySelector('[class*="game-name"], [class*="sport-name"], [class*="esport-name"]');
             if (gameNameElement) {
                 gameName = gameNameElement.textContent.trim();
                 return gameName;
             }
-            
+
             // 尝试从matchInfoLeft的文本内容中提取游戏名称
             const matchInfoText = matchInfoLeft.textContent;
             const gameNameMatch = matchInfoText.match(/(英雄联盟|刀塔2|CS2|王者荣耀|无尽对决|守望先锋2|彩虹六号|使命召唤|星际争霸2|火箭联盟|炉石传说|NBA 2K|魔兽争霸3|绝地求生|堡垒之夜|云顶之弈|Free Fire|街头霸王6|铁拳8|Apex 英雄|Rennsport)/i);
@@ -2000,14 +1993,14 @@
                 return gameName;
             }
         }
-        
+
         // 尝试从比赛元素中获取游戏名称（通用方法）
         const gameNameElement = match.querySelector('[class*="game-name"], [class*="sport-name"], [class*="esport-name"]');
         if (gameNameElement) {
             gameName = gameNameElement.textContent.trim();
             return gameName;
         }
-        
+
         // 尝试从左侧面板中提取游戏名称
         const leftPanel = document.querySelector('.leftPanel, .leftPanel.dom-collector-highlight');
         if (leftPanel) {
@@ -2017,7 +2010,7 @@
                 gameName = selectedGame.textContent.trim();
                 return gameName;
             }
-            
+
             // 尝试从左侧面板中提取游戏名称
             const gameNameMatch = leftPanel.textContent.match(/(英雄联盟|刀塔2|CS2|王者荣耀|无尽对决|守望先锋2|彩虹六号|使命召唤|星际争霸2|火箭联盟|炉石传说|NBA 2K|魔兽争霸3|绝地求生|堡垒之夜|云顶之弈|Free Fire|街头霸王6|铁拳8|Apex 英雄|Rennsport)/i);
             if (gameNameMatch) {
@@ -2025,30 +2018,30 @@
                 return gameName;
             }
         }
-        
+
         // 尝试从比赛元素的文本内容中提取游戏名称
         const matchText = match.textContent;
         const gameNameMatch = matchText.match(/(英雄联盟|刀塔2|CS2|王者荣耀|无尽对决|守望先锋2|彩虹六号|使命召唤|星际争霸2|火箭联盟|炉石传说|NBA 2K|魔兽争霸3|绝地求生|堡垒之夜|云顶之弈|Free Fire|街头霸王6|铁拳8|Apex 英雄|Rennsport)/i);
         if (gameNameMatch) {
             gameName = gameNameMatch[1];
         }
-        
+
         return gameName;
     }
-    
+
     /**
      * 获取队伍名称
      */
     function getTeamNames(match) {
         let homeTeam = '未知队伍';
         let awayTeam = '未知队伍';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element') {
             // 从teamInfoGrp元素中提取队伍名称
             if (match.teamInfoGrp) {
                 const teamInfoGrp = match.teamInfoGrp;
-                
+
                 // 方法1: 尝试查找明确的队伍元素
                 const teamElements = teamInfoGrp.querySelectorAll('[class*="team"], [class*="competitor"], [class*="player"]');
                 if (teamElements.length >= 2) {
@@ -2056,17 +2049,17 @@
                     awayTeam = teamElements[1].textContent.trim();
                     return { homeTeam, awayTeam };
                 }
-                
+
                 // 方法2: 尝试查找左右两侧的元素
                 const leftElements = teamInfoGrp.querySelectorAll('.left, [class*="left"], [class*="home"]');
                 const rightElements = teamInfoGrp.querySelectorAll('.right, [class*="right"], [class*="away"]');
-                
+
                 if (leftElements.length > 0 && rightElements.length > 0) {
                     homeTeam = leftElements[0].textContent.trim();
                     awayTeam = rightElements[0].textContent.trim();
                     return { homeTeam, awayTeam };
                 }
-                
+
                 // 方法3: 尝试从文本内容中提取队伍名称和赔率
                 const teamInfoText = teamInfoGrp.textContent.trim();
                 const teamMatch = teamInfoText.match(/([一-龥\w\s]+)[^\w]+(\d+\.\d+)[^\w]+([一-龥\w\s]+)[^\w]+(\d+\.\d+)/);
@@ -2075,7 +2068,7 @@
                     awayTeam = teamMatch[3].trim();
                     return { homeTeam, awayTeam };
                 }
-                
+
                 // 方法4: 尝试将文本内容分成两半
                 const allText = teamInfoText.replace(/\d+\.\d+/g, '').trim(); // 移除所有赔率
                 const midPoint = Math.floor(allText.length / 2);
@@ -2085,12 +2078,12 @@
                     return { homeTeam, awayTeam };
                 }
             }
-            
+
             // 如果teamInfoGrp没有提供足够信息，尝试从matchInfoLeft获取
             if (match.originalMatchInfo) {
                 const matchInfoLeft = match.originalMatchInfo;
                 const teamElements = matchInfoLeft.querySelectorAll('[class*="team"], [class*="competitor"], [class*="player"]');
-                
+
                 if (teamElements.length >= 2) {
                     homeTeam = teamElements[0].textContent.trim();
                     awayTeam = teamElements[1].textContent.trim();
@@ -2098,7 +2091,7 @@
                 }
             }
         }
-        
+
         // 检查是否是teamInfoGrp元素
         if (match.classList && (match.classList.contains('teamInfoGrp') || match.className.includes('teamInfoGrp'))) {
             // 方法1: 尝试查找明确的队伍元素
@@ -2108,17 +2101,17 @@
                 awayTeam = teamElements[1].textContent.trim();
                 return { homeTeam, awayTeam };
             }
-            
+
             // 方法2: 尝试查找左右两侧的元素
             const leftElements = match.querySelectorAll('.left, [class*="left"], [class*="home"]');
             const rightElements = match.querySelectorAll('.right, [class*="right"], [class*="away"]');
-            
+
             if (leftElements.length > 0 && rightElements.length > 0) {
                 homeTeam = leftElements[0].textContent.trim();
                 awayTeam = rightElements[0].textContent.trim();
                 return { homeTeam, awayTeam };
             }
-            
+
             // 方法3: 尝试从文本内容中提取队伍名称和赔率
             const matchText = match.textContent.trim();
             const teamMatch = matchText.match(/([一-龥\w\s]+)[^\w]+(\d+\.\d+)[^\w]+([一-龥\w\s]+)[^\w]+(\d+\.\d+)/);
@@ -2128,7 +2121,7 @@
                 return { homeTeam, awayTeam };
             }
         }
-        
+
         // 尝试查找队伍元素（通用方法）
         const teamElements = match.querySelectorAll('[class*="team"], [class*="competitor"], [class*="player"]');
         if (teamElements.length >= 2) {
@@ -2136,7 +2129,7 @@
             awayTeam = teamElements[1].textContent.trim();
             return { homeTeam, awayTeam };
         }
-        
+
         // 尝试从文本内容中提取队伍名称
         const matchText = match.textContent;
         // 尝试提取队伍名称和赔率（支持中文和英文）
@@ -2145,28 +2138,28 @@
             homeTeam = teamMatch[1].trim();
             awayTeam = teamMatch[3].trim();
         }
-        
+
         return { homeTeam, awayTeam };
     }
-    
+
     /**
      * 获取联赛/比赛名称
      */
     function getLeagueName(match) {
         let leagueName = '未知联赛';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element' && match.originalMatchInfo) {
             // 从matchInfoLeft元素中提取联赛名称
             const matchInfoLeft = match.originalMatchInfo;
-            
+
             // 尝试查找联赛元素
             const leagueElement = matchInfoLeft.querySelector('[class*="league"], [class*="tournament"], [class*="competition"]');
             if (leagueElement) {
                 leagueName = leagueElement.textContent.trim();
                 return leagueName;
             }
-            
+
             // 如果没有找到明确的联赛元素，尝试从matchInfoLeft的文本内容中提取
             const matchInfoText = matchInfoLeft.textContent.trim();
             // 通常联赛名称会出现在文本的开头部分
@@ -2181,34 +2174,34 @@
                 return leagueName;
             }
         }
-        
+
         // 尝试查找联赛元素（通用方法）
         const leagueElement = match.querySelector('[class*="league"], [class*="tournament"], [class*="competition"]');
         if (leagueElement) {
             leagueName = leagueElement.textContent.trim();
         }
-        
+
         return leagueName;
     }
-    
+
     /**
      * 获取比赛局数信息
      */
     function getGameCount(match) {
         let gameCount = '';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element' && match.originalMatchInfo) {
             // 从matchInfoLeft元素中提取比赛局数信息
             const matchInfoLeft = match.originalMatchInfo;
-            
+
             // 尝试查找明确的局数元素
             const gameCountElement = matchInfoLeft.querySelector('[class*="bo"], [class*="best-of"], [class*="series"]');
             if (gameCountElement) {
                 gameCount = gameCountElement.textContent.trim();
                 return gameCount;
             }
-            
+
             // 尝试从文本中提取BO信息
             const matchInfoText = matchInfoLeft.textContent;
             const boMatch = matchInfoText.match(/BO[1-9]|BO\s[1-9]|Best\sof\s[1-9]|最佳[1-9]局/i);
@@ -2216,7 +2209,7 @@
                 gameCount = boMatch[0];
                 return gameCount;
             }
-            
+
             // 尝试查找所有元素，寻找包含BO信息的元素
             const allElements = matchInfoLeft.querySelectorAll('*');
             for (const element of allElements) {
@@ -2228,7 +2221,7 @@
                 }
             }
         }
-        
+
         // 通用方法
         // 尝试查找明确的局数元素
         const gameCountElement = match.querySelector('[class*="bo"], [class*="best-of"], [class*="series"]');
@@ -2236,7 +2229,7 @@
             gameCount = gameCountElement.textContent.trim();
             return gameCount;
         }
-        
+
         // 尝试从文本中提取BO信息
         const matchText = match.textContent;
         const boMatch = matchText.match(/BO[1-9]|BO\s[1-9]|Best\sof\s[1-9]|最佳[1-9]局/i);
@@ -2244,7 +2237,7 @@
             gameCount = boMatch[0];
             return gameCount;
         }
-        
+
         // 尝试查找所有元素，寻找包含BO信息的元素
         const allElements = match.querySelectorAll('*');
         for (const element of allElements) {
@@ -2255,21 +2248,21 @@
                 break;
             }
         }
-        
+
         return gameCount;
     }
-    
+
     /**
      * 获取当前局数
      */
     function getCurrentRound(match) {
         let currentRound = '1';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element' && match.originalMatchInfo) {
             // 从matchInfoLeft元素中提取当前局数信息
             const matchInfoLeft = match.originalMatchInfo;
-            
+
             // 尝试查找明确标注当前局数的元素
             const roundElements = matchInfoLeft.querySelectorAll('[class*="round"], [class*="map"], [class*="game"]');
             for (const element of roundElements) {
@@ -2285,7 +2278,7 @@
                     if (currentRound !== '1') return currentRound; // 如果找到非默认值，则返回
                 }
             }
-            
+
             // 尝试从文本中提取当前局数信息
             const matchInfoText = matchInfoLeft.textContent;
             const roundMatch = matchInfoText.match(/第([1-9])局|([1-9]):[1-9]|[1-9]:([1-9])|Map\s*([1-9])|Game\s*([1-9])/i);
@@ -2297,7 +2290,7 @@
                     }
                 }
             }
-            
+
             // 如果没有找到明确的局数标注，则通过比分推断
             const scoreElements = matchInfoLeft.querySelectorAll('[class*="score"]');
             if (scoreElements.length >= 2) {
@@ -2307,7 +2300,7 @@
                 return currentRound;
             }
         }
-        
+
         // 通用方法
         // 尝试查找明确标注当前局数的元素
         const roundElements = match.querySelectorAll('[class*="round"], [class*="map"], [class*="game"]');
@@ -2324,7 +2317,7 @@
                 if (currentRound !== '1') break; // 如果找到非默认值，则停止查找
             }
         }
-        
+
         // 如果没有找到明确的局数标注，则通过比分推断
         if (currentRound === '1') {
             const scoreElements = match.querySelectorAll('[class*="score"]');
@@ -2334,31 +2327,31 @@
                 currentRound = String(homeScore + awayScore + 1); // 当前局数 = 已完成的局数 + 1
             }
         }
-        
+
         return currentRound;
     }
-    
+
     /**
      * 获取比分信息
      */
     function getScores(match) {
         let homeScore = '0';
         let awayScore = '0';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element') {
             // 从matchInfoLeft元素中提取比分
             if (match.originalMatchInfo) {
                 const matchInfoLeft = match.originalMatchInfo;
-                
+
                 // 尝试查找比分元素
                 const scoreElements = matchInfoLeft.querySelectorAll('[class*="score"]');
                 if (scoreElements.length >= 2) {
                     homeScore = scoreElements[0].textContent.trim() || '0';
                     awayScore = scoreElements[1].textContent.trim() || '0';
                     return { homeScore, awayScore };
-                } 
-                
+                }
+
                 if (scoreElements.length === 1) {
                     // 尝试从单个比分元素中提取两个分数
                     const scoreText = scoreElements[0].textContent.trim();
@@ -2368,7 +2361,7 @@
                         awayScore = scores[1] || '0';
                         return { homeScore, awayScore };
                     }
-                    
+
                     // 尝试使用正则表达式匹配
                     const scoreMatch = scoreText.match(/(\d+)[^\d]+(\d+)/);
                     if (scoreMatch && scoreMatch.length === 3) {
@@ -2378,19 +2371,19 @@
                     }
                 }
             }
-            
+
             // 从teamInfoGrp元素中提取比分
             if (match.teamInfoGrp) {
                 const teamInfoGrp = match.teamInfoGrp;
-                
+
                 // 尝试查找比分元素
                 const scoreElements = teamInfoGrp.querySelectorAll('[class*="score"]');
                 if (scoreElements.length >= 2) {
                     homeScore = scoreElements[0].textContent.trim() || '0';
                     awayScore = scoreElements[1].textContent.trim() || '0';
                     return { homeScore, awayScore };
-                } 
-                
+                }
+
                 if (scoreElements.length === 1) {
                     // 尝试从单个比分元素中提取两个分数
                     const scoreText = scoreElements[0].textContent.trim();
@@ -2400,7 +2393,7 @@
                         awayScore = scores[1] || '0';
                         return { homeScore, awayScore };
                     }
-                    
+
                     // 尝试使用正则表达式匹配
                     const scoreMatch = scoreText.match(/(\d+)[^\d]+(\d+)/);
                     if (scoreMatch && scoreMatch.length === 3) {
@@ -2411,15 +2404,15 @@
                 }
             }
         }
-        
+
         // 通用方法：尝试查找比分元素
         const scoreElements = match.querySelectorAll('[class*="score"]');
         if (scoreElements.length >= 2) {
             homeScore = scoreElements[0].textContent.trim() || '0';
             awayScore = scoreElements[1].textContent.trim() || '0';
             return { homeScore, awayScore };
-        } 
-        
+        }
+
         if (scoreElements.length === 1) {
             // 尝试从单个比分元素中提取两个分数
             const scoreText = scoreElements[0].textContent.trim();
@@ -2429,7 +2422,7 @@
                 awayScore = scores[1] || '0';
                 return { homeScore, awayScore };
             }
-            
+
             // 尝试使用正则表达式匹配
             const scoreMatch = scoreText.match(/(\d+)[^\d]+(\d+)/);
             if (scoreMatch && scoreMatch.length === 3) {
@@ -2438,22 +2431,22 @@
                 return { homeScore, awayScore };
             }
         }
-        
+
         return { homeScore, awayScore };
     }
-    
+
     /**
      * 获取赔率信息
      */
     function getOdds(match) {
         let homeOdds = '未知';
         let awayOdds = '未知';
-        
+
         // 检查是否是虚拟匹配元素（包含matchInfoLeft和teamInfoGrp）
         if (match.className === 'virtual-match-element' && match.originalMatchInfo && match.originalTeamInfo) {
             // 从teamInfoGrp元素中提取赔率
             const teamInfoGrp = match.originalTeamInfo;
-            
+
             // 方法1: 尝试查找明确的赔率元素
             const oddsElements = teamInfoGrp.querySelectorAll('[class*="odd"], [class*="odds"], [class*="rate"], [class*="ratio"]');
             if (oddsElements.length >= 2) {
@@ -2461,12 +2454,12 @@
                 awayOdds = oddsElements[1].textContent.trim();
                 return { homeOdds, awayOdds };
             }
-            
+
             // 方法2: 尝试查找所有可能包含赔率的元素
             const allElements = teamInfoGrp.querySelectorAll('*');
             const oddsRegex = /\d+\.\d+/; // 匹配形如1.5, 2.0等赔率格式
             const foundOdds = [];
-            
+
             for (const element of allElements) {
                 const text = element.textContent.trim();
                 if (oddsRegex.test(text) && text.length < 10) { // 赔率通常是短文本
@@ -2474,14 +2467,14 @@
                     if (foundOdds.length >= 2) break;
                 }
             }
-            
+
             if (foundOdds.length >= 2) {
                 homeOdds = foundOdds[0];
                 awayOdds = foundOdds[1];
                 return { homeOdds, awayOdds };
             }
         }
-        
+
         // 检查是否是teamInfoGrp元素
         if (match.classList.contains('teamInfoGrp') || match.className.includes('teamInfoGrp')) {
             // 方法1: 尝试查找明确的赔率元素
@@ -2491,12 +2484,12 @@
                 awayOdds = oddsElements[1].textContent.trim();
                 return { homeOdds, awayOdds };
             }
-            
+
             // 方法2: 尝试查找所有可能包含赔率的元素
             const allElements = match.querySelectorAll('*');
             const oddsRegex = /\d+\.\d+/; // 匹配形如1.5, 2.0等赔率格式
             const foundOdds = [];
-            
+
             for (const element of allElements) {
                 const text = element.textContent.trim();
                 if (oddsRegex.test(text) && text.length < 10) { // 赔率通常是短文本
@@ -2504,14 +2497,14 @@
                     if (foundOdds.length >= 2) break;
                 }
             }
-            
+
             if (foundOdds.length >= 2) {
                 homeOdds = foundOdds[0];
                 awayOdds = foundOdds[1];
                 return { homeOdds, awayOdds };
             }
         }
-        
+
         // 通用方法
         // 方法1: 尝试查找明确的赔率元素
         const oddsElements = match.querySelectorAll('[class*="odd"], [class*="odds"], [class*="rate"], [class*="ratio"]');
@@ -2520,12 +2513,12 @@
             awayOdds = oddsElements[1].textContent.trim();
             return { homeOdds, awayOdds };
         }
-        
+
         // 方法2: 尝试查找所有可能包含赔率的元素
         const allElements = match.querySelectorAll('*');
         const oddsRegex = /\d+\.\d+/; // 匹配形如1.5, 2.0等赔率格式
         const foundOdds = [];
-        
+
         for (const element of allElements) {
             const text = element.textContent.trim();
             if (oddsRegex.test(text) && text.length < 10) { // 赔率通常是短文本
@@ -2533,13 +2526,13 @@
                 if (foundOdds.length >= 2) break;
             }
         }
-        
+
         if (foundOdds.length >= 2) {
             homeOdds = foundOdds[0];
             awayOdds = foundOdds[1];
             return { homeOdds, awayOdds };
         }
-        
+
         // 方法3: 尝试从文本内容中提取赔率
         const matchText = match.textContent;
         const oddsMatch = matchText.match(/(\d+\.\d+)[^\d]+(\d+\.\d+)/);
@@ -2547,10 +2540,10 @@
             homeOdds = oddsMatch[1];
             awayOdds = oddsMatch[2];
         }
-        
+
         return { homeOdds, awayOdds };
     }
-    
+
     // 获取比赛信息并创建比赛卡片
     function updateMatchCards() {
         const matchListContainer = document.getElementById('match-list-container');
@@ -2558,48 +2551,48 @@
             debugLog('找不到match-list-container元素，无法更新比赛卡片');
             return;
         }
-        
+
         // 清空容器
         matchListContainer.innerHTML = '';
-        
+
         // 使用增强的方法获取所有比赛
         let matches = enhancedExtractMatchesFromDOM();
-        
+
         // 如果增强方法没有找到比赛，尝试原始方法
         if (matches.length === 0) {
             matches = Array.from(document.querySelectorAll('div[class*="match"], div[class*="event"], div[class*="game"], div[class*="contest"]'));
         }
-        
+
         debugLog(`找到 ${matches.length} 个比赛元素`);
-        
+
         // 更新总比赛数显示
         const totalMatchesElement = document.getElementById('total-matches');
         if (totalMatchesElement) {
             totalMatchesElement.textContent = matches.length;
         }
-        
+
         // 更新总下注次数显示
         const totalBetsElement = document.getElementById('total-bets');
         if (totalBetsElement) {
             const totalBets = Object.values(matchBetCounts).reduce((sum, count) => sum + count, 0);
             totalBetsElement.textContent = totalBets;
         }
-        
+
         if (matches.length === 0) {
             matchListContainer.innerHTML = '<div class="match-card empty"><div class="match-card-empty-message">未找到比赛</div></div>';
             return;
         }
-            
+
             // 处理每个比赛
          matches.forEach(match => {
              // 获取比赛ID
              const matchId = generateMatchId(match);
-             
+
              // 获取比赛状态
              const matchStatus = getMatchStatus(match);
              let statusClass = '';
              let statusText = matchStatus;
-             
+
              if (matchStatus === '进行中') {
                  statusClass = 'live';
              } else if (matchStatus === '即将开始') {
@@ -2609,39 +2602,39 @@
              } else if (matchStatus.includes('结束') || matchStatus.includes('完成')) {
                  statusClass = 'ended';
              }
-             
+
              // 获取游戏名称
              const gameName = getGameName(match);
-             
+
              // 获取队伍名称
              const teamInfo = getTeamNames(match);
              const homeTeam = teamInfo.homeTeam;
              const awayTeam = teamInfo.awayTeam;
-             
+
              // 获取联赛/比赛名称
              const leagueName = getLeagueName(match);
-             
+
              // 获取比赛局数信息
              const gameCount = getGameCount(match);
-             
+
              // 获取当前局数
              const currentRound = getCurrentRound(match);
-             
+
              // 获取比分信息
              const scores = getScores(match);
              const homeScore = scores.homeScore;
              const awayScore = scores.awayScore;
-             
+
              // 获取赔率信息
              const odds = getOdds(match);
              const homeOdds = odds.homeOdds;
              const awayOdds = odds.awayOdds;
-             
+
              // 创建比赛卡片
             const card = document.createElement('div');
             card.className = `match-card ${statusClass}`;
             card.dataset.matchId = matchId;
-            
+
             // 获取比赛结果状态
             let betResult = '';
             if (matchBetCounts[matchId]) {
@@ -2649,7 +2642,7 @@
                 card.classList.add('has-bet');
                 card.classList.add(`bet-${betResult}`);
             }
-            
+
             // 添加卡片内容
             card.innerHTML = `
                 <div class="match-card-header">
@@ -2685,65 +2678,65 @@
                         ${gameCount ? `<div class="match-card-game-count">${gameCount}</div>` : ''}
                         <div class="match-card-current-round">第${currentRound}局</div>
                     </div>
-                    ${matchBetCounts[matchId] ? 
+                    ${matchBetCounts[matchId] ?
                         `<div class="match-card-bet-count ${betResult}">
                             <span class="bet-count-value">${matchBetCounts[matchId]}</span>
                             <span class="bet-count-label">次</span>
-                        </div>` : 
+                        </div>` :
                         '<div class="match-card-bet-count empty">未下注</div>'}
                 </div>
                 ${betResult ? `<div class="match-card-bet-result ${betResult}">${betResult === 'win' ? '赢' : betResult === 'lose' ? '输' : '待定'}</div>` : ''}
             `;
-            
+
             // 添加点击事件 - 点击卡片时滚动到对应的比赛
             card.addEventListener('click', () => {
                 // 移除所有高亮
                 document.querySelectorAll('.match-highlight').forEach(el => {
                     el.classList.remove('match-highlight');
                 });
-                
+
                 // 移除所有卡片的高亮
                 document.querySelectorAll('.match-card.highlighted').forEach(el => {
                     el.classList.remove('highlighted');
                 });
-                
+
                 // 高亮显示对应的比赛元素
                 match.classList.add('match-highlight');
-                
+
                 // 高亮显示当前卡片
                 card.classList.add('highlighted');
-                
+
                 // 滚动到对应的比赛元素
                 match.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
+
                 // 添加高亮效果
                 match.style.boxShadow = '0 0 15px 3px var(--primary-light, #4a9eff)';
                 setTimeout(() => {
                     match.style.boxShadow = '';
                 }, 2500);
-                
+
                 // 显示一个提示
                 updateStatus(`已定位到比赛: ${homeTeam} vs ${awayTeam}`);
             });
-            
+
             // 添加到容器
             matchListContainer.appendChild(card);
         });
-        
+
         // 更新统计数据
         updateBetStatistics();
     }
-    
+
     // 更新下注统计数据
     function updateBetStatistics() {
         const statsContainer = document.getElementById('bet-stats-container');
         if (!statsContainer) return;
-        
+
         // 计算胜负数据
         let winCount = 0;
         let loseCount = 0;
         let pendingCount = 0;
-        
+
         // 遍历所有比赛
         const matches = Array.from(document.querySelectorAll('div[class*="match"], div[class*="event"], div[class*="game"], div[class*="contest"]'));
         const totalMatches = matches.length;
@@ -2756,22 +2749,22 @@
                 else pendingCount++;
             }
         });
-        
+
         // 更新统计显示
         const winElement = document.getElementById('win-bets');
         const loseElement = document.getElementById('lose-bets');
         const totalBetsElement = document.getElementById('total-bets');
         const totalMatchesElement = document.getElementById('total-matches');
-        
+
         if (winElement) winElement.textContent = winCount;
         if (loseElement) loseElement.textContent = loseCount;
         if (totalBetsElement) totalBetsElement.textContent = winCount + loseCount + pendingCount;
         if (totalMatchesElement) totalMatchesElement.textContent = totalMatches;
-        
+
         // 计算胜率和完成率
         const winRate = winCount + loseCount > 0 ? (winCount / (winCount + loseCount) * 100).toFixed(1) : 0;
         const completionRate = totalMatches > 0 ? ((winCount + loseCount + pendingCount) / totalMatches * 100).toFixed(1) : 0;
-        
+
         // 更新统计选项卡内容 - 使用新的现代化UI
         statsContainer.innerHTML = `
             <div class="statistics-container">
@@ -2783,7 +2776,7 @@
                         <div class="statistics-progress-bar" style="width: ${completionRate}%"></div>
                     </div>
                 </div>
-                
+
                 <div class="statistics-card fade-in">
                     <div class="statistics-card-title">胜率</div>
                     <div class="statistics-card-value">${winRate}%</div>
@@ -2792,17 +2785,17 @@
                         <div class="statistics-progress-bar ${winRate >= 50 ? 'success' : 'danger'}" style="width: ${winRate}%"></div>
                     </div>
                 </div>
-                
+
                 <div class="statistics-card fade-in">
                     <div class="statistics-card-title">下注结果</div>
                     <div class="statistics-card-value">
-                        <span style="color: var(--success-color)">${winCount}</span> / 
-                        <span style="color: var(--danger-color)">${loseCount}</span> / 
+                        <span style="color: var(--success-color)">${winCount}</span> /
+                        <span style="color: var(--danger-color)">${loseCount}</span> /
                         <span style="color: var(--warning-color)">${pendingCount}</span>
                     </div>
                     <div class="statistics-card-subtitle">胜 / 负 / 待定</div>
                 </div>
-                
+
                 <div class="statistics-card fade-in">
                     <div class="statistics-card-title">比赛覆盖率</div>
                     <div class="statistics-card-value">${totalMatches}</div>
@@ -2840,7 +2833,7 @@
         if (statusElement) {
             // 重置所有状态样式
             statusElement.classList.remove('status-live', 'status-soon', 'status-upcoming');
-            
+
             // 根据消息内容添加相应的状态样式
             if (message.includes('进行中')) {
                 statusElement.classList.add('status-live');
@@ -2849,7 +2842,7 @@
             } else if (message.includes('未开赛')) {
                 statusElement.classList.add('status-upcoming');
             }
-            
+
             statusElement.textContent = message;
             console.log('[自动下注]', message);
         }
@@ -2893,7 +2886,7 @@
         // 获取之前的状态（如果存在）
         const previousStatus = matchElement.dataset.previousStatus || '';
         let currentStatus = '';
-        
+
         // 检查是否有明确的状态标识
         const statusElement = matchElement.querySelector('.match-status, [class*="status"], [class*="state"]');
         if (statusElement) {
@@ -2942,51 +2935,51 @@
         if (!currentStatus) {
             currentStatus = '未开赛';
         }
-        
+
         // 检查状态是否发生变化
         if (previousStatus && previousStatus !== currentStatus) {
             // 状态发生变化，添加视觉提示
             debugLog(`比赛状态变化: ${previousStatus} -> ${currentStatus}`);
-            
+
             // 如果是从即将开始变为进行中，添加高亮动画
             if (previousStatus === '即将开始' && currentStatus === '进行中') {
                 // 在比赛元素上添加一个临时的高亮类
                 matchElement.classList.add('status-changed');
-                
+
                 // 在卡片上也添加高亮
                 const matchId = getMatchIdentifier(matchElement);
                 const matchCard = document.querySelector(`.match-card[data-match-id="${matchId}"]`);
                 if (matchCard) {
                     matchCard.classList.add('highlighted');
-                    
+
                     // 获取队伍名称
                     const homeTeamEl = matchCard.querySelector('.match-card-team.home');
                     const awayTeamEl = matchCard.querySelector('.match-card-team.away');
                     const homeTeam = homeTeamEl ? homeTeamEl.textContent : '未知队伍';
                     const awayTeam = awayTeamEl ? awayTeamEl.textContent : '未知队伍';
-                    
+
                     // 显示状态变化通知
                     updateStatus(`比赛开始! ${homeTeam} VS ${awayTeam} 现在进行中`);
-                    
+
                     // 滚动到对应的比赛元素
                     matchCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
+
                     // 3秒后移除高亮
                     setTimeout(() => {
                         matchCard.classList.remove('highlighted');
                     }, 3000);
                 }
-                
+
                 // 3秒后移除高亮
                 setTimeout(() => {
                     matchElement.classList.remove('status-changed');
                 }, 3000);
             }
         }
-        
+
         // 保存当前状态以便下次比较
         matchElement.dataset.previousStatus = currentStatus;
-        
+
         return currentStatus;
     }
 
@@ -3005,7 +2998,7 @@
             matches = Array.from(document.querySelectorAll('div[class*="match"], div[class*="event"], div[class*="game"], div[class*="contest"]')).filter(match => {
                 // 获取比赛状态
                 const matchStatus = getMatchStatus(match);
-                
+
                 // 根据设置决定是否包含即将开始的比赛
                 if (matchStatus === '进行中') {
                     return true; // 始终包含进行中的比赛
@@ -3652,7 +3645,7 @@
         if (!popupMsg) {
             return false; // 没有检测到盘口关闭提示
         }
-        
+
         debugLog('检测到盘口关闭提示');
         // 查找并点击关闭按钮
         const closeBtn = document.querySelector('.btn.btnGrey');
@@ -3663,7 +3656,7 @@
             updateStatus('盘口已关闭，稍后将重试');
             return true;
         }
-        
+
         // 尝试查找其他可能的关闭按钮
         const otherCloseBtn = popupMsg.querySelector('button, [class*="close"], [class*="btn"], [role="button"]');
         if (otherCloseBtn) {
@@ -3673,11 +3666,11 @@
             updateStatus('盘口已关闭，稍后将重试');
             return true;
         }
-        
+
         debugLog('未找到关闭按钮，无法处理盘口关闭提示');
         return false;
     }
-    
+
     // 关闭成功提示框
     async function closeSuccessPopup() {
         debugLog('检查是否出现成功提示框');
@@ -3725,7 +3718,7 @@
     // 确认下注
     async function confirmBet() {
         debugLog('尝试查找确认下注按钮');
-        
+
         // 检查是否出现盘口关闭提示
         if (await handleMarketClosed()) {
             return false;
@@ -3825,33 +3818,33 @@
         const success = await closeSuccessPopup();
         debugLog(`closeSuccessPopup返回结果: ${success}`);
 
-        
+
         // 如果成功关闭了提示框，说明下注成功，增加下注计数
         if (success) {
             // 获取当前选中的比赛元素
             const selectedOdds = document.querySelector('[class*="odds"][class*="selected"], [class*="selection"][class*="selected"], [class*="option"][class*="selected"]');
             debugLog(`选中的赔率元素: ${selectedOdds ? selectedOdds.outerHTML : '未找到'}`);
-            
+
             if (selectedOdds) {
                 const matchElement = selectedOdds.closest('div[class*="match"], div[class*="event"], div[class*="game"], div[class*="contest"]');
                 debugLog(`比赛容器元素: ${matchElement ? matchElement.outerHTML.substring(0, 100) + '...' : '未找到'}`);
-                
+
                 if (matchElement) {
                     // 获取比赛唯一标识符
                     const matchId = getMatchIdentifier(matchElement);
                     debugLog(`获取到比赛ID: ${matchId}`);
-                    
+
                     // 增加下注计数
                     if (!matchBetCounts[matchId]) {
                         matchBetCounts[matchId] = 0;
                     }
                     matchBetCounts[matchId]++;
                     debugLog(`增加下注计数后: ${matchBetCounts[matchId]}`);
-                    
+
                     // 更新下注计数显示
                     updateBetCountsDisplay();
                     debugLog('已更新下注计数显示');
-                    
+
                     // 获取最大下注次数
                     const maxBetsPerMatch = parseInt(document.getElementById('max-bets-per-match').value);
                     if (maxBetsPerMatch > 0) {
@@ -3866,13 +3859,13 @@
                         const firstMatch = visibleMatches[0];
                         const matchId = getMatchIdentifier(firstMatch);
                         debugLog(`使用备用方法获取比赛ID: ${matchId}`);
-                        
+
                         if (!matchBetCounts[matchId]) {
                             matchBetCounts[matchId] = 0;
                         }
                         matchBetCounts[matchId]++;
                         debugLog(`增加下注计数后: ${matchBetCounts[matchId]}`);
-                        
+
                         updateBetCountsDisplay();
                         debugLog('已更新下注计数显示');
                     } else {
@@ -3898,17 +3891,17 @@
         if (!selection) {
             return false;
         }
-        
+
         // 获取比赛容器元素
         const matchElement = selection.element.closest('div[class*="match"], div[class*="event"], div[class*="game"], div[class*="contest"]');
-        
+
         // 获取比赛唯一标识符
         const matchId = getMatchIdentifier(matchElement);
         debugLog(`获取到比赛ID: ${matchId}`);
-        
+
         // 获取并显示比赛状态
         const matchStatus = getMatchStatus(matchElement);
-        
+
         // 检查该比赛的下注次数是否已达到上限
         const maxBetsPerMatch = parseInt(document.getElementById('max-bets-per-match').value);
         if (maxBetsPerMatch > 0) {
@@ -3916,14 +3909,14 @@
             if (!matchBetCounts[matchId]) {
                 matchBetCounts[matchId] = 0;
             }
-            
+
             // 检查是否达到最大下注次数
             if (matchBetCounts[matchId] >= maxBetsPerMatch) {
                 updateStatus(`该比赛已下注${matchBetCounts[matchId]}次，达到上限${maxBetsPerMatch}次`);
                 debugLog(`比赛ID: ${matchId} 已达到下注上限: ${matchBetCounts[matchId]}/${maxBetsPerMatch}`);
                 return false;
             }
-            
+
             updateStatus(`已选择${matchStatus}的比赛，赔率: ${selection.odds}，当前下注次数: ${matchBetCounts[matchId]}/${maxBetsPerMatch}`);
         } else {
             updateStatus(`已选择${matchStatus}的比赛，赔率: ${selection.odds}`);
@@ -3949,7 +3942,7 @@
 
         updateStatus(`已设置下注金额: ${amount}`);
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         // 检查是否出现盘口关闭提示
         if (await handleMarketClosed()) {
             return false;
@@ -3959,7 +3952,7 @@
         if (!await confirmBet()) {
             return false;
         }
-        
+
         // 下注成功，确保下注计数已更新
         // 由于confirmBet函数中可能存在获取不到正确matchElement的情况，这里再次确认下注计数更新
         if (!matchBetCounts[matchId]) {
@@ -3967,19 +3960,19 @@
         } else {
             matchBetCounts[matchId]++;
         }
-        
+
         // 更新下注计数显示
         updateBetCountsDisplay();
-        
+
         // 记录详细的比赛标识符信息
         debugLog(`下注成功，比赛标识符: ${matchId}`);
-        
+
         // 检查是否达到最大下注次数
         if (maxBetsPerMatch > 0 && matchBetCounts[matchId] >= maxBetsPerMatch) {
             const message = `该比赛已下注${matchBetCounts[matchId]}/${maxBetsPerMatch}次，达到上限！`;
             updateStatus(message, 'warning');
             debugLog(message);
-            
+
             // 在控制面板中显示明显的提示
             const statusElement = document.getElementById('autoBetStatus');
             if (statusElement) {
@@ -3990,9 +3983,9 @@
         } else {
             updateStatus(`下注成功！${maxBetsPerMatch > 0 ? `该比赛已下注${matchBetCounts[matchId]}/${maxBetsPerMatch}次` : ''}`);
         }
-        
+
         debugLog(`下注成功，比赛ID: ${matchId}，当前下注次数: ${matchBetCounts[matchId]}`);
-        
+
         // 保存下注记录到本地存储
         try {
             localStorage.setItem('matchBetCounts', JSON.stringify(matchBetCounts));
@@ -4061,14 +4054,14 @@
                 // 尝试查找投注记录标签（通过文本内容）
                 const allElements = document.querySelectorAll('div, span, a, button');
                 let betHistoryTab = null;
-                
+
                 for (const element of allElements) {
                     if (element.textContent.includes('投注记录')) {
                         betHistoryTab = element;
                         break;
                     }
                 }
-                
+
                 if (betHistoryTab) {
                     debugLog('找到投注记录标签，点击打开投注记录');
                     betHistoryTab.click();
@@ -4078,10 +4071,10 @@
                     return false;
                 }
             }
-            
+
             // 查找投注记录列表 - 使用更广泛的选择器
             let betRecords = document.querySelectorAll('[class*="betRecord"], [class*="betItem"], [class*="betHistory"] > div, [class*="btList"] > div, [class*="betList"] > div, [class*="bet-record"], [class*="bet-item"], [class*="bet-history"] > div, [class*="bet_record"], [class*="bet_item"], [class*="bet_list"] > div');
-            
+
             // 如果没有找到记录，尝试查找表格中的行
             if (betRecords.length === 0) {
                 const betTables = document.querySelectorAll('table[class*="bet"], table[class*="record"], table[class*="history"]');
@@ -4093,7 +4086,7 @@
                     }
                 }
             }
-            
+
             // 如果仍然没有找到记录，尝试查找任何可能的投注记录容器
             if (betRecords.length === 0) {
                 const possibleContainers = document.querySelectorAll('.btList, .betList, .betHistory, #btList, #betList, #betHistory, [data-role="betList"], [data-role="betHistory"]');
@@ -4104,22 +4097,22 @@
                     }
                 }
             }
-            
+
             debugLog(`找到 ${betRecords.length} 条投注记录`);
-            
+
             if (betRecords.length === 0) {
                 debugLog('未找到投注记录列表');
                 return false;
             }
-            
+
             // 临时存储比赛下注次数的对象
             const tempMatchBetCounts = {};
-            
+
             // 分析每条投注记录
             for (const record of betRecords) {
                 // 提取比赛信息 - 尝试多种选择器以提高匹配率
                 let matchInfo = record.querySelector('[class*="match"], [class*="event"], [class*="game"], [class*="contest"], [class*="league"], [class*="team"], [class*="vs"]');
-                
+
                 // 如果没有找到匹配的元素，尝试查找包含VS或vs的元素
                 if (!matchInfo) {
                     const allElements = record.querySelectorAll('*');
@@ -4131,46 +4124,46 @@
                         }
                     }
                 }
-                
+
                 // 如果仍然没有找到，使用整个记录作为匹配信息
                 if (!matchInfo) {
                     matchInfo = record;
                 }
-                
+
                 const matchText = matchInfo.textContent.trim();
                 debugLog(`找到比赛信息: ${matchText}`);
-                
+
                 // 尝试从投注记录中提取游戏名称、比赛名称和局数信息
                 let gameName = '未知游戏';
                 let leagueName = '未知联赛';
                 let teamNames = '';
                 let gameCount = '未知局数';
                 let currentRound = '1';
-                
+
                 // 尝试提取游戏名称
                 const gameNameMatch = matchText.match(/(英雄联盟|刀塔2|CS2|王者荣耀|无尽对决|守望先锋2|彩虹六号|使命召唤|星际争霸2|火箭联盟|炉石传说|NBA 2K|魔兽争霸3|绝地求生|堡垒之夜|云顶之弈|Free Fire|街头霸王6|铁拳8|Apex 英雄|Rennsport)/i);
                 if (gameNameMatch) {
                     gameName = gameNameMatch[1];
                 }
-                
+
                 // 尝试提取联赛名称
                 const leagueNameMatch = matchText.match(/(\d{4}\s*[^\d\s]+\s*[赛季中邀请赛|总决赛|瑞士轮|电子竞技杯|世界杯|系列赛|锦标赛|职业联赛|挑战者|联赛|杯赛])/i);
                 if (leagueNameMatch) {
                     leagueName = leagueNameMatch[1];
                 }
-                
+
                 // 尝试提取队伍名称
                 const teamNamesMatch = matchText.match(/([^\s]+)\s*(?:vs\.?|对)\s*([^\s]+)/i);
                 if (teamNamesMatch && teamNamesMatch.length >= 3) {
                     teamNames = `${teamNamesMatch[1]}_vs_${teamNamesMatch[2]}`;
                 }
-                
+
                 // 尝试提取比赛局数信息
                 const gameCountMatch = matchText.match(/BO[1-9]|BO\s[1-9]|Best\sof\s[1-9]|最佳[1-9]局/i);
                 if (gameCountMatch) {
                     gameCount = gameCountMatch[0];
                 }
-                
+
                 // 尝试提取当前局数
                 const currentRoundMatch = matchText.match(/第([1-9])局|([1-9]):[1-9]|[1-9]:([1-9])/i);
                 if (currentRoundMatch) {
@@ -4181,25 +4174,25 @@
                         }
                     }
                 }
-                
+
                 // 构建比赛标识符
                 const recordIdentifier = `${gameName}_${leagueName}_${teamNames}_${gameCount}_${currentRound}`;
                 debugLog(`投注记录标识符: ${recordIdentifier}`);
-                
+
                 // 增加该比赛的下注计数
                 if (!tempMatchBetCounts[recordIdentifier]) {
                     tempMatchBetCounts[recordIdentifier] = 1;
                 } else {
                     tempMatchBetCounts[recordIdentifier]++;
                 }
-                
+
                 debugLog(`投注记录中的比赛: ${matchText}, ID: ${recordIdentifier}, 计数: ${tempMatchBetCounts[recordIdentifier]}`);
             }
-            
+
             // 尝试将投注记录中的比赛与当前页面上的比赛匹配
             const currentMatches = document.querySelectorAll('[class*="match"], [class*="event"], [class*="game"], [class*="contest"], [class*="league"]');
             debugLog(`当前页面上找到 ${currentMatches.length} 场比赛`);
-            
+
             // 创建当前页面比赛的标识符映射
             const currentMatchMap = {};
             for (const match of currentMatches) {
@@ -4207,37 +4200,37 @@
                 currentMatchMap[pageMatchId] = pageMatchId;
                 debugLog(`当前页面比赛标识符: ${pageMatchId}`);
             }
-            
+
             // 更新全局的matchBetCounts对象，尝试匹配当前页面的比赛
             for (const recordMatchId in tempMatchBetCounts) {
                 // 尝试在当前页面找到匹配的比赛
                 let matched = false;
-                
+
                 for (const pageMatchId in currentMatchMap) {
                     // 分解两个标识符以进行更精确的比较
                     const recordParts = recordMatchId.split('_');
                     const pageParts = pageMatchId.split('_');
-                    
+
                     // 提取关键部分进行比较：游戏名称、联赛名称、队伍名称、比赛局数
                     const recordGameName = recordParts[0] || '';
                     const recordLeagueName = recordParts[1] || '';
                     const recordTeamNames = recordParts[2] || '';
                     const recordGameCount = recordParts[3] || '';
                     const recordCurrentRound = recordParts[4] || '';
-                    
+
                     const pageGameName = pageParts[0] || '';
                     const pageLeagueName = pageParts[1] || '';
                     const pageTeamNames = pageParts[2] || '';
                     const pageGameCount = pageParts[3] || '';
                     const pageCurrentRound = pageParts[4] || '';
-                    
+
                     // 计算各部分的相似度
                     const gameNameSimilarity = textSimilarity(recordGameName, pageGameName);
                     const leagueNameSimilarity = textSimilarity(recordLeagueName, pageLeagueName);
                     const teamNamesSimilarity = textSimilarity(recordTeamNames, pageTeamNames);
                     const gameCountSimilarity = textSimilarity(recordGameCount, pageGameCount);
                     const roundSimilarity = textSimilarity(recordCurrentRound, pageCurrentRound);
-                    
+
                     // 计算总体相似度，加权平均
                     const totalSimilarity = (
                         gameNameSimilarity * 0.2 +
@@ -4246,9 +4239,9 @@
                         gameCountSimilarity * 0.15 +
                         roundSimilarity * 0.15
                     );
-                    
+
                     debugLog(`比较: ${recordMatchId} 与 ${pageMatchId}, 总相似度: ${totalSimilarity.toFixed(2)}`);
-                    
+
                     // 如果总体相似度高，则认为是同一场比赛同一局
                     if (totalSimilarity > 0.7) {
                         matchBetCounts[pageMatchId] = tempMatchBetCounts[recordMatchId];
@@ -4257,14 +4250,14 @@
                         break;
                     }
                 }
-                
+
                 // 如果没有匹配到，仍然保留投注记录中的计数
                 if (!matched) {
                     matchBetCounts[recordMatchId] = tempMatchBetCounts[recordMatchId];
                     debugLog(`未匹配: 保留投注记录ID ${recordMatchId} 的计数`);
                 }
             }
-            
+
             // 尝试从本地存储加载之前保存的下注记录
             try {
                 const savedBetCounts = localStorage.getItem('matchBetCounts');
@@ -4281,18 +4274,18 @@
             } catch (error) {
                 debugLog('加载本地存储的下注记录失败: ' + error.message);
             }
-            
+
             // 计算文本相似度的辅助函数
             function textSimilarity(text1, text2) {
                 // 简化为小写并移除空格
                 const a = text1.toLowerCase().replace(/\s+/g, '');
                 const b = text2.toLowerCase().replace(/\s+/g, '');
-                
+
                 // 如果一个包含另一个，返回高相似度
                 if (a.includes(b) || b.includes(a)) {
                     return 0.9;
                 }
-                
+
                 // 计算编辑距离
                 const matrix = [];
                 for (let i = 0; i <= a.length; i++) {
@@ -4301,7 +4294,7 @@
                 for (let j = 0; j <= b.length; j++) {
                     matrix[0][j] = j;
                 }
-                
+
                 for (let i = 1; i <= a.length; i++) {
                     for (let j = 1; j <= b.length; j++) {
                         const cost = a[i-1] === b[j-1] ? 0 : 1;
@@ -4312,23 +4305,23 @@
                         );
                     }
                 }
-                
+
                 // 计算相似度 (0-1之间，1表示完全相同)
                 const maxLength = Math.max(a.length, b.length);
                 if (maxLength === 0) return 1.0; // 两个空字符串
                 return 1.0 - matrix[a.length][b.length] / maxLength;
             }
-            
+
             // 更新下注计数显示
             updateBetCountsDisplay();
             debugLog('投注记录分析完成，已更新下注计数');
-            
+
             // 关闭投注记录面板（如果有关闭按钮）
             const closeBtn = document.querySelector('[class*="close"], [class*="back"], [class*="return"]');
             if (closeBtn) {
                 closeBtn.click();
             }
-            
+
             return true;
         } catch (error) {
             debugLog(`分析投注记录时出错: ${error.message}`);
@@ -4342,7 +4335,18 @@
 
         // 创建控制面板
         const panel = createControlPanel();
-        
+
+        // 根据保存的面板状态设置初始状态（确保面板始终可见，即使之前被隐藏）
+        const panelState = GM_getValue('panelState', 'expanded');
+        if (panelState === 'minimized') {
+            panel.classList.add('minimized');
+        } else {
+            // 确保面板始终可见，即使之前的状态是'hidden'
+            panel.classList.remove('minimized');
+            panel.style.display = 'block';
+            GM_setValue('panelState', 'expanded');
+        }
+
         // 尝试从本地存储加载之前保存的下注记录
         try {
             const savedBetCounts = localStorage.getItem('matchBetCounts');
@@ -4355,7 +4359,7 @@
                 }
                 // 更新下注计数显示
                 updateBetCountsDisplay();
-                
+
                 // 在控制面板中显示提示
                 const statusElement = document.getElementById('autoBetStatus');
                 if (statusElement) {
@@ -4370,10 +4374,10 @@
         } catch (error) {
             debugLog('初始化时加载本地存储的下注记录失败: ' + error.message);
         }
-        
+
         // 分析投注记录，获取已下注的比赛次数
         await analyzeBetHistory();
-        
+
         // 初始化比赛列表卡片并自动显示比赛标签页
         if (typeof updateMatchCards === 'function') {
             // 自动切换到比赛标签页
@@ -4381,10 +4385,10 @@
             if (matchesTab) {
                 matchesTab.click(); // 模拟点击比赛标签页
             }
-            
+
             // 立即更新比赛列表
             updateMatchCards();
-            
+
             // 设置定时更新比赛列表卡片，增加刷新频率
             setInterval(() => {
                 updateMatchCards();
@@ -4414,20 +4418,16 @@
             const result = await analyzeBetHistory();
             updateStatus(result ? '投注记录刷新成功' : '投注记录刷新失败');
         });
-        
+
         // 移除手动刷新功能，因为已经实现自动刷新
 
         // 添加快捷键
         document.addEventListener('keydown', (e) => {
-            // Alt+B 显示/隐藏面板
+            // Alt+B 最小化/展开面板（修改后不再完全隐藏面板）
             if (e.altKey && e.key === 'b') {
-                if (panel.style.display === 'none') {
-                    panel.style.display = 'block';
-                    panel.classList.remove('minimized');
-                    GM_setValue('panelState', 'expanded');
-                } else {
-                    panel.style.display = 'none';
-                    GM_setValue('panelState', 'hidden');
+                if (panel.style.display !== 'none') {
+                    panel.classList.toggle('minimized');
+                    GM_setValue('panelState', panel.classList.contains('minimized') ? 'minimized' : 'expanded');
                 }
             }
             // Alt+S 开始/停止自动下注
@@ -4447,7 +4447,7 @@
             }
         });
 
-        updateStatus('脚本已加载，按Alt+B显示/隐藏面板');
+        updateStatus('脚本已加载，按Alt+B最小化/展开面板');
     }
 
     // 启动脚本
