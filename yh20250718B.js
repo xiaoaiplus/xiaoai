@@ -37,7 +37,12 @@
         betAmount: 10, // 默认下注金额
         autoBetInterval: 30, // 自动下注间隔（秒）
         preferBO3Total: false, // 与betUpcomingMatches保持一致
-        preferFirstWin: true // 与prioritizeLiveMatches保持一致
+        preferFirstWin: true, // 与prioritizeLiveMatches保持一致
+        adjustBetAmountByOdds: false, // 是否根据赔率调整下注金额
+        oddsThreshold1: 2.10, // 赔率阈值1
+        betAmount1: 15, // 赔率阈值1对应的下注金额
+        oddsThreshold2: 2.60, // 赔率阈值2
+        betAmount2: 10 // 赔率阈值2对应的下注金额
     };
 
     // 创建投注记录弹窗
@@ -49,46 +54,56 @@
         // 创建弹窗
         betRecordsPopup = document.createElement('div');
         betRecordsPopup.id = 'bet-records-popup';
-        betRecordsPopup.className = 'popup-container';
 
-        // 添加样式元素
+        // 添加连接线样式
         const styleElement = document.createElement('style');
         styleElement.textContent = `
-            /* 自定义样式将在主样式表中定义 */
+            #bet-records-popup::before {
+                content: '';
+                position: absolute;
+                top: 30px;
+                left: -5px;
+                width: 10px;
+                height: 40px;
+                background-color: #2e7d32;
+                border-radius: 5px 0 0 5px;
+                z-index: 9998;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            #bet-records-popup.visible::before {
+                opacity: 1;
+            }
         `;
         document.head.appendChild(styleElement);
         betRecordsPopup.style.cssText = `
             position: fixed;
             top: 20px;
-            left: 20px; /* 与主脚本弹窗位置相同 */
-            width: 480px;
-            max-height: 650px;
+            left: -420px; /* 初始状态隐藏在左侧 */
+            width: 420px;
+            max-height: 600px;
             background-color: rgba(255, 255, 255, 0.95);
             color: #333333;
-            z-index: 9999;
+            z-index: 9999; /* 比主界面低一点，确保主界面在上层 */
             border-radius: 12px;
             padding: 15px;
             font-family: 'Segoe UI', Arial, sans-serif;
             font-size: 13px;
             overflow: hidden;
             box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
-            transition: all 0.5s ease;
+            transition: all 0.3s ease;
             border: 1px solid rgba(200, 200, 200, 0.8);
-            border-left: 3px solid #e65100; /* 左侧边框颜色 */
+            border-left: 3px solid #2e7d32; /* 左侧边框颜色与主界面标题颜色一致 */
             backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
-            transform-style: preserve-3d;
-            backface-visibility: visible;
-            opacity: 0; /* 初始状态隐藏 */
-            visibility: hidden; /* 初始状态隐藏 */
         `;
 
         // 添加标题
         const header = document.createElement('div');
         header.style.cssText = `
             padding: 12px;
-            background: linear-gradient(to left, #f0f0f0, #e0e0e0); /* 反向渐变 */
+            background: linear-gradient(to right, #f0f0f0, #e0e0e0);
             border-bottom: 1px solid #dddddd;
             display: flex;
             justify-content: space-between;
@@ -97,76 +112,7 @@
             border-radius: 8px 8px 0 0;
             position: relative;
         `;
-        header.innerHTML = '<h4 style="margin: 0; color: #2e7d32; text-shadow: 0 0 5px rgba(46,125,50,0.2); font-size: 16px;">投注记录</h4>';
-        
-        // 添加返回按钮
-        const returnToMatchesBtn = document.createElement('button');
-        returnToMatchesBtn.textContent = '←';
-        returnToMatchesBtn.title = '返回比赛数据';
-        returnToMatchesBtn.style.cssText = `
-            background-color: rgba(230, 81, 0, 0.7);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            width: 24px;
-            height: 24px;
-            line-height: 20px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 5px rgba(230, 81, 0, 0.2);
-        `;
-        
-        // 返回按钮的鼠标悬停效果
-        returnToMatchesBtn.onmouseover = function() {
-            this.style.backgroundColor = 'rgba(230, 81, 0, 0.9)';
-            this.style.transform = 'scale(1.05)';
-        };
-        returnToMatchesBtn.onmouseout = function() {
-            this.style.backgroundColor = 'rgba(230, 81, 0, 0.7)';
-            this.style.transform = 'scale(1)';
-        };
-        
-        // 返回按钮的点击事件 - 控制弹窗的翻转显示/隐藏（像书的正反面）
-         returnToMatchesBtn.onclick = function() {
-             const betRecordsPopup = document.getElementById('bet-records-popup');
-             const matchesPopup = document.getElementById('matches-popup');
-             if (!betRecordsPopup || !matchesPopup) return;
-             
-             // 显示主脚本弹窗，隐藏投注记录弹窗（翻转效果）
-             // 设置主脚本弹窗为可见
-             matchesPopup.style.visibility = 'visible';
-             matchesPopup.style.opacity = '1';
-             matchesPopup.classList.add('flip-to-front');
-             matchesPopup.classList.remove('flip-to-back');
-             
-             // 隐藏投注记录弹窗
-             betRecordsPopup.classList.add('flip-to-back');
-             betRecordsPopup.classList.remove('flip-to-front');
-             
-             // 更新主脚本弹窗中投注记录按钮的状态
-             const betRecordsBtn = document.getElementById('toggle-bet-records-button');
-             if (betRecordsBtn) {
-                 betRecordsBtn.textContent = '+';
-                 betRecordsBtn.title = '显示投注记录';
-             }
-             
-             // 更新全局状态变量
-             window.betRecordsVisible = false;
-             
-             // 延迟后完全隐藏投注记录弹窗
-             setTimeout(() => {
-                 betRecordsPopup.style.visibility = 'hidden';
-                 betRecordsPopup.style.opacity = '0';
-             }, 300);
-             
-             // 显示切换提示
-             showNotification('已切换到比赛数据', 'info', 1000);
-         };
-        
-        header.appendChild(returnToMatchesBtn);
+        header.innerHTML = '<h4 style="margin: 0; color: #2e7d32; text-shadow: 0 0 5px rgba(46,125,50,0.2);">投注记录</h4>';
         betRecordsPopup.appendChild(header);
 
         // 投注记录弹窗不需要最小化按钮和刷新按钮，只使用主界面的控制
@@ -175,11 +121,11 @@
         const recordsContent = document.createElement('div');
         recordsContent.id = 'bet-records-container';
         recordsContent.style.cssText = `
-            max-height: 550px; /* 更高一些 */
+            max-height: 500px;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: #bbbbbb #f0f0f0;
-            padding: 15px; /* 更大的内边距 */
+            padding: 10px;
             background-color: rgba(240, 240, 240, 0.6);
             border-radius: 8px;
             border: 1px solid rgba(200, 200, 200, 0.4);
@@ -206,52 +152,47 @@
                 background-color: #999999;
             }
             .bet-record-item {
-                margin-bottom: 12px;
-                padding: 12px;
+                margin-bottom: 10px;
+                padding: 10px;
                 background-color: rgba(255, 255, 255, 0.8);
                 border-radius: 8px;
-                border-right: 3px solid #e65100;
+                border-left: 3px solid #e65100;
                 animation: fadeIn 0.3s ease;
                 transition: all 0.2s ease;
             }
             .bet-record-item:hover {
-                transform: translateX(-2px);
+                transform: translateX(2px);
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
             .bet-record-team {
                 font-weight: bold;
-                margin-bottom: 8px;
+                margin-bottom: 5px;
                 color: #333333;
-                font-size: 14px;
             }
             .bet-record-info {
                 display: flex;
                 justify-content: space-between;
-                font-size: 12px;
+                font-size: 11px;
                 color: #666666;
-                margin-bottom: 5px;
             }
             .bet-record-status {
-                padding: 4px 10px;
-                border-radius: 5px;
-                font-size: 13px;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 12px;
                 font-weight: bold;
                 background-color: rgba(240, 240, 240, 0.8);
             }
             .bet-record-status.pending {
                 background-color: rgba(255, 152, 0, 0.2);
                 color: #e65100;
-                border-right: 2px solid #e65100;
             }
             .bet-record-status.win {
                 background-color: rgba(76, 175, 80, 0.2);
                 color: #2e7d32;
-                border-right: 2px solid #2e7d32;
             }
             .bet-record-status.lose {
                 background-color: rgba(244, 67, 54, 0.2);
                 color: #d32f2f;
-                border-right: 2px solid #d32f2f;
             }
         `;
         document.head.appendChild(style);
@@ -297,11 +238,11 @@
                         <span>类型: ${record.matchType}</span>
                         <span>时间: ${formattedTime}</span>
                     </div>
-                    <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
                         <span class="bet-record-status ${statusClass}">${record.status}</span>
                         <div>
-                            <button class="record-btn win-btn" data-id="${record.id}" style="background-color: rgba(76, 175, 80, 0.7); color: white; border: none; border-radius: 4px; padding: 3px 8px; margin-right: 8px; cursor: pointer; font-size: 12px;">赢</button>
-                            <button class="record-btn lose-btn" data-id="${record.id}" style="background-color: rgba(244, 67, 54, 0.7); color: white; border: none; border-radius: 4px; padding: 3px 8px; cursor: pointer; font-size: 12px;">输</button>
+                            <button class="record-btn win-btn" data-id="${record.id}" style="background-color: rgba(76, 175, 80, 0.7); color: white; border: none; border-radius: 3px; padding: 2px 5px; margin-right: 5px; cursor: pointer; font-size: 11px;">赢</button>
+                            <button class="record-btn lose-btn" data-id="${record.id}" style="background-color: rgba(244, 67, 54, 0.7); color: white; border: none; border-radius: 3px; padding: 2px 5px; cursor: pointer; font-size: 11px;">输</button>
                         </div>
                     </div>
                 </div>
@@ -352,30 +293,27 @@
         // 创建弹窗
         matchesPopup = document.createElement('div');
         matchesPopup.id = 'matches-popup';
-        matchesPopup.className = 'popup-container';
         matchesPopup.style.cssText = `
             position: fixed;
             top: 20px;
             left: 20px;
-            width: 480px; /* 与投注记录弹窗相同宽度 */
-            max-height: 650px; /* 与投注记录弹窗相同高度 */
+            width: 420px;
+            max-height: 600px;
             background-color: rgba(255, 255, 255, 0.95);
             color: #333333;
             z-index: 10000;
             border-radius: 12px;
-            transition: all 0.5s ease; /* 添加过渡效果 */
             padding: 15px;
             font-family: 'Segoe UI', Arial, sans-serif;
             font-size: 13px;
             overflow: hidden;
             box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
             border: 1px solid rgba(200, 200, 200, 0.8);
             backdrop-filter: blur(8px);
             animation: slideIn 0.5s ease-out;
             display: flex;
             flex-direction: column;
-            transform-style: preserve-3d;
-            backface-visibility: visible;
         `;
 
         // 添加标题
@@ -485,67 +423,26 @@
             this.style.transform = 'scale(1)';
         };
 
-        // 投注记录按钮的点击事件 - 控制弹窗的翻转显示/隐藏（像书的正反面）
-        // 使用全局变量，以便投注记录弹窗中的返回按钮可以访问
-        window.betRecordsVisible = false;
+        // 投注记录按钮的点击事件 - 控制投注记录弹窗的显示/隐藏
+        let betRecordsVisible = false;
         betRecordsBtn.onclick = function() {
             const betRecordsPopup = document.getElementById('bet-records-popup');
-            const matchesPopup = document.getElementById('matches-popup');
-            if (!betRecordsPopup || !matchesPopup) return;
+            if (!betRecordsPopup) return;
 
-            if (!window.betRecordsVisible) {
-                // 显示投注记录弹窗，隐藏主脚本弹窗（翻转效果）
-                // 先更新投注记录内容
-                updateBetRecordsInPopup();
-                
-                // 设置投注记录弹窗为可见
-                betRecordsPopup.style.visibility = 'visible';
-                betRecordsPopup.style.opacity = '1';
-                betRecordsPopup.classList.add('flip-to-front');
-                betRecordsPopup.classList.remove('flip-to-back');
-                
-                // 隐藏主脚本弹窗
-                matchesPopup.classList.add('flip-to-back');
-                matchesPopup.classList.remove('flip-to-front');
-                
-                // 设置按钮状态
+            if (!betRecordsVisible) {
+                // 显示投注记录弹窗 - 从左侧滑出
+                betRecordsPopup.style.left = '445px'; // 放在主界面右侧，稍微重叠一点
+                betRecordsPopup.classList.add('visible'); // 添加visible类以显示连接线
                 betRecordsBtn.textContent = '-';
-                betRecordsBtn.title = '显示比赛数据';
-                window.betRecordsVisible = true;
-                
-                // 延迟后完全隐藏主脚本弹窗
-                setTimeout(() => {
-                    matchesPopup.style.visibility = 'hidden';
-                    matchesPopup.style.opacity = '0';
-                }, 300);
-                
-                // 显示切换提示
-                showNotification('已切换到投注记录', 'info', 1000);
+                betRecordsBtn.title = '隐藏投注记录';
+                betRecordsVisible = true;
             } else {
-                // 显示主脚本弹窗，隐藏投注记录弹窗（翻转效果）
-                // 设置主脚本弹窗为可见
-                matchesPopup.style.visibility = 'visible';
-                matchesPopup.style.opacity = '1';
-                matchesPopup.classList.add('flip-to-front');
-                matchesPopup.classList.remove('flip-to-back');
-                
-                // 隐藏投注记录弹窗
-                betRecordsPopup.classList.add('flip-to-back');
-                betRecordsPopup.classList.remove('flip-to-front');
-                
-                // 设置按钮状态
+                // 隐藏投注记录弹窗 - 滑回左侧
+                betRecordsPopup.style.left = '-420px';
+                betRecordsPopup.classList.remove('visible'); // 移除visible类以隐藏连接线
                 betRecordsBtn.textContent = '+';
                 betRecordsBtn.title = '显示投注记录';
-                window.betRecordsVisible = false;
-                
-                // 延迟后完全隐藏投注记录弹窗
-                setTimeout(() => {
-                    betRecordsPopup.style.visibility = 'hidden';
-                    betRecordsPopup.style.opacity = '0';
-                }, 300);
-                
-                // 显示切换提示
-                showNotification('已切换到比赛数据', 'info', 1000);
+                betRecordsVisible = false;
             }
         };
         header.appendChild(betRecordsBtn);
@@ -703,39 +600,6 @@
                 from { opacity: 1; }
                 to { opacity: 0; }
             }
-            /* 3D翻转动画 */
-            @keyframes flipToFront {
-                0% { transform: rotateY(180deg); opacity: 0; }
-                100% { transform: rotateY(0deg); opacity: 1; }
-            }
-            @keyframes flipToBack {
-                0% { transform: rotateY(0deg); opacity: 1; }
-                100% { transform: rotateY(180deg); opacity: 0; }
-            }
-            .flip-to-front {
-                animation: flipToFront 0.6s ease-out forwards;
-                backface-visibility: visible;
-                transform-style: preserve-3d;
-            }
-            .flip-to-back {
-                animation: flipToBack 0.6s ease-out forwards;
-                backface-visibility: visible;
-                transform-style: preserve-3d;
-            }
-            /* 弹窗容器通用样式 */
-            .popup-container {
-                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(200, 200, 200, 0.8);
-                transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease, visibility 0.5s ease;
-                transform-style: preserve-3d;
-                perspective: 1000px;
-                backface-visibility: visible;
-            }
-            .popup-container:hover {
-                transform: translateY(-2px) rotateY(0deg);
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-            }
             .match-item {
                 margin-bottom: 10px;
                 padding: 10px;
@@ -796,12 +660,6 @@
         document.head.appendChild(style);
 
         document.body.appendChild(matchesPopup);
-        
-        // 确保主脚本弹窗初始状态是可见的
-        matchesPopup.style.visibility = 'visible';
-        matchesPopup.style.opacity = '1';
-        matchesPopup.classList.add('flip-to-front');
-        
         return matchesPopup;
     }
 
@@ -1008,10 +866,35 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             min-width: 350px;
             max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(200, 200, 200, 0.8);
             backdrop-filter: blur(8px);
         `;
+        
+        // 添加滚动条样式
+        settingsPanel.style.cssText += `
+            scrollbar-width: thin;
+            scrollbar-color: #2e7d32 #f0f0f0;
+        `;
+        
+        // 添加Webkit滚动条样式
+        const scrollbarStyle = document.createElement('style');
+        scrollbarStyle.textContent = `
+            #settings-panel::-webkit-scrollbar {
+                width: 8px;
+            }
+            #settings-panel::-webkit-scrollbar-track {
+                background: #f0f0f0;
+                border-radius: 4px;
+            }
+            #settings-panel::-webkit-scrollbar-thumb {
+                background-color: #2e7d32;
+                border-radius: 4px;
+            }
+        `;
+        document.head.appendChild(scrollbarStyle);
 
         // 添加标题和关闭按钮
         const header = document.createElement('div');
@@ -1289,9 +1172,9 @@
         `;
 
         const betAmountTextLabel = document.createElement('span');
-        betAmountTextLabel.textContent = '下注金额:';
+        betAmountTextLabel.textContent = '默认下注金额:';
         betAmountTextLabel.style.cssText = `
-            width: 80px;
+            width: 100px;
             font-size: 13px;
             font-weight: bold;
         `;
@@ -1319,8 +1202,194 @@
             font-size: 11px;
             color: #666666;
             margin-top: 5px;
+            margin-bottom: 15px;
             font-style: italic;
         `;
+        betAmountDescription.textContent = '设置自动下注时的默认下注金额。';
+        betAmountSetting.appendChild(betAmountDescription);
+        
+        // 添加自定义金额和赔率设置
+        const customAmountContainer = document.createElement('div');
+        customAmountContainer.style.cssText = `
+            margin-top: 15px;
+            border-top: 1px dashed #cccccc;
+            padding-top: 15px;
+        `;
+        
+        // 添加自定义金额和赔率开关
+        const adjustAmountContainer = document.createElement('div');
+        adjustAmountContainer.style.cssText = `
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        `;
+        
+        const adjustAmountCheckbox = document.createElement('input');
+        adjustAmountCheckbox.type = 'checkbox';
+        adjustAmountCheckbox.id = 'adjust-amount-checkbox';
+        adjustAmountCheckbox.checked = userSettings.adjustBetAmountByOdds;
+        adjustAmountCheckbox.style.cssText = `
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+        `;
+        adjustAmountContainer.appendChild(adjustAmountCheckbox);
+        
+        const adjustAmountLabel = document.createElement('label');
+        adjustAmountLabel.htmlFor = 'adjust-amount-checkbox';
+        adjustAmountLabel.textContent = '根据赔率自动调整下注金额';
+        adjustAmountLabel.style.cssText = `
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        `;
+        adjustAmountContainer.appendChild(adjustAmountLabel);
+        customAmountContainer.appendChild(adjustAmountContainer);
+        
+        // 添加赔率阈值1和对应金额设置
+        const threshold1Container = document.createElement('div');
+        threshold1Container.style.cssText = `
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        `;
+        
+        const threshold1Label = document.createElement('span');
+        threshold1Label.textContent = '赔率超过:';
+        threshold1Label.style.cssText = `
+            width: 80px;
+            font-size: 13px;
+        `;
+        threshold1Container.appendChild(threshold1Label);
+        
+        const threshold1Input = document.createElement('input');
+        threshold1Input.type = 'number';
+        threshold1Input.id = 'odds-threshold1-input';
+        threshold1Input.min = '1.01';
+        threshold1Input.step = '0.01';
+        threshold1Input.value = userSettings.oddsThreshold1;
+        threshold1Input.style.cssText = `
+            width: 70px;
+            padding: 5px 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-right: 10px;
+        `;
+        threshold1Container.appendChild(threshold1Input);
+        
+        const amount1Label = document.createElement('span');
+        amount1Label.textContent = '调整注额为:';
+        amount1Label.style.cssText = `
+            margin-left: 5px;
+            margin-right: 10px;
+            font-size: 13px;
+        `;
+        threshold1Container.appendChild(amount1Label);
+        
+        const amount1Input = document.createElement('input');
+        amount1Input.type = 'number';
+        amount1Input.id = 'bet-amount1-input';
+        amount1Input.min = '1';
+        amount1Input.step = '1';
+        amount1Input.value = userSettings.betAmount1;
+        amount1Input.style.cssText = `
+            width: 70px;
+            padding: 5px 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 13px;
+        `;
+        threshold1Container.appendChild(amount1Input);
+        customAmountContainer.appendChild(threshold1Container);
+        
+        // 添加赔率阈值2和对应金额设置
+        const threshold2Container = document.createElement('div');
+        threshold2Container.style.cssText = `
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        `;
+        
+        const threshold2Label = document.createElement('span');
+        threshold2Label.textContent = '赔率超过:';
+        threshold2Label.style.cssText = `
+            width: 80px;
+            font-size: 13px;
+        `;
+        threshold2Container.appendChild(threshold2Label);
+        
+        const threshold2Input = document.createElement('input');
+        threshold2Input.type = 'number';
+        threshold2Input.id = 'odds-threshold2-input';
+        threshold2Input.min = '1.01';
+        threshold2Input.step = '0.01';
+        threshold2Input.value = userSettings.oddsThreshold2;
+        threshold2Input.style.cssText = `
+            width: 70px;
+            padding: 5px 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-right: 10px;
+        `;
+        threshold2Container.appendChild(threshold2Input);
+        
+        const amount2Label = document.createElement('span');
+        amount2Label.textContent = '调整注额为:';
+        amount2Label.style.cssText = `
+            margin-left: 5px;
+            margin-right: 10px;
+            font-size: 13px;
+        `;
+        threshold2Container.appendChild(amount2Label);
+        
+        const amount2Input = document.createElement('input');
+        amount2Input.type = 'number';
+        amount2Input.id = 'bet-amount2-input';
+        amount2Input.min = '1';
+        amount2Input.step = '1';
+        amount2Input.value = userSettings.betAmount2;
+        amount2Input.style.cssText = `
+            width: 70px;
+            padding: 5px 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 13px;
+        `;
+        threshold2Container.appendChild(amount2Input);
+        customAmountContainer.appendChild(threshold2Container);
+        
+        // 添加自定义金额说明文本
+        const customAmountDescription = document.createElement('div');
+        customAmountDescription.style.cssText = `
+            font-size: 11px;
+            color: #666666;
+            margin-top: 5px;
+            font-style: italic;
+        `;
+        customAmountDescription.textContent = '启用后，系统将根据赔率自动调整下注金额。当赔率超过设定阈值时，将使用对应的下注金额。';
+        customAmountContainer.appendChild(customAmountDescription);
+        
+        // 根据复选框状态控制自定义金额设置的可用性
+        function updateCustomAmountInputs() {
+            const isEnabled = adjustAmountCheckbox.checked;
+            threshold1Input.disabled = !isEnabled;
+            amount1Input.disabled = !isEnabled;
+            threshold2Input.disabled = !isEnabled;
+            amount2Input.disabled = !isEnabled;
+            
+            // 更新样式
+            [threshold1Input, amount1Input, threshold2Input, amount2Input].forEach(input => {
+                input.style.opacity = isEnabled ? '1' : '0.5';
+            });
+        }
+        
+        // 初始设置输入框状态
+        adjustAmountCheckbox.addEventListener('change', updateCustomAmountInputs);
+        updateCustomAmountInputs();
+        
+        betAmountSetting.appendChild(customAmountContainer);
         betAmountDescription.textContent = '设置自动下注时的下注金额。';
         betAmountSetting.appendChild(betAmountDescription);
 
@@ -1524,6 +1593,13 @@
 
             // 保存下注金额设置
             userSettings.betAmount = parseInt(document.getElementById('bet-amount-input').value);
+            
+            // 保存自定义下注金额设置
+            userSettings.adjustBetAmountByOdds = document.getElementById('adjust-amount-checkbox').checked;
+            userSettings.oddsThreshold1 = parseFloat(document.getElementById('odds-threshold1-input').value) || 1.5;
+            userSettings.betAmount1 = parseInt(document.getElementById('bet-amount1-input').value) || 100;
+            userSettings.oddsThreshold2 = parseFloat(document.getElementById('odds-threshold2-input').value) || 2.0;
+            userSettings.betAmount2 = parseInt(document.getElementById('bet-amount2-input').value) || 50;
 
             // 保存下注偏好设置
             userSettings.betHighWinRate = true; // 始终为true，默认下注胜率高的一方
@@ -2426,14 +2502,14 @@
                         startTime: matchStartTime,
                         source: 'dom-extracted'
                     };
-                    
+
                     console.log(`创建比赛对象: ${team1} vs ${team2}, 类型=${tempMatch.type}, 状态=${matchStatus}`);
-                    
+
                     // 检查队伍名称是否包含特殊字符
                     if(team1.includes('-') || team1.includes('.') || team2.includes('-') || team2.includes('.')) {
                         console.log(`注意: 检测到带有特殊字符的队伍名称: ${team1} vs ${team2}`);
                     }
-                    
+
                     // 检查队伍名称是否包含特殊字符
                     if(team1.includes('-') || team1.includes('.') || team2.includes('-') || team2.includes('.')) {
                         console.log(`注意: 检测到带有特殊字符的队伍名称: ${team1} vs ${team2}`);
@@ -2549,7 +2625,7 @@
                         startTime: matchStartTime,
                         source: 'dom-extracted'
                     };
-                    
+
                     console.log(`创建比赛对象: ${team1} vs ${team2}, 类型=${tempMatch.type}, 状态=${matchStatus}`);
 
                     // 设置赔率
@@ -2718,7 +2794,7 @@
             if (newMatch.startTime) {
                 existingMatch.startTime = newMatch.startTime;
             }
-            
+
             // 更新比赛类型（如果有新的类型信息）
             if (newMatch.type && newMatch.type !== '未知比赛' && newMatch.type !== '未知') {
                 // 标准化处理比赛类型，去除前后空格
@@ -2786,7 +2862,7 @@
     async function placeBetOnMatch() {
         // 显示状态提示
         showNotification('开始自动下注...', 'info');
-        
+
         // 每次下注前重新加载投注记录，确保数据最新
         console.log('重新加载投注记录以确保数据最新...');
         loadBetRecords();
@@ -2799,22 +2875,44 @@
             return false;
         }
         
+        // 根据赔率调整下注金额
+        let betAmount = userSettings.betAmount; // 默认使用设置的下注金额
+        
+        // 如果启用了基于赔率的下注金额调整
+        if (userSettings.adjustBetAmountByOdds) {
+            const odds = selection.odds || 0;
+            console.log(`检查是否需要根据赔率(${odds})调整下注金额`);
+            
+            // 根据赔率阈值调整下注金额
+            if (odds <= userSettings.oddsThreshold1) {
+                betAmount = userSettings.betAmount1;
+                console.log(`赔率(${odds})低于或等于阈值1(${userSettings.oddsThreshold1})，调整下注金额为: ${betAmount}`);
+            } else if (odds <= userSettings.oddsThreshold2) {
+                betAmount = userSettings.betAmount2;
+                console.log(`赔率(${odds})低于或等于阈值2(${userSettings.oddsThreshold2})，调整下注金额为: ${betAmount}`);
+            } else {
+                console.log(`赔率(${odds})高于所有阈值，使用默认下注金额: ${betAmount}`);
+            }
+        } else {
+            console.log(`未启用基于赔率的下注金额调整，使用默认下注金额: ${betAmount}`);
+        }
+
         // 检查是否已经对同一局或同一总局下注超过2次
         const matchType = selection.matchType || '未知';
         const teamNames = [selection.teamName, selection.opponentName].sort().join('-vs-');
-        
+
         console.log(`准备下注: 比赛类型=${matchType}, 队伍=${selection.teamName} vs ${selection.opponentName}`);
         console.log(`检查现有投注记录数量: ${betRecords.length}`);
-        
+
         // 计算已经对该比赛下注的次数
         let betCount = 0;
         for (const record of betRecords) {
             const recordTeamNames = [record.teamName, record.opponentName].sort().join('-vs-');
             const recordType = (record.matchType || '未知').trim().toLowerCase();
             const currentMatchType = matchType.trim().toLowerCase();
-            
+
             console.log(`检查记录: ${record.teamName} vs ${record.opponentName}, 类型=${recordType}`);
-            
+
             // 比较时忽略大小写和前后空格
             if (recordTeamNames === teamNames && recordType === currentMatchType) {
                 betCount++;
@@ -2824,14 +2922,14 @@
                 console.log(`  - 记录类型="${recordType}", 当前类型="${currentMatchType}"`);
             }
         }
-        
+
         // 如果已经下注2次，则不再下注
         if (betCount >= 2) {
             showNotification(`已对${matchType}(${selection.teamName} vs ${selection.opponentName})下注${betCount}次，达到上限`, 'warning');
             console.log(`已对${matchType}(${selection.teamName} vs ${selection.opponentName})下注${betCount}次，达到上限`);
             return false;
         }
-        
+
         console.log(`对${matchType}(${selection.teamName} vs ${selection.opponentName})已下注${betCount}次，未达上限，继续下注`);
 
         // 确保选择对象有正确的属性
@@ -2980,7 +3078,7 @@
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 return placeBetOnMatch();
             }
-            
+
             // 检查是否出现盘口关闭弹窗并关闭
             if (await closeMarketClosedPopup()) {
                 showNotification('检测到盘口关闭，稍等后继续...', 'warning');
@@ -2995,37 +3093,37 @@
 
         // 设置下注金额
         try {
-            if (!await setBetAmount(userSettings.betAmount)) {
+            if (!await setBetAmount(betAmount)) { // 使用根据赔率调整后的下注金额
                 // 检查是否是因为滚球暂停导致的失败
                 if (await closeRollingPausePopup()) {
                     showNotification('检测到滚球暂停，稍等后重试...', 'warning');
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     return placeBetOnMatch();
                 }
-                
-                // 检查是否是因为盘口关闭导致的失败
-                if (await closeMarketClosedPopup()) {
-                    showNotification('检测到盘口关闭，稍等后重试...', 'warning');
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    return placeBetOnMatch();
-                }
-                
-                // 检查是否是因为盘口关闭导致的失败
-                if (await closeMarketClosedPopup()) {
-                    showNotification('检测到盘口关闭，稍等后重试...', 'warning');
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    return placeBetOnMatch();
-                }
-                
-                // 检查是否是因为盘口关闭导致的失败
-                if (await closeMarketClosedPopup()) {
-                    showNotification('检测到盘口关闭，稍等后重试...', 'warning');
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    return placeBetOnMatch();
-                }
-                
 
-                
+                // 检查是否是因为盘口关闭导致的失败
+                if (await closeMarketClosedPopup()) {
+                    showNotification('检测到盘口关闭，稍等后重试...', 'warning');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    return placeBetOnMatch();
+                }
+
+                // 检查是否是因为盘口关闭导致的失败
+                if (await closeMarketClosedPopup()) {
+                    showNotification('检测到盘口关闭，稍等后重试...', 'warning');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    return placeBetOnMatch();
+                }
+
+                // 检查是否是因为盘口关闭导致的失败
+                if (await closeMarketClosedPopup()) {
+                    showNotification('检测到盘口关闭，稍等后重试...', 'warning');
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    return placeBetOnMatch();
+                }
+
+
+
                 // 检查是否是因为盘口关闭导致的失败
                 if (await closeMarketClosedPopup()) {
                     showNotification('检测到盘口关闭，稍等后重试...', 'warning');
@@ -3036,7 +3134,7 @@
                 return false;
             }
 
-            showNotification(`已设置下注金额: ${userSettings.betAmount}`, 'info');
+            showNotification(`已设置下注金额: ${betAmount}`, 'info'); // 显示调整后的下注金额
             await new Promise(resolve => setTimeout(resolve, 400));
         } catch (error) {
             console.error('设置下注金额时出错:', error);
@@ -3065,11 +3163,11 @@
                 teamName: selection.team?.name || selection.teamName || '未知队伍',
                 opponentName: selection.opponentName || '对手',
                 odds: selection.odds || 0,
-                amount: userSettings.betAmount,
+                amount: betAmount, // 使用根据赔率调整后的下注金额
                 matchType: (selection.matchType || '未知').trim(), // 确保matchType格式一致
                 status: '待结算' // 初始状态为待结算
             };
-            
+
             console.log(`创建新投注记录: ID=${betRecord.id}, 队伍=${betRecord.teamName} vs ${betRecord.opponentName}, 类型=${betRecord.matchType}`);
 
             console.log(`添加投注记录: ${betRecord.teamName} vs ${betRecord.opponentName}, 赔率: ${betRecord.odds}, 比赛类型: ${betRecord.matchType}`);
@@ -3309,19 +3407,61 @@
 
             // 如果没有找到符合胜率条件的比赛，则考虑只按赔率选择
             if (!selectedTeam) {
-                console.log(`  策略: 仅考虑赔率`);
-                if (team1Odds >= minOdds && team1Odds <= maxOdds) {
-                    selectedTeam = match.teams ? match.teams[0] : { name: team1Name };
-                    selectedOdds = team1Odds;
-                    opponentName = team2Name;
-                    console.log(`  选择: 队伍1 (${team1Name}), 赔率=${team1Odds}, 比赛类型=${match.type || '未知'}`);
-                } else if (team2Odds >= minOdds && team2Odds <= maxOdds) {
-                    selectedTeam = match.teams ? match.teams[1] : { name: team2Name };
-                    selectedOdds = team2Odds;
-                    opponentName = team1Name;
-                    console.log(`  选择: 队伍2 (${team2Name}), 赔率=${team2Odds}, 比赛类型=${match.type || '未知'}`);
+                console.log(`  策略: 仅考虑赔率，但仍然遵循反向下注设置: ${betLowWinRate ? '反向下注' : '正常下注'}`);
+                
+                // 即使没有胜率数据，也要考虑反向下注设置
+                // 如果开启了反向下注，我们选择赔率较高的队伍（通常赔率高意味着胜率低）
+                // 如果没有开启反向下注，我们选择赔率较低的队伍（通常赔率低意味着胜率高）
+                if (betLowWinRate) {
+                    // 反向下注：选择赔率较高的队伍
+                    if (team1Odds > team2Odds && team1Odds >= minOdds && team1Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[0] : { name: team1Name };
+                        selectedOdds = team1Odds;
+                        opponentName = team2Name;
+                        console.log(`  反向下注选择: 队伍1 (${team1Name}), 赔率=${team1Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else if (team2Odds > team1Odds && team2Odds >= minOdds && team2Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[1] : { name: team2Name };
+                        selectedOdds = team2Odds;
+                        opponentName = team1Name;
+                        console.log(`  反向下注选择: 队伍2 (${team2Name}), 赔率=${team2Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else if (team1Odds >= minOdds && team1Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[0] : { name: team1Name };
+                        selectedOdds = team1Odds;
+                        opponentName = team2Name;
+                        console.log(`  反向下注备选: 队伍1 (${team1Name}), 赔率=${team1Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else if (team2Odds >= minOdds && team2Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[1] : { name: team2Name };
+                        selectedOdds = team2Odds;
+                        opponentName = team1Name;
+                        console.log(`  反向下注备选: 队伍2 (${team2Name}), 赔率=${team2Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else {
+                        console.log(`  未选择: 赔率不在设置范围内 ${minOdds}-${maxOdds}`);
+                    }
                 } else {
-                    console.log(`  未选择: 赔率不在设置范围内 ${minOdds}-${maxOdds}`);
+                    // 正常下注：选择赔率较低的队伍
+                    if (team1Odds < team2Odds && team1Odds >= minOdds && team1Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[0] : { name: team1Name };
+                        selectedOdds = team1Odds;
+                        opponentName = team2Name;
+                        console.log(`  正常下注选择: 队伍1 (${team1Name}), 赔率=${team1Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else if (team2Odds < team1Odds && team2Odds >= minOdds && team2Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[1] : { name: team2Name };
+                        selectedOdds = team2Odds;
+                        opponentName = team1Name;
+                        console.log(`  正常下注选择: 队伍2 (${team2Name}), 赔率=${team2Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else if (team1Odds >= minOdds && team1Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[0] : { name: team1Name };
+                        selectedOdds = team1Odds;
+                        opponentName = team2Name;
+                        console.log(`  正常下注备选: 队伍1 (${team1Name}), 赔率=${team1Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else if (team2Odds >= minOdds && team2Odds <= maxOdds) {
+                        selectedTeam = match.teams ? match.teams[1] : { name: team2Name };
+                        selectedOdds = team2Odds;
+                        opponentName = team1Name;
+                        console.log(`  正常下注备选: 队伍2 (${team2Name}), 赔率=${team2Odds}, 比赛类型=${match.type || '未知'}`);
+                    } else {
+                        console.log(`  未选择: 赔率不在设置范围内 ${minOdds}-${maxOdds}`);
+                    }
                 }
             }
 
@@ -3962,7 +4102,7 @@
             showNotification('检测到滚球暂停，请稍后重试', 'warning');
             return false;
         }
-        
+
         // 检查是否出现盘口关闭弹窗
         if (await closeMarketClosedPopup()) {
             console.log('确认下注后检测到盘口关闭弹窗，已关闭');
@@ -3982,7 +4122,7 @@
         try {
             // 查找投注金额缺失弹窗
             const popupMsg = document.querySelector('div.popMsg.fadeShow');
-            if (popupMsg && popupMsg.querySelector('.pMTxt') && 
+            if (popupMsg && popupMsg.querySelector('.pMTxt') &&
                 popupMsg.querySelector('.pMTxt').textContent.includes('投注单上有一些选项缺少投注金额')) {
                 console.log('找到投注金额缺失弹窗');
 
@@ -4011,7 +4151,7 @@
                     }
 
                     await new Promise(resolve => setTimeout(resolve, 300)); // 等待操作完成
-                    
+
                     // 查找并点击"关闭"按钮
                     const closeButton = document.querySelector('div.btBtn.btBtn3');
                     if (closeButton) {
@@ -4019,7 +4159,7 @@
                         closeButton.click();
                         await new Promise(resolve => setTimeout(resolve, 300)); // 等待关闭动画完成
                     }
-                    
+
                     return true;
                 }
             }
@@ -4278,7 +4418,7 @@
             if (savedRecords) {
                 betRecords = JSON.parse(savedRecords);
                 console.log(`已加载保存的投注记录，共${betRecords.length}条`);
-                
+
                 // 输出每条记录的关键信息，帮助调试
                 betRecords.forEach((record, index) => {
                     console.log(`记录${index+1}: ${record.teamName} vs ${record.opponentName}, 类型=${record.matchType || '未知'}, 时间=${new Date(record.time).toLocaleString()}`);
@@ -4301,10 +4441,10 @@
                 console.error('保存投注记录失败: betRecords不是一个数组', betRecords);
                 betRecords = [];
             }
-            
+
             GM_setValue('betRecords', JSON.stringify(betRecords));
             console.log(`投注记录已保存，共${betRecords.length}条`);
-            
+
             // 输出最新添加的记录信息
             if (betRecords.length > 0) {
                 const latestRecord = betRecords[0]; // 假设最新记录在数组开头
