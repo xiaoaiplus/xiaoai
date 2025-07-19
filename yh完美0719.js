@@ -1926,6 +1926,9 @@
 
             console.log(`查找队伍标签，需匹配: ${team1} 和 ${team2}`);
             if (teamLabels.length >= 2) {
+                // 创建一个数组来存储标签和它们的索引
+                const labelMatches = [];
+                
                 teamLabels.forEach((label, index) => {
                     const labelText = label.textContent.trim();
                     console.log(`队伍标签 ${index}: ${labelText}`);
@@ -1933,12 +1936,29 @@
                     // 检查标签文本是否包含队伍名称
                     if (labelText.includes(team1)) {
                         console.log(`找到队伍1标签: ${labelText}`);
-                        team1Index = index % 2; // 确保索引为0或1
+                        labelMatches.push({team: 'team1', index: index});
                     } else if (labelText.includes(team2)) {
                         console.log(`找到队伍2标签: ${labelText}`);
-                        team2Index = index % 2; // 确保索引为0或1
+                        labelMatches.push({team: 'team2', index: index});
                     }
                 });
+                
+                // 根据标签在DOM中的顺序分配索引
+                if (labelMatches.length >= 2) {
+                    // 按照DOM中的顺序排序
+                    labelMatches.sort((a, b) => a.index - b.index);
+                    
+                    // 第一个标签对应索引0，第二个标签对应索引1
+                    if (labelMatches[0].team === 'team1') {
+                        team1Index = 0;
+                        team2Index = 1;
+                    } else {
+                        team1Index = 1;
+                        team2Index = 0;
+                    }
+                    
+                    console.log(`根据DOM顺序分配索引: team1=${team1Index}, team2=${team2Index}`);
+                }
             } else {
                 console.log('未找到队伍标签，使用默认顺序');
             }
@@ -1955,6 +1975,12 @@
 
                 console.log(`根据队伍索引分配胜率: team1(${team1})索引=${team1Index}, team2(${team2})索引=${team2Index}`);
                 console.log(`分配的胜率: ${team1}=${team1Rate}, ${team2}=${team2Rate}`);
+                
+                // 记录DOM结构，帮助调试
+                console.log('胜率DOM结构:');
+                for (let i = 0; i < statsPcts.length; i++) {
+                    console.log(`  statsPct[${i}]: ${statsPcts[i].textContent.trim()}`);
+                }
 
                 // 提取百分比数值（用于进度条）
                 let team1Percentage = 0;
@@ -2030,10 +2056,15 @@
                     const secondRate = userFormatMatch[5].trim();
 
                     // 根据队伍索引分配胜率数据
+                    // 确保正确分配，无论索引如何
                     const team1Rate = team1Index === 0 ? firstRate : secondRate;
-                    const team2Rate = team2Index === 1 ? secondRate : firstRate;
+                    const team2Rate = team2Index === 0 ? firstRate : secondRate;
                     const team1Percentage = team1Index === 0 ? firstPercentage : secondPercentage;
-                    const team2Percentage = team2Index === 1 ? secondPercentage : firstPercentage;
+                    const team2Percentage = team2Index === 0 ? firstPercentage : secondPercentage;
+                    
+                    console.log(`从HTML中提取胜率数据 - 原始数据: first=${firstRate}(${firstPercentage}%), second=${secondRate}(${secondPercentage}%)`);
+                    console.log(`分配后: team1(${team1})=${team1Rate}(${team1Percentage}%), team2(${team2})=${team2Rate}(${team2Percentage}%)`);
+                    console.log(`索引: team1Index=${team1Index}, team2Index=${team2Index}`);
 
                     console.log(`从用户格式HTML中提取到胜率数据: ${team1}=${team1Rate}(${team1Percentage}%), ${team2}=${team2Rate}(${team2Percentage}%), 类别=${category}`);
                     return { team1Rate, team2Rate, team1Percentage, team2Percentage };
@@ -2052,9 +2083,13 @@
 
                     // 根据队伍索引分配胜率数据
                     const team1Rate = team1Index === 0 ? firstRate : secondRate;
-                    const team2Rate = team2Index === 1 ? secondRate : firstRate;
+                    const team2Rate = team2Index === 0 ? firstRate : secondRate;
                     const team1Percentage = team1Index === 0 ? firstPercentage : secondPercentage;
-                    const team2Percentage = team2Index === 1 ? secondPercentage : firstPercentage;
+                    const team2Percentage = team2Index === 0 ? firstPercentage : secondPercentage;
+                    
+                    console.log(`从HTML中提取胜率数据 - 原始数据: first=${firstRate}(${firstPercentage}%), second=${secondRate}(${secondPercentage}%)`);
+                    console.log(`分配后: team1(${team1})=${team1Rate}(${team1Percentage}%), team2(${team2})=${team2Rate}(${team2Percentage}%)`);
+                    console.log(`索引: team1Index=${team1Index}, team2Index=${team2Index}`);
 
                     console.log(`从HTML中提取到胜率数据: ${team1}=${team1Rate}(${team1Percentage}%), ${team2}=${team2Rate}(${team2Percentage}%), 类别=${category}`);
                     return { team1Rate, team2Rate, team1Percentage, team2Percentage };
@@ -2072,9 +2107,13 @@
 
                     // 根据队伍索引分配胜率数据
                     const team1Rate = team1Index === 0 ? firstRate : secondRate;
-                    const team2Rate = team2Index === 1 ? secondRate : firstRate;
+                    const team2Rate = team2Index === 0 ? firstRate : secondRate;
                     const team1Percentage = team1Index === 0 ? firstPercentage : secondPercentage;
-                    const team2Percentage = team2Index === 1 ? secondPercentage : firstPercentage;
+                    const team2Percentage = team2Index === 0 ? firstPercentage : secondPercentage;
+                    
+                    console.log(`从简化HTML中提取胜率数据 - 原始数据: first=${firstRate}(${firstPercentage}%), second=${secondRate}(${secondPercentage}%)`);
+                    console.log(`分配后: team1(${team1})=${team1Rate}(${team1Percentage}%), team2(${team2})=${team2Rate}(${team2Percentage}%)`);
+                    console.log(`索引: team1Index=${team1Index}, team2Index=${team2Index}`);
 
                     console.log(`从简化HTML中提取到胜率数据: ${team1}=${team1Rate}(${team1Percentage}%), ${team2}=${team2Rate}(${team2Percentage}%)`);
                     return { team1Rate, team2Rate, team1Percentage, team2Percentage };
@@ -2093,9 +2132,13 @@
 
                     // 根据队伍索引分配元素
                     const team1PctEl = team1Index === 0 ? firstPct : secondPct;
-                    const team2PctEl = team2Index === 1 ? secondPct : firstPct;
+                    const team2PctEl = team2Index === 0 ? firstPct : secondPct;
                     const team1ProgEl = team1Index === 0 ? firstProg : secondProg;
-                    const team2ProgEl = team2Index === 1 ? secondProg : firstProg;
+                    const team2ProgEl = team2Index === 0 ? firstProg : secondProg;
+                    
+                    console.log(`从DOM元素分配 - 索引: team1Index=${team1Index}, team2Index=${team2Index}`);
+                    console.log(`元素内容: firstPct=${firstPct.textContent.trim()}, secondPct=${secondPct.textContent.trim()}`);
+                    console.log(`分配后: team1PctEl=${team1PctEl.textContent.trim()}, team2PctEl=${team2PctEl.textContent.trim()}`);
 
                     // 从分配的元素中获取数据
                     const team1Rate = team1PctEl.textContent.trim();
@@ -2154,9 +2197,13 @@
 
                     // 根据队伍索引分配胜率数据
                     const team1Percentage = team1Index === 0 ? firstPercentage : secondPercentage;
-                    const team2Percentage = team2Index === 1 ? secondPercentage : firstPercentage;
+                    const team2Percentage = team2Index === 0 ? firstPercentage : secondPercentage;
                     const team1Rate = team1Percentage + '%';
                     const team2Rate = team2Percentage + '%';
+                    
+                    console.log(`从直接百分比匹配 - 原始数据: first=${firstPercentage}%, second=${secondPercentage}%`);
+                    console.log(`分配后: team1(${team1})=${team1Percentage}%, team2(${team2})=${team2Percentage}%`);
+                    console.log(`索引: team1Index=${team1Index}, team2Index=${team2Index}`);
 
                     console.log(`从直接百分比匹配中提取到胜率数据: ${team1}=${team1Rate}, ${team2}=${team2Rate}`);
                     return { team1Rate, team2Rate, team1Percentage, team2Percentage };
@@ -2171,9 +2218,13 @@
 
                     // 根据队伍索引分配胜率数据
                     const team1Percentage = team1Index === 0 ? firstPercentage : secondPercentage;
-                    const team2Percentage = team2Index === 1 ? secondPercentage : firstPercentage;
+                    const team2Percentage = team2Index === 0 ? firstPercentage : secondPercentage;
                     const team1Rate = team1Percentage + '%';
                     const team2Rate = team2Percentage + '%';
+                    
+                    console.log(`从直接宽度匹配 - 原始数据: first=${firstPercentage}%, second=${secondPercentage}%`);
+                    console.log(`分配后: team1(${team1})=${team1Percentage}%, team2(${team2})=${team2Percentage}%`);
+                    console.log(`索引: team1Index=${team1Index}, team2Index=${team2Index}`);
 
                     console.log(`从直接宽度匹配中提取到胜率数据: ${team1}=${team1Rate}, ${team2}=${team2Rate}`);
                     return { team1Rate, team2Rate, team1Percentage, team2Percentage };
