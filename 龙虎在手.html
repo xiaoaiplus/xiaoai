@@ -3,38 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notebook龙虎榜</title>
+    <title>带新建功能的记事本</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            font-family: sans-serif;
         }
         body {
-            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-            min-height: 100vh;
             padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        /* 优化记事本样式 */
-        .notebook {
-            width: 100%;
             max-width: 800px;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 12px 32px rgba(174, 190, 205, 0.2);
-            overflow: hidden;
-            transition: transform 0.3s ease;
+            margin: 0 auto;
         }
-        .notebook:hover {
-            transform: translateY(-4px);
+        /* 顶部操作区：新建按钮 + 标题 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
-        /* 记事本头部 */
-        .notebook-header {
-            background: linear-gradient(90deg, #5d7fb9, #7b96c8);
+        .top-bar h1 {
+            font-size: 20px;
+        }
+        #add-note-btn {
+            padding: 8px 16px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #add-note-btn:hover {
+            background-color: #0056b3;
+        }
+        /* 说明文本样式 */
+        .note-description {
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            font-size: 14px;
+            color: #495057;
+        }
+        /* 选项卡导航：可滚动适应多文章 */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+            font-weight: 500;
+        }
+        /* 文章内容区 */
+        .tab-content {
+            display: none;
+            min-height: 300px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            outline: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部操作区 -->
+    <div class="top-bar">
+        <h1>简单记事本</h1>
+        <button id="add-note-btn">新建文章</button>
+    </div>
+
+    <!-- 新增说明文本：龙虎争霸天下 -->
+    <div class="note-description">
+        说明：本记事本支持新建文章并实时本地保存，刷新页面内容不丢失；仅提供新建功能，无删除入口，可安全记录“龙虎争霸天下”相关内容或其他信息。
+    </div>
+
+    <!-- 选项卡导航（动态生成文章标签） -->
+    <div class="tab-nav" id="tab-nav"></div>
+
+    <!-- 文章内容容器（动态生成文章内容区） -->
+    <div id="content-container"></div>
+
+    <script>
+        // 核心变量：存储文章数据（本地存储键名）
+        const STORAGE_KEY = 'simple_notes_data';
+        let notesData = [];
+
+        // DOM元素
+        const tabNav = document.getElementById('tab-nav');
+        const contentContainer = document.getElementById('content-container');
+        const addNoteBtn = document.getElementById('add-note-btn');
+
+        // 1. 初始化：从本地存储加载文章数据
+        function initNotes() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            // 若有本地数据则加载，无则初始化默认的2篇文章
+            if (savedData) {
+                notesData = JSON.parse(savedData);
+            } else {
+                notesData = [
+                    {
+                        id: 'note1',
+                        title: '文章1',
+                        content: 'U2FsdGVkX1/MhJju87zLf1bHORHtI//VqkiPm1IWV7YXt7iztmZ/Xk3lX/o6nYT+BuFenGegNgwXn+dbEX3w4aoUTciUQVcKtEO+/WNpX3tikBmFkpS+OJe90sSxx5rhdMx3QPvk/PfpfBMOTlMidXACDIGsALvS/KLtDNsVDA49M2+XzkP9Z08r3u3vi5OQteIFgtOgHIozyHCYZH5KEQMPbAbphsNS6UgnpgfOzFWQd8C7RtXV9DDpmtef9ewW3yetCQ3SceBykubMNDJd2IULc0EruATkPfDAvxT4bkJcUWz9h0BjzYtfbbRu7TSSEHhhy2jo3pufmV9ZHoJ4Nu+LVWaQw/3QenRYyHiRx/XbBnoEBgvCIb9ZCbtAmU0cij7dUChoj15muGgz8Q8MN8kB5grfLuaJpiRPlefbIV3LWEMMYrn5esaX8yYfeIpSMDNlw/KpzALrlTYY2lR4SdZNqmwVOR8BJfUTuUWXzMax/NemNQurxguHjWwA0+caB2OfQit2dDZVm8Wb2LFJcQ=='
+                    },
+                    {
+                        id: 'note2',
+                        title: '文章2',
+                        content: 'U2FsdGVkX18/j/WrfcTjV+6Ldi1ihrv+r3hsttIpIF8RWpn3JdXGQTD4WJVeTLffHG8vwLMkacRTzVFkY+DOZWrNRSJYkUg24qkVae88XYBNvirHedrwDE4cPVQIZAhBq5RKBhFqtUTpt9bvSYzVc0pJHEaHqIhjq7AqhlxCZEvnXdW+UeFaeNyup2iBDTW407ODZqujkQf0++3hd7V25KmKvKCuhP+FTRRBIR97YTtOM+ZOliFXH0Gy75v+GIC0J7zkZ8HqN3NBmo6UbSb9/A=='
+                    }
+                ];
+                // 首次初始化保存到本地
+                saveNotesToLocal();
+            }
+            // 渲染文章标签和内容
+            renderNotes();
+        }
+
+        // 2. 渲染所有文章（标签+内容）
+        function renderNotes() {
+            // 清空现有内容
+            tabNav.innerHTML = '';
+            contentContainer.innerHTML = '';
+
+            // 遍历文章数据生成标签和内容区
+            notesData.forEach((note, index) => {
+                // 生成选项卡按钮
+                const tabBtn = document.createElement('button');
+                tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`; // 默认激活第一篇
+                tabBtn.textContent = note.title;
+                tabBtn.setAttribute('data-note-id', note.id);
+                // 标签点击事件：切换文章
+                tabBtn.addEventListener('click', () => switchNote(note.id));
+                tabNav.appendChild(tabBtn);
+
+                // 生成内容区
+                const contentDiv = document.createElement('div');
+                contentDiv.className = `tab-content ${index === 0 ? 'active' : ''}`;
+                contentDiv.id = `content-${note.id}`;
+                contentDiv.textContent = note.content;
+                contentDiv.contentEditable = true; // 可编辑
+                // 内容变化事件：实时保存
+                contentDiv.addEventListener('input', () => {
+                    updateNoteContent(note.id, contentDiv.textContent);
+                });
+                contentContainer.appendChild(contentDiv);
+            });
+        }
+
+        // 3. 切换文章（激活对应标签和内容区）
+        function switchNote(noteId) {
+            // 切换标签激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-note-id') === noteId);
+            });
+            // 切换内容区显示状态
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `content-${noteId}`);
+            });
+        }
+
+        // 4. 更新文章内容并保存到本地
+        function updateNoteContent(noteId, newContent) {
+            const noteIndex = notesData.findIndex(note => note.id === noteId);
+            if (noteIndex !== -1) {
+                notesData[noteIndex].content = newContent;
+                saveNotesToLocal(); // 实时保存
+            }
+        }
+
+        // 5. 新建文章
+        function addNewNote() {
+            // 生成唯一ID（避免重复）
+            const newNoteId = `note-${Date.now()}`;
+            // 新建文章默认标题（文章3、文章4...）
+            const newNoteTitle = `文章${notesData.length + 1}`;
+            // 新增文章数据
+            const newNote = {
+                id: newNoteId,
+                title: newNoteTitle,
+                content: '' // 新文章默认空内容
+            };
+            // 添加到数据数组并保存
+            notesData.push(newNote);
+            saveNotesToLocal();
+            // 重新渲染并切换到新文章
+            renderNotes();
+            switchNote(newNoteId);
+        }
+
+        // 6. 保存文章数据到本地存储
+        function saveNotesToLocal() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notesData));
+        }
+
+        // 绑定新建按钮点击事件
+        addNoteBtn.addEventListener('click', addNewNote);
+
+        // 页面加载时初始化
+        window.addEventListener('load', initNotes);
+    </script>
+</body>
+</html>            background: linear-gradient(90deg, #5d7fb9, #7b96c8);
             padding: 20px 28px;
             color: #ffffff;
             display: flex;
