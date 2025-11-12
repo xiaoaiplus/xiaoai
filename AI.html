@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>生活历程 - 极简记录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        light: '#F8FAFC',
+                        gray: {
+                            100: '#F3F4F6',
+                            200: '#E5E7EB',
+                            600: '#4B5563',
+                            800: '#1F2937'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .touch-scale { transition: transform 0.2s ease; }
+            .touch-scale:active { transform: scale(0.96); }
+            .text-balance { text-wrap: balance; }
+            .card-hover { transition: all 0.3s ease; }
+            .card-hover:hover { transform: translateY(-2px); }
+        }
+    </style>
+    <style>
+        body {
+            overflow-x: hidden;
+            background-color: #F8FAFC;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .timeline-line {
+            left: 1.5rem;
+            top: 2rem;
+            bottom: 0;
+            width: 2px;
+            background-color: #E5E7EB;
+        }
+        .timeline-dot {
+            left: calc(1.5rem - 6px);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3B82F6;
+            border: 3px solid #F8FAFC;
+            z-index: 10;
+        }
+        ::-webkit-input-placeholder { color: #9CA3AF; }
+        :-moz-placeholder { color: #9CA3AF; opacity: 1; }
+        ::-moz-placeholder { color: #9CA3AF; opacity: 1; }
+        :-ms-input-placeholder { color: #9CA3AF; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased">
+    <!-- 顶部仅保留标题和发布按钮 -->
+    <header class="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
+        <div class="container px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-primary">生活历程</h1>
+            <button id="addBtn" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center touch-scale shadow-md">
+                <<i class="fa fa-plus"></</i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 简化发布弹窗：仅保留输入框和发布按钮 -->
+    <div id="postModal" class="fixed inset-0 bg-black/50 bg-blur z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
+        <div class="bg-white rounded-2xl w-[90%] max-w-md mx-4 transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">记录生活</h2>
+                    <button id="closeModal" class="w-8 h-8 rounded-full flex items-center justify-center touch-scale text-gray-600">
+                        <<i class="fa fa-times"></</i>
+                    </button>
+                </div>
+                <form id="postForm" class="space-y-4">
+                    <div>
+                        <textarea placeholder="记录今天的生活点滴..." class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 h-32 resize-none text-balance"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white font-medium py-3 rounded-lg touch-scale shadow-md">
+                        保存记录
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 核心：生活历程时间轴 -->
+    <section class="pt-20 pb-16 container px-6">
+        <div class="max-w-md mx-auto relative">
+            <!-- 时间轴竖线 -->
+            <div class="timeline-line absolute"></div>
+            
+            <!-- 历程卡片1 -->
+            <div class="mb-8 relative card-hover">
+                <div class="timeline-dot absolute"></div>
+                <div class="ml-12 bg-white rounded-xl shadow-sm p-5">
+                    <span class="text-xs text-gray-600 block mb-2">2025.08.15</span>
+                    <p class="text-gray-800 text-balance">终于打卡了一直想去的海边，海风、沙滩、落日，所有美好都如期而至～</p>
+                </div>
+            </div>
+            
+            <!-- 历程卡片2 -->
+            <div class="mb-8 relative card-hover">
+                <div class="timeline-dot absolute"></div>
+                <div class="ml-12 bg-white rounded-xl shadow-sm p-5">
+                    <span class="text-xs text-gray-600 block mb-2">2025.08.10</span>
+                    <p class="text-gray-800 text-balance">周末尝试做了手工意面，从和面到煮面耗时3小时，味道比外面好吃，成就感满满～</p>
+                </div>
+            </div>
+            
+            <!-- 历程卡片3 -->
+            <div class="mb-8 relative card-hover">
+                <div class="timeline-dot absolute"></div>
+                <div class="ml-12 bg-white rounded-xl shadow-sm p-5">
+                    <span class="text-xs text-gray-600 block mb-2">2025.08.05</span>
+                    <p class="text-gray-800 text-balance">坚持学习PS的第30天，今天终于独立完成了一套海报设计！慢慢积累真的有收获～</p>
+                </div>
+            </div>
+            
+            <!-- 历程卡片4 -->
+            <div class="mb-8 relative card-hover">
+                <div class="timeline-dot absolute"></div>
+                <div class="ml-12 bg-white rounded-xl shadow-sm p-5">
+                    <span class="text-xs text-gray-600 block mb-2">2025.08.01</span>
+                    <p class="text-gray-800 text-balance">给阳台的绿植换了新盆，看着它们生机勃勃的样子，心情也跟着变好～</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+</body>
+</html>
