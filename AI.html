@@ -30,36 +30,43 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            /* 终极换行方案：兼容所有字符类型 */
-            .text-wrap-all {
-                word-wrap: break-word;
-                word-break: break-all;
-                white-space: normal;
-                overflow-wrap: break-word;
-                -ms-word-break: break-all;
-                -webkit-hyphens: auto;
-                hyphens: auto;
+            /* 终极换行：强制拆分任何连续字符 */
+            .text-wrap-force {
+                word-wrap: break-word !important;
+                word-break: break-all !important;
+                white-space: normal !important;
+                overflow-wrap: break-word !important;
+                -ms-word-break: break-all !important;
+                -webkit-hyphens: auto !important;
+                hyphens: auto !important;
             }
             .card-hover { transition: all 0.3s ease; }
             .card-hover:hover { transform: translateY(-2px); }
         }
     </style>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box !important; /* 所有元素强制盒模型 */
+        }
         body {
-            overflow-x: hidden;
+            overflow-x: hidden !important;
             background-color: #F8FAFC;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            width: 100vw !important; /* 强制body宽度为屏幕宽度 */
         }
+        /* 时间轴进一步左移，几乎贴边 */
         .timeline-line {
-            left: 1.5rem;
-            top: 2rem;
+            left: 0.75rem;
+            top: 1.5rem;
             bottom: 0;
             width: 2px;
             background-color: #E5E7EB;
         }
         .timeline-dot {
-            left: calc(1.5rem - 6px);
+            left: calc(0.75rem - 6px);
             width: 12px;
             height: 12px;
             border-radius: 50%;
@@ -67,60 +74,68 @@
             border: 3px solid #F8FAFC;
             z-index: 10;
         }
-        /* 确保卡片内容不超出容器 */
+        /* 核心：强制卡片最大宽度，留出安全边距 */
+        .card-wrapper {
+            max-width: calc(100vw - 2rem) !important; /* 左右各留1rem安全边距 */
+            width: 100% !important;
+        }
         .card-content {
-            width: 100%;
-            box-sizing: border-box;
+            padding: 0 !important;
+        }
+        /* 容器零额外间距 */
+        .timeline-container {
+            padding: 0 !important;
+            margin: 0 auto !important;
         }
     </style>
 </head>
 <body class="font-sans text-gray-800 antialiased">
-    <!-- 顶部仅保留标题（去掉发布按钮） -->
+    <!-- 顶部标题极致紧凑 -->
     <header class="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
-        <div class="container px-4 py-3 flex justify-center items-center">
-            <h1 class="text-base font-semibold text-primary">生活历程</h1>
+        <div class="container px-2 py-2 flex justify-center items-center">
+            <h1 class="text-sm font-semibold text-primary">生活历程</h1>
         </div>
     </header>
 
-    <!-- 核心：生活历程时间轴（字体缩小一号） -->
-    <section class="pt-16 pb-16 container px-6">
-        <div class="max-w-md mx-auto relative">
+    <!-- 时间轴区域：零额外内边距 -->
+    <section class="pt-12 pb-10 container px-2">
+        <div class="max-w-none mx-auto relative timeline-container">
             <!-- 时间轴竖线 -->
             <div class="timeline-line absolute"></div>
             
             <!-- 历程卡片1 -->
-            <div class="mb-8 relative card-hover">
+            <div class="mb-5 relative card-hover">
                 <div class="timeline-dot absolute"></div>
-                <div class="ml-12 bg-white rounded-xl shadow-sm p-4 card-content">
-                    <span class="text-[0.75rem] text-gray-600 block mb-2">2025.08.15</span>
-                    <p class="text-gray-800 text-[0.875rem] text-wrap-all">终于打卡了一直想去的海边，海风、沙滩、落日，所有美好都如期而至～</p>
+                <div class="ml-6 bg-white rounded-xl shadow-sm p-3 card-wrapper card-content">
+                    <span class="text-[0.65rem] text-gray-600 block mb-1">2025.08.15</span>
+                    <p class="text-gray-800 text-[0.8rem] text-wrap-force">终于打卡了一直想去的海边，海风、沙滩、落日，所有美好都如期而至～</p>
                 </div>
             </div>
             
-            <!-- 历程卡片2（长文本+连续字符测试） -->
-            <div class="mb-8 relative card-hover">
+            <!-- 历程卡片2（长文本测试） -->
+            <div class="mb-5 relative card-hover">
                 <div class="timeline-dot absolute"></div>
-                <div class="ml-12 bg-white rounded-xl shadow-sm p-4 card-content">
-                    <span class="text-[0.75rem] text-gray-600 block mb-2">2025.08.10</span>
-                    <p class="text-gray-800 text-[0.875rem] text-wrap-all">周末尝试做了手工意面，从和面到煮面耗时3小时，增仓非绿，板块多个高位增仓绿跳过此板块，【多位高票增仓0就尾盘进隔天卖】味道比外面好吃，成就感满满～</p>
+                <div class="ml-6 bg-white rounded-xl shadow-sm p-3 card-wrapper card-content">
+                    <span class="text-[0.65rem] text-gray-600 block mb-1">2025.08.10</span>
+                    <p class="text-gray-800 text-[0.8rem] text-wrap-force">周末尝试做了手工意面，从和面到煮面耗时3小时，增仓非绿，板块多个高位增仓绿跳过此板块，【多位高票增仓0就尾盘进隔天卖】味道比外面好吃，成就感满满～</p>
                 </div>
             </div>
             
             <!-- 历程卡片3（超长特殊字符串测试） -->
-            <div class="mb-8 relative card-hover">
+            <div class="mb-5 relative card-hover">
                 <div class="timeline-dot absolute"></div>
-                <div class="ml-12 bg-white rounded-xl shadow-sm p-4 card-content">
-                    <span class="text-[0.75rem] text-gray-600 block mb-2">2025.08.05</span>
-                    <p class="text-gray-800 text-[0.875rem] text-wrap-all">坚持学习PS的第30天，今天终于独立完成了一套海报设计！慢慢积累真的有收获～【U2FsdGVkX19dZZ4AevACzo8nCIz9tciptpBMIEcAWGTEzoGaX0bMXhjc/ZZ31WALn4m/hayYhnrZNXsc4QeMZvY5Zr7JF1fHHHnJlKRJW926qmKC08euMbWhWB1tvlqQSXGed5vrVhRr36eaUSKl3676OlteX630dcaPmQTdOaA=】</p>
+                <div class="ml-6 bg-white rounded-xl shadow-sm p-3 card-wrapper card-content">
+                    <span class="text-[0.65rem] text-gray-600 block mb-1">2025.08.05</span>
+                    <p class="text-gray-800 text-[0.8rem] text-wrap-force">坚持学习PS的第30天，今天终于独立完成了一套海报设计！慢慢积累真的有收获～【U2FsdGVkX19dZZ4AevACzo8nCIz9tciptpBMIEcAWGTEzoGaX0bMXhjc/ZZ31WALn4m/hayYhnrZNXsc4QeMZvY5Zr7JF1fHHHnJlKRJW926qmKC08euMbWhWB1tvlqQSXGed5vrVhRr36eaUSKl3676OlteX630dcaPmQTdOaA=】</p>
                 </div>
             </div>
             
             <!-- 历程卡片4（特殊字符测试） -->
-            <div class="mb-8 relative card-hover">
+            <div class="mb-5 relative card-hover">
                 <div class="timeline-dot absolute"></div>
-                <div class="ml-12 bg-white rounded-xl shadow-sm p-4 card-content">
-                    <span class="text-[0.75rem] text-gray-600 block mb-2">2025.08.01</span>
-                    <p class="text-gray-800 text-[0.875rem] text-wrap-all">给阳台的绿植换了新盆，看着它们生机勃勃的样子，心情也跟着变好～【U2FsdGVkX18y1q3Vt16RkaR3q1VuqXy0VB2UkGKRTP26gzQmskSY5xYWCldGXcRk+ab5/ETz6vRtiutlKiCrz87s5p4jspsPr7lJSTfvnqb5nhGmoA040x3XV8pqRe2K8R0sZWDVnfVjeJZWCDpkCwT7uxyLQc82nBCY/I6m0Dk=】</p>
+                <div class="ml-6 bg-white rounded-xl shadow-sm p-3 card-wrapper card-content">
+                    <span class="text-[0.65rem] text-gray-600 block mb-1">2025.08.01</span>
+                    <p class="text-gray-800 text-[0.8rem] text-wrap-force">给阳台的绿植换了新盆，看着它们生机勃勃的样子，心情也跟着变好～【U2FsdGVkX18y1q3Vt16RkaR3q1VuqXy0VB2UkGKRTP26gzQmskSY5xYWCldGXcRk+ab5/ETz6vRtiutlKiCrz87s5p4jspsPr7lJSTfvnqb5nhGmoA040x3XV8pqRe2K8R0sZWDVnfVjeJZWCDpkCwT7uxyLQc82nBCY/I6m0Dk=】</p>
                 </div>
             </div>
         </div>
