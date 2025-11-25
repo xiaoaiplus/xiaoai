@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>极简小说阅读器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f5f5f5; font-family: 'Segoe UI', Roboto, sans-serif; color: #333; }
+        /* 容器 */
+        .reader-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 标题栏 */
+        .reader-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .book-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 5px;
+        }
+        .book-author {
+            font-size: 15px;
+            color: #888;
+        }
+        /* 阅读区 */
+        .reader-content {
+            flex: 1;
+            line-height: 1.8;
+            font-size: 18px;
+            padding: 30px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+        .reader-content p {
+            margin-bottom: 20px;
+            text-indent: 2em;
+        }
+        .reader-content p:last-child { margin-bottom: 0; }
+        /* 工具栏 */
+        .reader-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .tool-btn {
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tool-btn:hover {
+            background: #f0f0f0;
+            color: #222;
+        }
+        .font-size-group {
+            display: flex;
+            gap: 8px;
+        }
+        /* 夜间模式 */
+        body.dark-mode { background: #121212; }
+        .dark-mode .reader-header { border-bottom-color: #2a2a2a; }
+        .dark-mode .book-title { color: #eee; }
+        .dark-mode .book-author { color: #aaa; }
+        .dark-mode .reader-content {
+            background: #1e1e1e;
+            color: #ddd;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        .dark-mode .reader-toolbar {
+            background: #1e1e1e;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .dark-mode .tool-btn {
+            color: #aaa;
+        }
+        .dark-mode .tool-btn:hover {
+            background: #2a2a2a;
+            color: #eee;
+        }
+        /* 适配移动端 */
+        @media (max-width: 600px) {
+            .reader-content {
+                padding: 20px 15px;
+                font-size: 17px;
+            }
+            .book-title { font-size: 22px; }
+            .reader-toolbar { padding: 10px 15px; }
+            .tool-btn { font-size: 15px; padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="reader-container">
+        <!-- 标题区 -->
+        <div class="reader-header">
+            <h1 class="book-title">平凡的世界</h1>
+            <p class="book-author">路遥 著</p>
+        </div>
+        <!-- 阅读区 -->
+        <div class="reader-content" id="content">
+            <p>一九七五年二三月间，一个平平常常的日子，细蒙蒙的雨丝夹着一星半点的雪花，正纷纷淋淋地向大地飘洒着。时令已快到惊蛰，雪当然再不会存留，往往还没等落地，就已经消失得无踪无影了。黄土高原严寒而漫长的冬天看来就要过去，但那真正温暖的春天还远远地没有到来。</p>
+            <p>在这样雨雪交加的日子里，如果没有什么紧要事，人们宁愿一整天足不出户。因此，县城的大街小巷倒也比平时少了许多嘈杂。街巷里的土路面，被雨水浸泡得泥泞不堪，踩上去发出“咯吱咯吱”的声响。空气里弥漫着一股潮湿的、泥土的气息，混合着淡淡的煤烟味。</p>
+            <p>县立高中的大院里，此刻却异常热闹。每个角落里几乎都聚集着一群群学生，他们兴奋地谈论着什么，声音里充满了期待和好奇。原来，今天是学校公布高考预选结果的日子。童话顺总榜交绿②ZT表现一板（涨停原因1排序；净额红＞卖出红）③隔天入场对于这群来自黄土高原各个角落的农村孩子来说，高考几乎是他们走出大山、改变命运的唯一途径。</p>
+            <p>孙少平穿着一件打了补丁的旧蓝布褂子，站在人群的边缘，心里像揣了一只兔子，怦怦直跳。他的脸色有些苍白，嘴唇微微抿着，眼神里既有紧张，又有一丝不易察觉的渴望。他来自双水村，家里条件很差，能读完高中已经很不容易了。如果这次能预选上，他就有机会参加高考，说不定就能考上大学，从此摆脱面朝黄土背朝天的生活。</p>
+            <p>人群渐渐安静下来，大家的目光都投向了贴在公告栏上的那张红纸。①童话顺总榜交红②ZT表现二板以上（涨停原因1排序；净额红＞卖出红）③隔天入场（注第三天净额绿说明连班）红纸上用毛笔写着预选合格的学生名单，一个个名字清晰可见。孙少平深吸一口气，挤到前面，顺着名单往下看。他的心跳越来越快，眼睛紧紧盯着那些熟悉或陌生的名字，生怕漏掉自己的。</p>
+            <p>名单不长，很快就看完了。孙少平没有找到自己的名字，心里像被泼了一盆冷水，瞬间凉了半截。他呆呆地站在那里，脑子里一片空白，耳边的喧闹声仿佛都消失了。他知道，自己的大学梦，就这样破碎了。</p>
+            <p>过了好一会儿，孙少平才缓过神来。他默默地转过身，走出人群，沿着泥泞的小路往宿舍走去。雨点打在他的脸上，冰凉冰凉的，和他此刻的心情一样。他没有哭，也没有抱怨，只是觉得心里很沉重。他知道，生活还要继续，即使不能考上大学，他也不能放弃希望。</p>
+            <p>回到宿舍，孙少平坐在自己的床铺上，看着窗外淅淅沥沥的雨丝，陷入了沉思。他想起了家里的父母，想起了懂事的妹妹兰香，想起了勤劳朴实的哥哥少安。他不能让家人失望，更不能让自己失望。他暗暗下定决心，就算不能上大学，也要靠自己的努力，活出不一样的人生。</p>
+            <p>雨还在下着，但孙少平的心里，却渐渐燃起了一股火焰。他知道，未来的路还很长，会遇到很多困难和挫折，但他不会退缩。他要像黄土高原上的白杨树一样，坚韧不拔，顽强地生长。</p>
+        </div>
+        <!-- 工具栏 -->
+        <div class="reader-toolbar">
+            <div class="font-size-group">
+                <button class="tool-btn" id="fontSmall">A-</button>
+                <button class="tool-btn" id="fontDefault">A</button>
+                <button class="tool-btn" id="fontBig">A+</button>
+            </div>
+            <button class="tool-btn" id="nightMode">夜间</button>
+            <button class="tool-btn" id="prevChapter">上一章</button>
+            <button class="tool-btn" id="nextChapter">下一章</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const contentEl = document.getElementById('content');
+        const nightModeBtn = document.getElementById('nightMode');
+        const fontSmallBtn = document.getElementById('fontSmall');
+        const fontDefaultBtn = document.getElementById('fontDefault');
+        const fontBigBtn = document.getElementById('fontBig');
+        const prevChapterBtn = document.getElementById('prevChapter');
+        const nextChapterBtn = document.getElementById('nextChapter');
+        const bodyEl = document.body;
+
+        // 字体大小控制
+        let currentFontSize = 18; // 默认字体大小
+        fontSmallBtn.addEventListener('click', () => {
+            currentFontSize = Math.max(15, currentFontSize - 1);
+            contentEl.style.fontSize = `${currentFontSize}px`;
+        });
+        fontDefaultBtn.addEventListener('click', () => {
+            currentFontSize = 18;
+            contentEl.style.fontSize = `${currentFontSize}px`;
+        });
+        fontBigBtn.addEventListener('click', () => {
+            currentFontSize = Math.min(24, currentFontSize + 1);
+            contentEl.style.fontSize = `${currentFontSize}px`;
+        });
+
+        // 夜间模式切换
+        let isDarkMode = false;
+        nightModeBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            bodyEl.classList.toggle('dark-mode', isDarkMode);
+            nightModeBtn.textContent = isDarkMode ? '日间' : '夜间';
+        });
+
+        // 章节切换（模拟）
+        prevChapterBtn.addEventListener('click', () => {
+            alert('已到第一章');
+        });
+        nextChapterBtn.addEventListener('click', () => {
+            alert('下一章内容加载中...');
+        });
+
+        // 移动端滑动翻页
+        let startX = 0;
+        contentEl.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+        contentEl.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            const diffX = endX - startX;
+            // 左滑下一章，右滑上一章
+            if (diffX < -50) nextChapterBtn.click();
+            if (diffX > 50) prevChapterBtn.click();
+        });
+    </script>
+</body>
+</html>
