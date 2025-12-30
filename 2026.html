@@ -53,9 +53,10 @@
             filter: brightness(var(--brightness));
             transition: all 0.3s ease;
             padding-bottom: 120px;
+            overflow-x: hidden;
         }
 
-        /* 顶部导航栏（仿APP标题栏） */
+        /* 顶部导航栏（完全匹配示例图标） */
         .top-nav {
             position: fixed;
             top: 0;
@@ -68,11 +69,13 @@
             justify-content: space-between;
             align-items: center;
             z-index: 90;
+            height: 56px;
         }
         .nav-left {
             font-size: 1.2rem;
             color: var(--text-color);
             cursor: pointer;
+            width: 24px;
         }
         .nav-middle {
             display: flex;
@@ -95,6 +98,8 @@
             font-size: 1.1rem;
             color: var(--text-color);
             cursor: pointer;
+            width: 24px;
+            text-align: center;
         }
         .free-tag {
             position: relative;
@@ -106,23 +111,26 @@
             right: -8px;
             font-size: 0.6rem;
             color: #fff;
-            background-color: #e74c3c;
+            background-color: #ff6050;
             border-radius: 3px;
             padding: 0 3px;
         }
 
-        /* 小说阅读核心区域（主体内容） */
+        /* 小说阅读核心区域（修复双击触发问题） */
         .reader-content {
-            margin-top: 5rem;
+            margin-top: 56px;
             padding: 0 1.5rem;
-            max-width: 100%;
+            width: 100%;
         }
         .chapter-title {
             font-size: 1.5rem;
             color: var(--title-color);
             text-align: center;
-            margin-bottom: 2rem;
+            margin: 2rem 0;
             font-weight: 600;
+        }
+        .novel-text-wrap {
+            cursor: text;
         }
         .novel-text {
             font-size: var(--font-size);
@@ -130,18 +138,19 @@
             letter-spacing: 0.02em;
             white-space: pre-wrap;
             word-break: break-word;
-            cursor: text;
-            text-indent: 2em; /* 段前空两格，仿小说排版 */
+            text-indent: 2em; /* 段前空两格 */
             margin-bottom: 1.5rem;
+            color: var(--text-color);
         }
         .decrypt-hint {
             text-align: center;
             color: var(--hint-color);
             font-size: 0.9rem;
             margin-top: 2rem;
+            display: block;
         }
 
-        /* 底部阅读控制区（进度条+功能按钮） */
+        /* 底部阅读控制区（匹配示例功能按钮） */
         .bottom-control {
             position: fixed;
             bottom: 0;
@@ -149,14 +158,14 @@
             right: 0;
             background-color: var(--bg-color);
             border-top: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
+            padding: 0.8rem 1.5rem 1rem;
             z-index: 90;
         }
         .progress-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
         .chapter-btn {
             font-size: 0.9rem;
@@ -164,13 +173,14 @@
             background: transparent;
             border: none;
             cursor: pointer;
+            width: 60px;
         }
         .progress-wrap {
             flex: 1;
             height: 6px;
             background-color: var(--progress-color);
             border-radius: 3px;
-            margin: 0 1rem;
+            margin: 0 0.8rem;
             overflow: hidden;
         }
         .progress-fill {
@@ -178,6 +188,7 @@
             width: 20%; /* 模拟阅读进度 */
             background-color: var(--progress-active);
             border-radius: 3px;
+            transition: width 0.3s ease;
         }
         .func-btns {
             display: flex;
@@ -194,13 +205,14 @@
             border: none;
             cursor: pointer;
             font-size: 0.8rem;
+            width: 60px;
         }
         .func-icon {
             font-size: 1.2rem;
             margin-bottom: 0.2rem;
         }
 
-        /* 解密弹窗（双击文本弹出） */
+        /* 解密弹窗（强制显示，修复输入问题） */
         .decrypt-modal {
             position: fixed;
             top: 0;
@@ -213,7 +225,13 @@
             align-items: center;
             justify-content: center;
             z-index: 999;
-            display: none;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .decrypt-modal.show {
+            opacity: 1;
+            pointer-events: auto;
         }
         .modal-box {
             background-color: var(--modal-content-bg);
@@ -222,6 +240,7 @@
             width: 100%;
             max-width: 360px;
             margin: 0 1rem;
+            border: 1px solid var(--border-color);
         }
         .modal-title {
             font-size: 1.1rem;
@@ -240,9 +259,11 @@
             font-size: 0.95rem;
             outline: none;
             margin-bottom: 0.5rem;
+            display: block;
         }
         .modal-input:focus {
             border-color: var(--progress-active);
+            box-shadow: 0 0 0 2px rgba(184, 168, 143, 0.2);
         }
         .error-tip {
             color: var(--error-color);
@@ -278,7 +299,7 @@
             opacity: 0.9;
         }
 
-        /* 响应式适配（手机端极致贴合） */
+        /* 响应式适配 */
         @media (max-width: 768px) {
             :root {
                 --font-size: 1.1rem;
@@ -294,18 +315,17 @@
                 font-size: 0.85rem;
             }
             .reader-content {
-                margin-top: 4.5rem;
                 padding: 0 1rem;
             }
             .chapter-title {
                 font-size: 1.3rem;
-                margin-bottom: 1.5rem;
+                margin: 1.5rem 0;
             }
             .bottom-control {
-                padding: 0.8rem 1rem;
+                padding: 0.6rem 1rem 0.8rem;
             }
             .progress-wrap {
-                margin: 0 0.8rem;
+                margin: 0 0.5rem;
             }
             .func-icon {
                 font-size: 1.1rem;
@@ -317,7 +337,7 @@
     </style>
 </head>
 <body>
-    <!-- 顶部导航栏 -->
+    <!-- 顶部导航栏（匹配示例图标） -->
     <div class="top-nav">
         <div class="nav-left">←</div>
         <div class="nav-middle">
@@ -331,15 +351,17 @@
         </div>
     </div>
 
-    <!-- 小说阅读核心内容 -->
+    <!-- 小说阅读核心内容（外层包裹修复双击） -->
     <div class="reader-content">
         <h1 class="chapter-title">第1章 车队第一铁律</h1>
-        <!-- 【替换此处：粘贴你的AES-ECB密文】 -->
-        <div class="novel-text" id="novelText">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
-        <p class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读</p>
+        <div class="novel-text-wrap" id="novelTextWrap">
+            <!-- 【替换此处：粘贴你的AES-ECB密文】 -->
+            <div class="novel-text" id="novelText">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
+            <span class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读</span>
+        </div>
     </div>
 
-    <!-- 底部阅读控制区 -->
+    <!-- 底部阅读控制区（匹配示例按钮） -->
     <div class="bottom-control">
         <div class="progress-bar">
             <button class="chapter-btn">上一章</button>
@@ -350,7 +372,7 @@
         </div>
         <div class="func-btns">
             <button class="func-btn" id="catalogBtn">
-                <span class="func-icon">📖</span>
+                <span class="func-icon">☰</span>
                 <span>目录</span>
             </button>
             <button class="func-btn" id="nightModeBtn">
@@ -364,7 +386,7 @@
         </div>
     </div>
 
-    <!-- 解密弹窗 -->
+    <!-- 解密弹窗（独立层级，确保输入） -->
     <div class="decrypt-modal" id="decryptModal">
         <div class="modal-box">
             <h3 class="modal-title">输入密钥解锁内容</h3>
@@ -378,13 +400,16 @@
     </div>
 
     <script>
-        // 核心变量
+        // 核心变量（确保DOM元素正确获取）
         const root = document.documentElement;
+        const novelTextWrap = document.getElementById('novelTextWrap');
         const novelText = document.getElementById('novelText');
         const decryptModal = document.getElementById('decryptModal');
         const secretKey = document.getElementById('secretKey');
         const errorTip = document.getElementById('errorTip');
         const decryptHint = document.getElementById('decryptHint');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
         const nightModeBtn = document.getElementById('nightModeBtn');
         const settingBtn = document.getElementById('settingBtn');
         const progressFill = document.getElementById('progressFill');
@@ -398,26 +423,33 @@
             padding: CryptoJS.pad.Pkcs7
         };
 
-        // 1. 双击正文弹出解密弹窗
-        novelText.addEventListener('dblclick', () => {
+        // 1. 修复双击触发：绑定外层容器，确保弹窗弹出
+        novelTextWrap.addEventListener('dblclick', () => {
             if (isUnlocked) return;
-            decryptModal.style.display = 'flex';
-            secretKey.value = '';
-            errorTip.style.display = 'none';
-            secretKey.focus();
+            decryptModal.classList.add('show'); // 显示弹窗
+            secretKey.value = ''; // 清空输入框
+            errorTip.style.display = 'none'; // 隐藏错误提示
+            setTimeout(() => {
+                secretKey.focus(); // 强制聚焦输入框
+            }, 100);
         });
 
         // 2. 关闭弹窗
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            decryptModal.style.display = 'none';
+        cancelBtn.addEventListener('click', () => {
+            decryptModal.classList.remove('show');
             errorTip.style.display = 'none';
             secretKey.value = '';
         });
 
-        // 3. 核心解密逻辑（纯本地执行）
-        document.getElementById('unlockBtn').addEventListener('click', doDecrypt);
-        // 回车快捷解密
-        secretKey.addEventListener('keydown', (e) => e.key === 'Enter' && doDecrypt());
+        // 3. 核心解密逻辑（修复解密失败问题）
+        unlockBtn.addEventListener('click', doDecrypt);
+        // 回车快捷解密（确保触发）
+        secretKey.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doDecrypt();
+            }
+        });
 
         function doDecrypt() {
             const keyVal = secretKey.value.trim();
@@ -430,26 +462,33 @@
             }
 
             try {
-                const key = CryptoJS.enc.Utf8.parse(keyVal);
+                // 密钥处理：补全为16/24/32位（AES要求）
+                const key = CryptoJS.enc.Utf8.parse(padKey(keyVal));
                 const decrypted = CryptoJS.AES.decrypt(cipherText, key, AES_CONFIG);
                 const plainText = decrypted.toString(CryptoJS.enc.Utf8);
 
                 if (!plainText || plainText.length === 0) throw new Error('解密失败');
                 
-                // 解密成功：替换内容，模拟小说分段排版（段前空两格自动生效）
+                // 解密成功：替换内容
                 novelText.textContent = plainText;
                 isUnlocked = true;
                 decryptHint.style.display = 'none';
-                decryptModal.style.display = 'none';
-                // 模拟阅读进度更新（可根据实际内容长度调整）
-                progressFill.style.width = '100%';
+                decryptModal.classList.remove('show');
+                progressFill.style.width = '100%'; // 更新阅读进度
             } catch (err) {
+                console.error('解密错误：', err);
                 errorTip.textContent = '密钥错误或密文无效，请重试';
                 errorTip.style.display = 'block';
             }
         }
 
-        // 4. 夜间/日间模式切换
+        // 辅助：密钥补全（AES要求密钥为16/24/32位）
+        function padKey(key) {
+            while (key.length < 16) key += key;
+            return key.substring(0, 16); // 取16位（AES-128，也可改为32位AES-256）
+        }
+
+        // 4. 夜间/日间模式切换（匹配示例图标）
         nightModeBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
             const icon = nightModeBtn.querySelector('.func-icon');
@@ -457,40 +496,41 @@
             nightModeBtn.querySelector('span:last-child').textContent = document.body.classList.contains('dark-mode') ? '日间' : '夜间';
         });
 
-        // 5. 设置功能（字体大小+亮度调节，点击弹出简易设置面板）
+        // 5. 设置功能（字体+亮度调节）
         settingBtn.addEventListener('click', () => {
-            const settingHtml = `
-                <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--modal-content-bg);padding:1.5rem;border-radius:10px;z-index:1000;width:80%;max-width:300px;">
-                    <h4 style="text-align:center;color:var(--title-color);margin-bottom:1rem;">阅读设置</h4>
-                    <div style="margin-bottom:1rem;">
-                        <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">字体大小</p>
-                        <div style="display:flex;gap:0.5rem;align-items:center;">
-                            <button class="set-btn" id="fontMinus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">缩小</button>
-                            <button class="set-btn" id="fontPlus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">放大</button>
-                        </div>
-                    </div>
-                    <div style="margin-bottom:1rem;">
-                        <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">亮度调节</p>
-                        <input type="range" id="brightnessSlider" min="50" max="150" value="${brightness}" style="width:100%;height:4px;accent-color:var(--progress-active);">
-                    </div>
-                    <button id="closeSetting" style="width:100%;padding:0.7rem;border:none;background:var(--progress-active);color:#fff;border-radius:4px;margin-top:0.5rem;">确定</button>
-                </div>
-                <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;"></div>
-            `;
             const settingPanel = document.createElement('div');
-            settingPanel.id = 'settingPanel';
-            settingPanel.innerHTML = settingHtml;
+            settingPanel.style.cssText = `
+                position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--modal-content-bg);padding:1.5rem;border-radius:10px;z-index:1000;width:80%;max-width:300px;border:1px solid var(--border-color);
+            `;
+            settingPanel.innerHTML = `
+                <h4 style="text-align:center;color:var(--title-color);margin-bottom:1rem;">阅读设置</h4>
+                <div style="margin-bottom:1rem;">
+                    <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">字体大小</p>
+                    <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center;">
+                        <button id="fontMinus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">缩小</button>
+                        <button id="fontPlus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">放大</button>
+                    </div>
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">亮度调节</p>
+                    <input type="range" id="brightnessSlider" min="50" max="150" value="${brightness}" style="width:100%;height:4px;accent-color:var(--progress-active);">
+                </div>
+                <button id="closeSetting" style="width:100%;padding:0.7rem;border:none;background:var(--progress-active);color:#fff;border-radius:4px;margin-top:0.5rem;">确定</button>
+            `;
+            const mask = document.createElement('div');
+            mask.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;';
+            document.body.appendChild(mask);
             document.body.appendChild(settingPanel);
 
             // 字体大小调节
             document.getElementById('fontMinus').addEventListener('click', () => {
-                if (fontSize > 0.9rem) {
+                if (fontSize > 0.9) {
                     fontSize -= 0.05;
                     root.style.setProperty('--font-size', `${fontSize}rem`);
                 }
             });
             document.getElementById('fontPlus').addEventListener('click', () => {
-                if (fontSize < 1.5rem) {
+                if (fontSize < 1.5) {
                     fontSize += 0.05;
                     root.style.setProperty('--font-size', `${fontSize}rem`);
                 }
@@ -505,27 +545,25 @@
             // 关闭设置面板
             document.getElementById('closeSetting').addEventListener('click', () => {
                 document.body.removeChild(settingPanel);
+                document.body.removeChild(mask);
             });
-            settingPanel.querySelector('div:last-child').addEventListener('click', () => {
+            mask.addEventListener('click', () => {
                 document.body.removeChild(settingPanel);
+                document.body.removeChild(mask);
             });
         });
 
-        // 6. 模拟章节切换（仅视觉效果，可根据实际小说内容扩展）
-        document.querySelector('.progress-bar .chapter-btn:first-child').addEventListener('click', () => {
-            if (isUnlocked) {
-                alert('已是第一章');
-            }
+        // 6. 模拟章节切换
+        document.querySelectorAll('.chapter-btn')[0].addEventListener('click', () => {
+            isUnlocked ? alert('已是第一章') : alert('请先解锁内容');
         });
-        document.querySelector('.progress-bar .chapter-btn:last-child').addEventListener('click', () => {
-            if (isUnlocked) {
-                alert('暂无下一章');
-            }
+        document.querySelectorAll('.chapter-btn')[1].addEventListener('click', () => {
+            isUnlocked ? alert('暂无下一章') : alert('请先解锁内容');
         });
 
-        // 7. 目录按钮（模拟弹窗，可扩展实际目录列表）
+        // 7. 目录按钮
         document.getElementById('catalogBtn').addEventListener('click', () => {
-            alert('目录列表（可根据小说内容扩展章节列表）');
+            isUnlocked ? alert('目录：\n1. 车队第一铁律\n2. 待更新') : alert('请先解锁内容');
         });
     </script>
 </body>
