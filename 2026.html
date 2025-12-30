@@ -2,439 +2,530 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>沉浸式小说阅读器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>小说阅读器</title>
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
         }
 
         :root {
-            --primary-color: #2d3748;
-            --bg-color: #f5f5f3;
-            --card-bg: #ffffff;
-            --text-color: #333331;
-            --light-text: #718096;
-            --border-color: #e9e9e6;
-            --success-color: #38a169;
-            --error-color: #e53e3e;
-            --control-bg: rgba(255,255,255,0.95);
-            --control-text: #333;
-            --transition: all 0.3s ease;
-            --read-line-height: 2;
-            --read-font-size: 1.15rem;
+            --bg-color: #f0e6d2; /* 示例米色护眼背景 */
+            --content-bg: #f0e6d2;
+            --text-color: #333333;
+            --title-color: #222222;
+            --hint-color: #887e6c;
+            --border-color: #d4c8b0;
+            --error-color: #e74c3c;
+            --progress-color: #d4c8b0;
+            --progress-active: #b8a88f;
+            --btn-bg: #f0e6d2;
+            --btn-text: #555555;
+            --modal-bg: rgba(0, 0, 0, 0.7);
+            --modal-content-bg: #f9f5eb;
+            --font-size: 1.15rem;
+            --line-height: 2.2;
             --brightness: 100%;
         }
 
         .dark-mode {
-            --primary-color: #a0aec0;
-            --bg-color: #18181a;
-            --card-bg: #242426;
-            --text-color: #e8e8e6;
-            --light-text: #a0aec0;
-            --border-color: #3a3a3c;
-            --success-color: #48bb78;
-            --error-color: #f56565;
-            --control-bg: rgba(36,36,38,0.95);
-            --control-text: #e8e8e6;
+            --bg-color: #2c2822;
+            --content-bg: #2c2822;
+            --text-color: #e0d8c8;
+            --title-color: #f0e6d2;
+            --hint-color: #a09888;
+            --border-color: #444038;
+            --progress-color: #444038;
+            --progress-active: #666056;
+            --btn-bg: #2c2822;
+            --btn-text: #e0d8c8;
+            --modal-content-bg: #3c3832;
         }
 
         body {
             background-color: var(--bg-color);
-            min-height: 100vh;
-            transition: var(--transition);
-            display: flex;
-            justify-content: center;
-            filter: brightness(var(--brightness));
-        }
-
-        /* 阅读器核心容器（仿APP全屏感） */
-        .reader-container {
-            width: 100%;
-            max-width: 720px;
-            margin: 0 auto;
-            position: relative;
-            min-height: 100vh;
-        }
-
-        .novel-reader {
-            background-color: var(--card-bg);
-            min-height: 100vh;
-            padding: 5rem 3rem;
-            transition: var(--transition);
-        }
-
-        .novel-content {
             color: var(--text-color);
-            font-size: var(--read-font-size);
-            line-height: var(--read-line-height);
+            min-height: 100vh;
+            filter: brightness(var(--brightness));
+            transition: all 0.3s ease;
+            padding-bottom: 120px;
+        }
+
+        /* 顶部导航栏（仿APP标题栏） */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 90;
+        }
+        .nav-left {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        .nav-middle {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .nav-btn {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .nav-icon {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        .free-tag {
+            position: relative;
+        }
+        .free-tag::after {
+            content: "免费";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 0.6rem;
+            color: #fff;
+            background-color: #e74c3c;
+            border-radius: 3px;
+            padding: 0 3px;
+        }
+
+        /* 小说阅读核心区域（主体内容） */
+        .reader-content {
+            margin-top: 5rem;
+            padding: 0 1.5rem;
+            max-width: 100%;
+        }
+        .chapter-title {
+            font-size: 1.5rem;
+            color: var(--title-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        .novel-text {
+            font-size: var(--font-size);
+            line-height: var(--line-height);
             letter-spacing: 0.02em;
             white-space: pre-wrap;
             word-break: break-word;
-            cursor: pointer;
-            text-align: justify;
+            cursor: text;
+            text-indent: 2em; /* 段前空两格，仿小说排版 */
+            margin-bottom: 1.5rem;
         }
-
-        .novel-content.decrypted {
-            cursor: default;
-        }
-
-        .encrypt-hint {
+        .decrypt-hint {
             text-align: center;
-            color: var(--light-text);
+            color: var(--hint-color);
             font-size: 0.9rem;
             margin-top: 2rem;
-            line-height: 1.6;
         }
 
-        /* 仿APP控制栏（点击页面呼出/隐藏） */
-        .reader-control {
+        /* 底部阅读控制区（进度条+功能按钮） */
+        .bottom-control {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: var(--control-bg);
+            background-color: var(--bg-color);
             border-top: 1px solid var(--border-color);
-            padding: 1.2rem 2rem;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 900;
-            transition: var(--transition);
+            padding: 1rem 1.5rem;
+            z-index: 90;
         }
-
-        .control-group {
+        .progress-bar {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 1.5rem;
+            margin-bottom: 1rem;
         }
-
-        .control-btn {
+        .chapter-btn {
+            font-size: 0.9rem;
+            color: var(--text-color);
             background: transparent;
             border: none;
-            color: var(--control-text);
-            font-size: 1rem;
             cursor: pointer;
-            transition: var(--transition);
-            width: 30px;
-            height: 30px;
+        }
+        .progress-wrap {
+            flex: 1;
+            height: 6px;
+            background-color: var(--progress-color);
+            border-radius: 3px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 20%; /* 模拟阅读进度 */
+            background-color: var(--progress-active);
+            border-radius: 3px;
+        }
+        .func-btns {
             display: flex;
+            justify-content: space-around;
             align-items: center;
-            justify-content: center;
         }
-
-        .control-btn:hover {
-            color: var(--primary-color);
-        }
-
-        /* 亮度调节滑块 */
-        .brightness-slider {
-            width: 120px;
-            height: 4px;
-            accent-color: var(--primary-color);
+        .func-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            color: var(--btn-text);
+            background: transparent;
+            border: none;
             cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .func-icon {
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
         }
 
-        /* 解密弹窗 */
-        .modal {
+        /* 解密弹窗（双击文本弹出） */
+        .decrypt-modal {
             position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.7);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--modal-bg);
             backdrop-filter: blur(6px);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            z-index: 999;
+            display: none;
         }
-
-        .modal.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-card {
-            background-color: var(--card-bg);
-            padding: 2.2rem 2rem 1.8rem;
-            border-radius: 14px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--border-color);
+        .modal-box {
+            background-color: var(--modal-content-bg);
+            border-radius: 12px;
+            padding: 2rem 1.8rem;
             width: 100%;
-            max-width: 380px;
+            max-width: 360px;
+            margin: 0 1rem;
         }
-
         .modal-title {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+            color: var(--title-color);
             text-align: center;
-        }
-
-        .input-group {
             margin-bottom: 1.2rem;
-        }
-
-        label {
-            display: block;
-            color: var(--primary-color);
-            font-size: 0.9rem;
             font-weight: 500;
-            margin-bottom: 0.5rem;
         }
-
-        input {
+        .modal-input {
             width: 100%;
-            padding: 0.85rem 1.1rem;
+            padding: 0.9rem 1rem;
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             color: var(--text-color);
             font-size: 0.95rem;
-            transition: var(--transition);
             outline: none;
+            margin-bottom: 0.5rem;
         }
-
-        input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(45, 55, 72, 0.1);
+        .modal-input:focus {
+            border-color: var(--progress-active);
         }
-
-        .btn-group {
-            display: flex;
-            gap: 0.7rem;
-            margin-top: 0.3rem;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 0.85rem 0;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.92;
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--primary-color);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--primary-color);
-            background-color: var(--bg-color);
-        }
-
         .error-tip {
             color: var(--error-color);
             font-size: 0.8rem;
             text-align: center;
-            margin-top: 0.7rem;
+            margin-top: 0.6rem;
             display: none;
         }
-
-        .tip {
-            color: var(--light-text);
-            font-size: 0.75rem;
-            text-align: center;
-            margin-top: 0.9rem;
-            line-height: 1.4;
+        .modal-btns {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 0.8rem 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .unlock-btn {
+            background-color: var(--progress-active);
+            color: #fff;
+        }
+        .cancel-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .modal-btn:hover {
+            opacity: 0.9;
         }
 
-        /* 响应式适配（完全贴合手机APP体验） */
+        /* 响应式适配（手机端极致贴合） */
         @media (max-width: 768px) {
             :root {
-                --read-line-height: 1.9;
-                --read-font-size: 1.05rem;
+                --font-size: 1.1rem;
+                --line-height: 2.1;
             }
-            .novel-reader {
-                padding: 3.5rem 1.8rem;
-                min-height: 100vh;
+            .top-nav {
+                padding: 0.7rem 0.8rem;
             }
-            .reader-control {
-                padding: 1rem 1.5rem;
-            }
-            .control-group {
+            .nav-middle {
                 gap: 1rem;
             }
-            .brightness-slider {
-                width: 100px;
+            .nav-btn {
+                font-size: 0.85rem;
             }
-            .modal-card {
-                padding: 1.8rem 1.5rem 1.5rem;
-                margin: 0 1rem;
+            .reader-content {
+                margin-top: 4.5rem;
+                padding: 0 1rem;
+            }
+            .chapter-title {
+                font-size: 1.3rem;
+                margin-bottom: 1.5rem;
+            }
+            .bottom-control {
+                padding: 0.8rem 1rem;
+            }
+            .progress-wrap {
+                margin: 0 0.8rem;
+            }
+            .func-icon {
+                font-size: 1.1rem;
+            }
+            .func-btn {
+                font-size: 0.75rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="reader-container" id="readerWrap">
-        <div class="novel-reader" id="novelReader">
-            <!-- 【★ 核心替换区：粘贴你的 AES-ECB 密文 ★】 -->
-            <div id="novelContent" class="novel-content">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
-            <p class="encrypt-hint" id="encryptHint">双击正文区域 输入专属密钥 解锁阅读 | 点击页面呼出阅读控制栏</p>
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+        <div class="nav-left">←</div>
+        <div class="nav-middle">
+            <button class="nav-btn">加入书架</button>
+            <button class="nav-btn free-tag">下载</button>
         </div>
+        <div class="nav-right">
+            <div class="nav-icon">💬</div>
+            <div class="nav-icon">🔗</div>
+            <div class="nav-icon">⋮</div>
+        </div>
+    </div>
 
-        <!-- 仿APP阅读控制栏（字体/亮度/模式切换） -->
-        <div class="reader-control" id="readerControl">
-            <div class="control-group">
-                <button class="control-btn" id="fontMinus" title="缩小字体">-A</button>
-                <button class="control-btn" id="fontPlus" title="放大字体">+A</button>
-                <input type="range" class="brightness-slider" id="brightnessSlider" min="50" max="150" value="100" title="调节亮度">
+    <!-- 小说阅读核心内容 -->
+    <div class="reader-content">
+        <h1 class="chapter-title">第1章 车队第一铁律</h1>
+        <!-- 【替换此处：粘贴你的AES-ECB密文】 -->
+        <div class="novel-text" id="novelText">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
+        <p class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读</p>
+    </div>
+
+    <!-- 底部阅读控制区 -->
+    <div class="bottom-control">
+        <div class="progress-bar">
+            <button class="chapter-btn">上一章</button>
+            <div class="progress-wrap">
+                <div class="progress-fill" id="progressFill"></div>
             </div>
-            <div class="control-group">
-                <button class="control-btn" id="modeToggle" title="切换日间/深色模式">🌙</button>
-                <button class="control-btn" id="progressTop" title="回到顶部">⤴️</button>
-            </div>
+            <button class="chapter-btn">下一章</button>
+        </div>
+        <div class="func-btns">
+            <button class="func-btn" id="catalogBtn">
+                <span class="func-icon">📖</span>
+                <span>目录</span>
+            </button>
+            <button class="func-btn" id="nightModeBtn">
+                <span class="func-icon">🌙</span>
+                <span>夜间</span>
+            </button>
+            <button class="func-btn" id="settingBtn">
+                <span class="func-icon">⚙️</span>
+                <span>设置</span>
+            </button>
         </div>
     </div>
 
     <!-- 解密弹窗 -->
-    <div id="decryptModal" class="modal">
-        <div class="modal-card">
-            <h2 class="modal-title">解锁小说内容</h2>
-            <div class="input-group">
-                <label for="secretKey">专属解密密钥</label>
-                <input type="password" id="secretKey" placeholder="请输入你的密钥" autocomplete="off" />
+    <div class="decrypt-modal" id="decryptModal">
+        <div class="modal-box">
+            <h3 class="modal-title">输入密钥解锁内容</h3>
+            <input type="password" class="modal-input" id="secretKey" placeholder="请输入专属解密密钥" autocomplete="off">
+            <p class="error-tip" id="errorTip">密钥错误或密文无效，请重试</p>
+            <div class="modal-btns">
+                <button class="modal-btn unlock-btn" id="unlockBtn">解锁</button>
+                <button class="modal-btn cancel-btn" id="cancelBtn">取消</button>
             </div>
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="decrypt()">解锁</button>
-                <button class="btn btn-outline" onclick="closeModal()">取消</button>
-            </div>
-            <p id="errorTip" class="error-tip">密钥错误或密文无效，请重试</p>
-            <p class="tip">AES-ECB 模式 | 纯本地解密 | 无数据上传</p>
         </div>
     </div>
 
     <script>
-        // 核心变量初始化
-        let isDecrypted = false;
+        // 核心变量
         const root = document.documentElement;
-        const contentEl = document.getElementById("novelContent");
-        const controlEl = document.getElementById("readerControl");
-        const readerWrap = document.getElementById("readerWrap");
-        const encryptHint = document.getElementById("encryptHint");
+        const novelText = document.getElementById('novelText');
+        const decryptModal = document.getElementById('decryptModal');
+        const secretKey = document.getElementById('secretKey');
+        const errorTip = document.getElementById('errorTip');
+        const decryptHint = document.getElementById('decryptHint');
+        const nightModeBtn = document.getElementById('nightModeBtn');
+        const settingBtn = document.getElementById('settingBtn');
+        const progressFill = document.getElementById('progressFill');
+        let isUnlocked = false;
+        let fontSize = parseFloat(getComputedStyle(root).getPropertyValue('--font-size'));
+        let brightness = 100;
 
-        // AES-ECB 核心配置（无需IV，加密/解密密钥一致即可）
-        const AES_ECB_CONFIG = {
+        // AES-ECB 核心配置（加密/解密需一致）
+        const AES_CONFIG = {
             mode: CryptoJS.mode.ECB,
             padding: CryptoJS.pad.Pkcs7
         };
 
-        // 双击加密内容打开解密弹窗（已解密不触发）
-        contentEl.addEventListener("dblclick", () => {
-            if (isDecrypted) return;
-            document.getElementById("decryptModal").classList.add("show");
-            document.getElementById("secretKey").focus();
+        // 1. 双击正文弹出解密弹窗
+        novelText.addEventListener('dblclick', () => {
+            if (isUnlocked) return;
+            decryptModal.style.display = 'flex';
+            secretKey.value = '';
+            errorTip.style.display = 'none';
+            secretKey.focus();
         });
 
-        // 点击页面呼出/隐藏控制栏（仿APP交互）
-        readerWrap.addEventListener("click", (e) => {
-            if (e.target.id !== "secretKey" && !document.getElementById("decryptModal").classList.contains("show")) {
-                controlEl.style.display = controlEl.style.display === "flex" ? "none" : "flex";
-            }
+        // 2. 关闭弹窗
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            decryptModal.style.display = 'none';
+            errorTip.style.display = 'none';
+            secretKey.value = '';
         });
 
-        // 关闭弹窗重置状态
-        function closeModal() {
-            document.getElementById("decryptModal").classList.remove("show");
-            document.getElementById("errorTip").style.display = "none";
-            document.getElementById("secretKey").value = "";
-        }
+        // 3. 核心解密逻辑（纯本地执行）
+        document.getElementById('unlockBtn').addEventListener('click', doDecrypt);
+        // 回车快捷解密
+        secretKey.addEventListener('keydown', (e) => e.key === 'Enter' && doDecrypt());
 
-        // AES-ECB 核心解密逻辑（纯本地执行）
-        function decrypt() {
-            const key = document.getElementById("secretKey").value.trim();
-            const errorEl = document.getElementById("errorTip");
-            const cipherText = contentEl.textContent.trim();
-
-            if (!key) {
-                errorEl.textContent = "请输入你的解密密钥";
-                errorEl.style.display = "block";
+        function doDecrypt() {
+            const keyVal = secretKey.value.trim();
+            const cipherText = novelText.textContent.trim();
+            
+            if (!keyVal) {
+                errorTip.textContent = '请输入解密密钥';
+                errorTip.style.display = 'block';
                 return;
             }
 
             try {
-                const decryptKey = CryptoJS.enc.Utf8.parse(key);
-                const decryptedResult = CryptoJS.AES.decrypt(cipherText, decryptKey, AES_ECB_CONFIG);
-                const plainText = decryptedResult.toString(CryptoJS.enc.Utf8);
+                const key = CryptoJS.enc.Utf8.parse(keyVal);
+                const decrypted = CryptoJS.AES.decrypt(cipherText, key, AES_CONFIG);
+                const plainText = decrypted.toString(CryptoJS.enc.Utf8);
 
-                if (!plainText || plainText.length === 0) throw new Error("解密失败");
+                if (!plainText || plainText.length === 0) throw new Error('解密失败');
                 
-                // 解密成功状态更新
-                contentEl.textContent = plainText;
-                contentEl.classList.add("decrypted");
-                encryptHint.style.display = "none";
-                isDecrypted = true;
-                closeModal();
-                // 自动隐藏控制栏
-                controlEl.style.display = "none";
-            } catch (e) {
-                errorEl.style.display = "block";
+                // 解密成功：替换内容，模拟小说分段排版（段前空两格自动生效）
+                novelText.textContent = plainText;
+                isUnlocked = true;
+                decryptHint.style.display = 'none';
+                decryptModal.style.display = 'none';
+                // 模拟阅读进度更新（可根据实际内容长度调整）
+                progressFill.style.width = '100%';
+            } catch (err) {
+                errorTip.textContent = '密钥错误或密文无效，请重试';
+                errorTip.style.display = 'block';
             }
         }
 
-        // 回车键快捷解锁
-        document.getElementById("secretKey").addEventListener("keydown", (e) => {
-            if (e.key === "Enter") decrypt();
+        // 4. 夜间/日间模式切换
+        nightModeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = nightModeBtn.querySelector('.func-icon');
+            icon.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+            nightModeBtn.querySelector('span:last-child').textContent = document.body.classList.contains('dark-mode') ? '日间' : '夜间';
         });
 
-        // 仿APP核心功能：字体大小调节
-        document.getElementById("fontPlus").addEventListener("click", () => {
-            let currSize = parseFloat(getComputedStyle(root).getPropertyValue('--read-font-size'));
-            if (currSize < 1.5rem) currSize += 0.05;
-            root.style.setProperty('--read-font-size', `${currSize}rem`);
-        });
-        document.getElementById("fontMinus").addEventListener("click", () => {
-            let currSize = parseFloat(getComputedStyle(root).getPropertyValue('--read-font-size'));
-            if (currSize > 0.9rem) currSize -= 0.05;
-            root.style.setProperty('--read-font-size', `${currSize}rem`);
-        });
+        // 5. 设置功能（字体大小+亮度调节，点击弹出简易设置面板）
+        settingBtn.addEventListener('click', () => {
+            const settingHtml = `
+                <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--modal-content-bg);padding:1.5rem;border-radius:10px;z-index:1000;width:80%;max-width:300px;">
+                    <h4 style="text-align:center;color:var(--title-color);margin-bottom:1rem;">阅读设置</h4>
+                    <div style="margin-bottom:1rem;">
+                        <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">字体大小</p>
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <button class="set-btn" id="fontMinus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">缩小</button>
+                            <button class="set-btn" id="fontPlus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">放大</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:1rem;">
+                        <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">亮度调节</p>
+                        <input type="range" id="brightnessSlider" min="50" max="150" value="${brightness}" style="width:100%;height:4px;accent-color:var(--progress-active);">
+                    </div>
+                    <button id="closeSetting" style="width:100%;padding:0.7rem;border:none;background:var(--progress-active);color:#fff;border-radius:4px;margin-top:0.5rem;">确定</button>
+                </div>
+                <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;"></div>
+            `;
+            const settingPanel = document.createElement('div');
+            settingPanel.id = 'settingPanel';
+            settingPanel.innerHTML = settingHtml;
+            document.body.appendChild(settingPanel);
 
-        // 仿APP核心功能：亮度调节
-        document.getElementById("brightnessSlider").addEventListener("input", (e) => {
-            const brightness = e.target.value;
-            root.style.setProperty('--brightness', `${brightness}%`);
-        });
-
-        // 仿APP核心功能：日间/深色模式切换
-        document.getElementById("modeToggle").addEventListener("click", () => {
-            document.body.classList.toggle("dark-mode");
-            const btn = document.getElementById("modeToggle");
-            btn.title = document.body.classList.contains("dark-mode") ? "切换日间模式" : "切换深色模式";
-            btn.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
-        });
-
-        // 仿APP核心功能：回到顶部
-        document.getElementById("progressTop").addEventListener("click", () => {
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
+            // 字体大小调节
+            document.getElementById('fontMinus').addEventListener('click', () => {
+                if (fontSize > 0.9rem) {
+                    fontSize -= 0.05;
+                    root.style.setProperty('--font-size', `${fontSize}rem`);
+                }
             });
-            controlEl.style.display = "none";
+            document.getElementById('fontPlus').addEventListener('click', () => {
+                if (fontSize < 1.5rem) {
+                    fontSize += 0.05;
+                    root.style.setProperty('--font-size', `${fontSize}rem`);
+                }
+            });
+
+            // 亮度调节
+            document.getElementById('brightnessSlider').addEventListener('input', (e) => {
+                brightness = e.target.value;
+                root.style.setProperty('--brightness', `${brightness}%`);
+            });
+
+            // 关闭设置面板
+            document.getElementById('closeSetting').addEventListener('click', () => {
+                document.body.removeChild(settingPanel);
+            });
+            settingPanel.querySelector('div:last-child').addEventListener('click', () => {
+                document.body.removeChild(settingPanel);
+            });
         });
 
-        // 页面滚动隐藏控制栏
-        window.addEventListener("scroll", () => {
-            if (controlEl.style.display === "flex") controlEl.style.display = "none";
+        // 6. 模拟章节切换（仅视觉效果，可根据实际小说内容扩展）
+        document.querySelector('.progress-bar .chapter-btn:first-child').addEventListener('click', () => {
+            if (isUnlocked) {
+                alert('已是第一章');
+            }
+        });
+        document.querySelector('.progress-bar .chapter-btn:last-child').addEventListener('click', () => {
+            if (isUnlocked) {
+                alert('暂无下一章');
+            }
+        });
+
+        // 7. 目录按钮（模拟弹窗，可扩展实际目录列表）
+        document.getElementById('catalogBtn').addEventListener('click', () => {
+            alert('目录列表（可根据小说内容扩展章节列表）');
         });
     </script>
 </body>
