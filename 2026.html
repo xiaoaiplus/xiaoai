@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>墨读 - 双页明文+加密文阅读器</title>
+    <title>墨读 </title>
     <style>
         /* 基础重置与全局样式 */
         * {
@@ -19,6 +19,7 @@
             font-size: 16px;
             background-color: #f7f5f2;
             color: #333;
+            padding33;
             padding: 0;
             margin: 0;
             overflow-x: hidden;
@@ -385,19 +386,19 @@
             </div>
         </div>
 
-        <!-- 第二页：加密文（完整保留你提供的密文+布局适配，图片不加密） -->
+        <!-- 第二页：你的专属密文（布局适配，解密后显示原文） -->
         <div class="reader-page" id="page2">
             <div class="reader-container">
                 <div class="article-header">
-                    <h1 class="article-title">古城旧巷里的烟火</h1>
+                    <h1 class="article-title">专属加密内容</h1>
                     <div class="article-meta">
-                        <span>作者：巷陌人</span>
-                        <span>发布时间：2026-01-02</span>
-                        <span>阅读时长：10分钟</span>
+                        <span>作者：专属创作者</span>
+                        <span>发布时间：专属时间</span>
+                        <span>阅读时长：专属时长</span>
                     </div>
                 </div>
                 <div class="article-content" id="page2Content">
-                    <!-- 完整保留你提供的密文，已做布局适配 -->
+                    <!-- 你的完整密文，自动换行适配 -->
                     <div id="cipherContainer">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
                     <span class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读</span>
                 </div>
@@ -414,8 +415,8 @@
             <button class="control-btn" id="fontXLBtn">特大字体</button>
         </div>
         <div class="control-group">
-            <button class="control-btn" id="toPage1Btn">第一页（明文）</button>
-            <button class="control-btn" id="toPage2Btn">第二页（加密）</button>
+            <button class="control-btn" id="toPage1Btn">第一页</button>
+            <button class="control-btn" id="toPage2Btn">第二页</button>
             <button class="control-btn" id="modeToggleBtn">切换暗黑模式</button>
             <button class="control-btn" id="backTopBtn">回到顶部</button>
         </div>
@@ -450,28 +451,10 @@
         const cancelBtn = document.getElementById('cancelBtn');
         let isUnlocked = false; // 第二页解密状态标记
 
-        // 第二页解密后明文（带配图，图片不加密，直接渲染）
-        const page2PlainText = `
-            <p>总偏爱那些藏在时光里的古城旧巷，青石板路被岁月磨得发亮，斑驳的墙面刻满了故事，每一步踏下去，都像是在与旧时光对话。这里没有快节奏的匆忙，只有慢悠悠的烟火，藏着最本真的生活模样。</p>
-            <p>清晨的古城是安静的，薄雾还未散去，笼罩着错落的灰瓦白墙。巷口的早点铺最先亮起灯光，蒸笼掀开时，白汽袅袅升起，混着豆浆的醇香、油条的焦香，飘满整条小巷。早起的老人搬着小马扎坐在门口，慢悠悠地喝着茶，眼神里满是从容。</p>
-            <img src="https://picsum.photos/id/1076/800/400" alt="清晨薄雾中的古城旧巷">
-            <h2>巷陌里的老故事</h2>
-            <p>古城的巷子大多弯弯曲曲，纵横交错，像一张细密的网，网住了岁月，也网住了人心。巷子里的老房子大多是砖木结构，雕花的窗棂虽已褪色，却依旧能看出当年的精致；木门推开时，吱呀作响，像是在诉说着经年的往事。</p>
-            <blockquote>一座古城，半城故事，每一块砖，每一片瓦，都藏着光阴的痕迹，每一个人，每一段过往，都写满了温柔的回忆。</blockquote>
-            <p>偶有老人坐在巷口，摇着蒲扇，讲起古城的旧事，那些泛黄的时光，那些远去的故人，在话语间慢慢鲜活起来。或许是某个商贾的传奇，或许是某段青涩的爱恋，或许是邻里间的温暖日常，都在这旧巷里，代代相传。</p>
-            <img src="https://picsum.photos/id/164/800/400" alt="古城里的雕花窗棂与老木门">
-            <h2>烟火里的慢时光</h2>
-            <p>午后的古城渐渐热闹起来，游客三三两两，沿着青石板路缓步前行，或是驻足拍照，或是走进街边的小店。手作的饰品店、飘香的糕点铺、安静的书店，每一家小店都有自己的特色，藏着不期而遇的惊喜。</p>
-            <p>傍晚时分，古城的烟火气最浓。家家户户升起炊烟，饭菜的香气弥漫在空气里；街边的小吃摊依次摆开，烤串的滋滋声、摊主的吆喝声、游客的谈笑声，交织在一起，格外热闹。夕阳西下，余晖洒在灰瓦上，给古城镀上一层金边，美得让人心醉。</p>
-            <p>夜色降临，古城换上了另一副模样。红灯笼次第亮起，暖黄的灯光映着青石板路，别有一番韵味。人们沿着巷子慢慢散步，褪去了白天的燥热，只剩下满心的惬意。这一刻，时光很慢，日子很暖，所有的疲惫都烟消云散。</p>
-            <img src="https://picsum.photos/id/177/800/400" alt="夜色里挂着红灯笼的古城">
-            <p>离开古城时，总有些不舍。那些青石板路，那些旧房子，那些烟火气，都让人念念不忘。原来我们眷恋的，从来不是古城的模样，而是藏在古城里的慢时光，是那份不慌不忙的从容，是那些藏在烟火里的温暖与安宁。</p>
-        `;
-
         // 1. 页面切换功能
         document.getElementById('toPage1Btn').addEventListener('click', () => {
             readerWrapper.style.transform = 'translateX(0)';
-            backToTop(); // 切换页自动回顶
+            backToTop();
         });
         document.getElementById('toPage2Btn').addEventListener('click', () => {
             readerWrapper.style.transform = 'translateX(-100vw)';
@@ -527,9 +510,9 @@
             modeToggleBtn.textContent = isDarkMode ? '切换明亮模式' : '切换暗黑模式';
         });
 
-        // 6. 第二页：双击弹出解密弹窗
+        // 6. 第二页双击唤出解密弹窗
         page2Content.addEventListener('dblclick', () => {
-            if (isUnlocked) return; // 已解密则不触发弹窗
+            if (isUnlocked) return;
             decryptModal.classList.add('show');
             secretKey.value = '';
             errorTip.style.display = 'none';
@@ -541,23 +524,25 @@
             decryptModal.classList.remove('show');
         });
 
-        // 8. AES-ECB 核心解密逻辑（密钥仅你知晓，输入正确即可解密）
+        // 8. 核心解密逻辑：输入你的专属密钥，解密后显示密文对应的原文
         function doDecrypt() {
             const password = secretKey.value.trim();
             const encryptedContent = cipherContainer.textContent.trim();
             
             try {
-                const decryptedContent = CryptoJS.AES.decrypt(encryptedContent, password, {
+                // 解密你的密文，转换为原文
+                const decryptedResult = CryptoJS.AES.decrypt(encryptedContent, password, {
                     mode: CryptoJS.mode.ECB,
                     padding: CryptoJS.pad.Pkcs7
                 }).toString(CryptoJS.enc.Utf8);
 
-                if (!decryptedContent) {
+                // 解密失败提示
+                if (!decryptedResult) {
                     errorTip.style.display = 'block';
                     return;
                 }
-                // 渲染明文（配图直接加载，不加密）
-                cipherContainer.innerHTML = page2PlainText;
+                // 渲染解密后的原文（保留排版样式）
+                cipherContainer.innerHTML = decryptedResult;
                 decryptHint.style.display = 'none';
                 isUnlocked = true;
                 decryptModal.classList.remove('show');
