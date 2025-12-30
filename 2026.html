@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌝🌝🌝🌝🌝🌝🌝🌝🌝</title>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        :root {
+            --primary-color: #2d3748;
+            --accent-color: #4a5568;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #1a202c;
+            --light-text: #718096;
+            --border-color: #e2e8f0;
+            --success-color: #38a169;
+            --error-color: #e53e3e;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #a0aec0;
+                --accent-color: #718096;
+                --bg-color: #171923;
+                --card-bg: #2d3748;
+                --text-color: #f7fafc;
+                --light-text: #a0aec0;
+                --border-color: #4a5568;
+            }
+        }
+
+        body {
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            transition: var(--transition);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .reader-card {
+            background-color: var(--card-bg);
+            padding: 5rem 4rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            width: 100%;
+            min-height: 80vh;
+        }
+
+        .title {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--light-text);
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+
+        .content-wrapper {
+            position: relative;
+        }
+
+        .content {
+            color: var(--text-color);
+            font-size: 1.15rem;
+            line-height: 1.8;
+            letter-spacing: 0.01em;
+            white-space: pre-wrap;
+            word-break: break-word;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            transition: var(--transition);
+        }
+
+        .content:hover {
+            border-color: var(--accent-color);
+        }
+
+        .encrypted-hint {
+            color: var(--light-text);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 0.8rem;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background-color: var(--card-bg);
+            padding: 2.5rem 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.6rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.9rem 0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-color);
+            background-color: var(--bg-color);
+        }
+
+        .error-tip {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 0.8rem;
+            display: none;
+        }
+
+        .tip {
+            color: var(--light-text);
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .reader-card {
+                padding: 3rem 2rem;
+            }
+            .title {
+                font-size: 1.8rem;
+            }
+            .content {
+                font-size: 1.05rem;
+                line-height: 1.7;
+                padding: 1.2rem;
+            }
+            .modal-card {
+                padding: 2rem 1.5rem 1.5rem;
+                margin: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="reader-card">
+            <h1 class="title">沉浸式 AES 加密阅读器</h1>
+            <p class="subtitle">双击密文区域输入密钥进行解密，所有操作均在本地完成</p>
+
+            <div class="content-wrapper">
+                <!-- 这里直接放 AES 加密后的密文（使用 CryptoJS 生成的 Ciphertext.toString() 结果） -->
+                <div id="content" class="content">
+U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=
+                </div>
+                <p class="encrypted-hint">双击密文区域输入密钥解密</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 解密弹窗 -->
+    <div id="decryptModal" class="modal">
+        <div class="modal-card">
+            <h2 class="modal-title">解密此文档</h2>
+
+            <div class="input-group">
+                <label for="secretKey">解密密钥</label>
+                <input type="password" id="secretKey" placeholder="请输入 AES 密钥" autocomplete="off" />
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="decrypt()">解密</button>
+                <button class="btn btn-outline" onclick="closeModal()">取消</button>
+            </div>
+
+            <p id="errorTip" class="error-tip">密钥错误，请重新输入</p>
+            <p class="tip">提示：解密过程在浏览器本地完成，不会上传任何数据</p>
+        </div>
+    </div>
+
+    <script>
+        // AES 配置（与你加密时保持一致，这里使用 CBC + Pkcs7）
+        const AES_CONFIG = {
+            iv: CryptoJS.enc.Utf8.parse("1234567890abcdef"), // 16 位 iv，需与加密时一致
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7,
+        };
+
+        // 双击打开解密弹窗
+        document.getElementById("content").addEventListener("dblclick", () => {
+            document.getElementById("decryptModal").classList.add("show");
+            document.getElementById("secretKey").focus();
+        });
+
+        function closeModal() {
+            document.getElementById("decryptModal").classList.remove("show");
+            document.getElementById("errorTip").style.display = "none";
+            document.getElementById("secretKey").value = "";
+        }
+
+        function decrypt() {
+            const key = document.getElementById("secretKey").value.trim();
+            const errorTip = document.getElementById("errorTip");
+            const contentEl = document.getElementById("content");
+            const encrypted = contentEl.textContent.trim();
+
+            if (!key) {
+                errorTip.textContent = "请输入解密密钥";
+                errorTip.style.display = "block";
+                return;
+            }
+
+            try {
+                // 解密：使用用户输入的密钥（UTF8 编码）
+                const decrypted = CryptoJS.AES.decrypt(
+                    encrypted,
+                    CryptoJS.enc.Utf8.parse(key),
+                    AES_CONFIG
+                );
+                const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+
+                if (!plainText) {
+                    throw new Error("解密结果为空");
+                }
+
+                // 解密成功：替换为明文，并移除双击事件
+                contentEl.textContent = plainText;
+                contentEl.style.cursor = "default";
+                contentEl.removeEventListener("dblclick", arguments.callee);
+                closeModal();
+            } catch (e) {
+                console.error(e);
+                errorTip.textContent = "密钥错误或密文无效，请重试";
+                errorTip.style.display = "block";
+            }
+        }
+
+        // 回车触发解密
+        document.getElementById("secretKey").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                decrypt();
+            }
+        });
+    </script>
+</body>
+</html>
