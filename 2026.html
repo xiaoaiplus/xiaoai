@@ -1,396 +1,423 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>小说阅读器</title>
-    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>墨读 - 双页明文+加密文阅读器</title>
     <style>
+        /* 基础重置与全局样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-        }
-
-        :root {
-            --bg-color: #f0e6d2; /* 示例米色护眼背景 */
-            --content-bg: #f0e6d2;
-            --text-color: #333333;
-            --title-color: #222222;
-            --hint-color: #887e6c;
-            --border-color: #d4c8b0;
-            --error-color: #e74c3c;
-            --progress-color: #d4c8b0;
-            --progress-active: #b8a88f;
-            --btn-bg: #f0e6d2;
-            --btn-text: #555555;
-            --modal-bg: rgba(0, 0, 0, 0.7);
-            --modal-content-bg: #f9f5eb;
-            --font-size: 1.15rem;
-            --line-height: 2.2;
-            --brightness: 100%;
-        }
-
-        .dark-mode {
-            --bg-color: #2c2822;
-            --content-bg: #2c2822;
-            --text-color: #e0d8c8;
-            --title-color: #f0e6d2;
-            --hint-color: #a09888;
-            --border-color: #444038;
-            --progress-color: #444038;
-            --progress-active: #666056;
-            --btn-bg: #2c2822;
-            --btn-text: #e0d8c8;
-            --modal-content-bg: #3c3832;
+            transition: all 0.3s ease;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            filter: brightness(var(--brightness));
-            transition: all 0.3s ease;
-            padding-bottom: 120px;
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.8;
+            font-size: 16px;
+            background-color: #f7f5f2;
+            color: #333;
+            padding: 0;
+            margin: 0;
             overflow-x: hidden;
         }
 
-        /* 顶部导航栏（完全匹配示例图标） */
-        .top-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.8rem 1rem;
+        /* 双页容器核心样式 */
+        .reader-wrapper {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 90;
-            height: 56px;
+            width: 200vw;
+            transition: transform 0.5s ease-in-out;
         }
-        .nav-left {
-            font-size: 1.2rem;
-            color: var(--text-color);
-            cursor: pointer;
-            width: 24px;
+        .reader-page {
+            width: 100vw;
+            min-height: 100vh;
+            padding-bottom: 60px;
         }
-        .nav-middle {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-        .nav-btn {
-            font-size: 0.9rem;
-            color: var(--text-color);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-        }
-        .nav-right {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        .nav-icon {
-            font-size: 1.1rem;
-            color: var(--text-color);
-            cursor: pointer;
-            width: 24px;
-            text-align: center;
-        }
-        .free-tag {
+        .reader-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 30px;
             position: relative;
         }
-        .free-tag::after {
-            content: "免费";
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            font-size: 0.6rem;
-            color: #fff;
-            background-color: #ff6050;
-            border-radius: 3px;
-            padding: 0 3px;
+
+        /* 文章头部样式 */
+        .article-header {
+            margin-bottom: 40px;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .article-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #222;
+        }
+        .article-meta {
+            font-size: 14px;
+            color: #888;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        /* 小说阅读核心区域（修复双击触发问题） */
-        .reader-content {
-            margin-top: 56px;
-            padding: 0 1.5rem;
-            width: 100%;
-        }
-        .chapter-title {
-            font-size: 1.5rem;
-            color: var(--title-color);
-            text-align: center;
-            margin: 2rem 0;
-            font-weight: 600;
-        }
-        .novel-text-wrap {
+        /* 文章内容样式 */
+        .article-content {
+            margin-bottom: 60px;
+            font-size: 16px;
             cursor: text;
         }
-        .novel-text {
-            font-size: var(--font-size);
-            line-height: var(--line-height);
-            letter-spacing: 0.02em;
-            white-space: pre-wrap;
-            word-break: break-word;
-            text-indent: 2em; /* 段前空两格 */
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
+        .article-content p {
+            margin-bottom: 25px;
+            text-indent: 2em;
         }
+        .article-content h2 {
+            font-size: 22px;
+            margin: 40px 0 20px;
+            color: #222;
+            font-weight: 600;
+        }
+        .article-content img {
+            width: 100%;
+            border-radius: 8px;
+            margin: 30px 0;
+            object-fit: cover;
+            height: auto;
+            /* 图片不加密，全程正常加载适配 */
+        }
+        .article-content blockquote {
+            border-left: 4px solid #666;
+            padding: 15px 20px;
+            margin: 30px 0;
+            background-color: #f0efe9;
+            border-radius: 0 6px 6px 0;
+            color: #555;
+        }
+
+        /* 解密提示专属样式 */
         .decrypt-hint {
             text-align: center;
-            color: var(--hint-color);
-            font-size: 0.9rem;
-            margin-top: 2rem;
+            color: #888;
+            font-size: 14px;
+            margin-top: 20px;
             display: block;
         }
 
-        /* 底部阅读控制区（匹配示例功能按钮） */
-        .bottom-control {
+        /* 控制栏样式（固定底部，新增页面切换按钮） */
+        .reader-controls {
             position: fixed;
             bottom: 0;
             left: 0;
-            right: 0;
-            background-color: var(--bg-color);
-            border-top: 1px solid var(--border-color);
-            padding: 0.8rem 1.5rem 1rem;
-            z-index: 90;
-        }
-        .progress-bar {
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.8rem;
+            padding: 12px 30px;
+            z-index: 999;
         }
-        .chapter-btn {
-            font-size: 0.9rem;
-            color: var(--text-color);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            width: 60px;
-        }
-        .progress-wrap {
-            flex: 1;
-            height: 6px;
-            background-color: var(--progress-color);
-            border-radius: 3px;
-            margin: 0 0.8rem;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            width: 20%; /* 模拟阅读进度 */
-            background-color: var(--progress-active);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        .func-btns {
+        .control-group {
             display: flex;
-            justify-content: space-around;
+            gap: 15px;
             align-items: center;
         }
-        .func-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.3rem;
-            color: var(--btn-text);
-            background: transparent;
+        .control-btn {
             border: none;
+            background: none;
+            font-size: 14px;
+            color: #666;
             cursor: pointer;
-            font-size: 0.8rem;
-            width: 60px;
+            padding: 5px 10px;
+            border-radius: 4px;
         }
-        .func-icon {
-            font-size: 1.2rem;
-            margin-bottom: 0.2rem;
+        .control-btn:hover {
+            background-color: #f0f0f0;
+            color: #222;
+        }
+        .control-btn.active {
+            color: #2c85e8;
+            font-weight: 500;
         }
 
-        /* 解密弹窗（强制显示，修复输入问题） */
+        /* 阅读进度条 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background-color: #2c85e8;
+            width: 0%;
+            z-index: 1000;
+        }
+
+        /* 明暗模式样式 */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ddd;
+        }
+        body.dark-mode .reader-container {
+            background-color: #1a1a1a;
+        }
+        body.dark-mode .article-header {
+            border-bottom-color: #333;
+        }
+        body.dark-mode .article-title,
+        body.dark-mode .article-content h2 {
+            color: #fff;
+        }
+        body.dark-mode .article-meta {
+            color: #aaa;
+        }
+        body.dark-mode .article-content blockquote {
+            background-color: #2d2d2d;
+            color: #ccc;
+            border-left-color: #555;
+        }
+        body.dark-mode .reader-controls {
+            background-color: #2d2d2d;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.4);
+        }
+        body.dark-mode .control-btn {
+            color: #aaa;
+        }
+        body.dark-mode .control-btn:hover {
+            background-color: #3d3d3d;
+            color: #fff;
+        }
+        body.dark-mode .control-btn.active {
+            color: #4a90e2;
+        }
+        body.dark-mode .decrypt-hint {
+            color: #aaa;
+        }
+
+        /* 字体大小样式 */
+        body.font-sm .article-content {
+            font-size: 14px;
+        }
+        body.font-md .article-content {
+            font-size: 16px;
+        }
+        body.font-lg .article-content {
+            font-size: 18px;
+        }
+        body.font-xl .article-content {
+            font-size: 20px;
+        }
+
+        /* 解密弹窗样式 */
         .decrypt-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--modal-bg);
+            background-color: rgba(0,0,0,0.7);
             backdrop-filter: blur(6px);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 999;
+            z-index: 1001;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
         }
         .decrypt-modal.show {
             opacity: 1;
             pointer-events: auto;
         }
         .modal-box {
-            background-color: var(--modal-content-bg);
-            border-radius: 12px;
+            background-color: #f7f5f2;
+            border-radius: 8px;
             padding: 2rem 1.8rem;
             width: 100%;
             max-width: 360px;
-            margin: 0 1rem;
-            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .modal-box {
+            background-color: #2d2d2d;
         }
         .modal-title {
-            font-size: 1.1rem;
-            color: var(--title-color);
+            font-size: 18px;
+            color: #222;
             text-align: center;
             margin-bottom: 1.2rem;
             font-weight: 500;
         }
+        body.dark-mode .modal-title {
+            color: #fff;
+        }
         .modal-input {
             width: 100%;
             padding: 0.9rem 1rem;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-color);
-            font-size: 0.95rem;
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            color: #333;
+            font-size: 14px;
             outline: none;
-            margin-bottom: 0.5rem;
-            display: block;
+            margin-bottom: 0.8rem;
+        }
+        body.dark-mode .modal-input {
+            background-color: #3d3d3d;
+            border-color: #4d4d4d;
+            color: #ddd;
         }
         .modal-input:focus {
-            border-color: var(--progress-active);
-            box-shadow: 0 0 0 2px rgba(184, 168, 143, 0.2);
+            border-color: #2c85e8;
+        }
+        body.dark-mode .modal-input:focus {
+            border-color: #4a90e2;
         }
         .error-tip {
-            color: var(--error-color);
-            font-size: 0.8rem;
+            color: #e74c3c;
+            font-size: 12px;
             text-align: center;
-            margin-top: 0.6rem;
+            margin-bottom: 1rem;
             display: none;
         }
         .modal-btns {
             display: flex;
-            gap: 0.8rem;
-            margin-top: 1rem;
+            gap: 10px;
         }
         .modal-btn {
             flex: 1;
             padding: 0.8rem 0;
-            border-radius: 8px;
+            border-radius: 4px;
             border: none;
-            font-size: 0.9rem;
+            font-size: 14px;
             cursor: pointer;
-            transition: opacity 0.2s ease;
         }
         .unlock-btn {
-            background-color: var(--progress-active);
+            background-color: #2c85e8;
             color: #fff;
         }
-        .cancel-btn {
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
+        .unlock-btn:hover {
+            background-color: #1a75e8;
         }
-        .modal-btn:hover {
-            opacity: 0.9;
+        .cancel-btn {
+            background-color: #eee;
+            color: #666;
+        }
+        body.dark-mode .cancel-btn {
+            background-color: #4d4d4d;
+            color: #aaa;
+        }
+        body.dark-mode .cancel-btn:hover {
+            background-color: #5d5d5d;
         }
 
         /* 响应式适配 */
         @media (max-width: 768px) {
-            :root {
-                --font-size: 1.1rem;
-                --line-height: 2.1;
+            .reader-container {
+                padding: 15px 20px;
             }
-            .top-nav {
-                padding: 0.7rem 0.8rem;
+            .article-title {
+                font-size: 24px;
             }
-            .nav-middle {
-                gap: 1rem;
+            .article-content h2 {
+                font-size: 20px;
             }
-            .nav-btn {
-                font-size: 0.85rem;
+            .reader-controls {
+                padding: 10px 15px;
             }
-            .reader-content {
-                padding: 0 1rem;
+            .control-group {
+                gap: 10px;
             }
-            .chapter-title {
-                font-size: 1.3rem;
-                margin: 1.5rem 0;
+            .control-btn {
+                font-size: 13px;
+                padding: 4px 8px;
             }
-            .bottom-control {
-                padding: 0.6rem 1rem 0.8rem;
-            }
-            .progress-wrap {
-                margin: 0 0.5rem;
-            }
-            .func-icon {
-                font-size: 1.1rem;
-            }
-            .func-btn {
-                font-size: 0.75rem;
+            .modal-box {
+                padding: 1.5rem 1.2rem;
+                margin: 0 1rem;
             }
         }
     </style>
 </head>
-<body>
-    <!-- 顶部导航栏（匹配示例图标） -->
-    <div class="top-nav">
-        <div class="nav-left">←</div>
-        <div class="nav-middle">
-            <button class="nav-btn">加入书架</button>
-            <button class="nav-btn free-tag">下载</button>
-        </div>
-        <div class="nav-right">
-            <div class="nav-icon">💬</div>
-            <div class="nav-icon">🔗</div>
-            <div class="nav-icon">⋮</div>
-        </div>
-    </div>
+<body class="font-md">
+    <!-- 阅读进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
 
-    <!-- 小说阅读核心内容（外层包裹修复双击） -->
-    <div class="reader-content">
-        <h1 class="chapter-title">第1章 车队第一铁律</h1>
-        <div class="novel-text-wrap" id="novelTextWrap">
-            <!-- 【替换此处：粘贴你的AES-ECB密文】 -->
-            <div class="novel-text" id="novelText">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
-            <span class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读</span>
-        </div>
-    </div>
-
-    <!-- 底部阅读控制区（匹配示例按钮） -->
-    <div class="bottom-control">
-        <div class="progress-bar">
-            <button class="chapter-btn">上一章</button>
-            <div class="progress-wrap">
-                <div class="progress-fill" id="progressFill"></div>
+    <!-- 双页核心容器 -->
+    <div class="reader-wrapper" id="readerWrapper">
+        <!-- 第一页：明文随机文章（直接展示+配图） -->
+        <div class="reader-page" id="page1">
+            <div class="reader-container">
+                <div class="article-header">
+                    <h1 class="article-title">山野间的时光</h1>
+                    <div class="article-meta">
+                        <span>作者：山野客</span>
+                        <span>发布时间：2025-12-30</span>
+                        <span>阅读时长：12分钟</span>
+                    </div>
+                </div>
+                <div class="article-content" id="page1Content">
+                    <p>总在某个疲惫的午后，想起山野间的日子。没有城市的车水马龙，没有霓虹的彻夜闪烁，只有风过林梢的轻响，和晨露滴落的清脆。那些藏在自然里的时光，慢得像一首老诗，每一句都写满了安宁。</p>
+                    <p>初次进山是在一个暮春时节，彼时草木疯长，漫山遍野都是深浅不一的绿，新抽的枝芽带着嫩黄，缀在墨绿的枝叶间，像不小心撒落的星光。山路蜿蜒，碎石铺就的小径被来往的脚步磨得光滑，两旁的灌木丛长得肆意，偶尔会勾住衣角，像是在挽留每一个路过的旅人。</p>
+                    <img src="https://picsum.photos/id/137/800/400" alt="漫山绿意的山野小径">
+                    <h2>晨雾里的温柔</h2>
+                    <p>山里的清晨是被雾裹着的。天刚蒙蒙亮，雾便从山谷里漫出来，先是缠在山脚的草木上，再一点点往上爬，最后把整座山都抱在怀里。站在院落里，能见度不过数米，远处的山峰只剩模糊的轮廓，近处的花草挂着露珠，在微光里闪着细碎的光。</p>
+                    <blockquote>山野的雾，不像城市的霾那样沉闷，它是轻盈的，带着草木的清香，吸一口，连肺腑都觉得清爽。</blockquote>
+                    <p>等到太阳慢慢升高，雾才会渐渐散去。先是露出枝头的鸟窝，几只不知名的小鸟在窝里叽叽喳喳，像是在讨论今日的觅食路线；再是露出远处的溪流，溪水潺潺，带着山间的凉意，顺着沟壑一路向下，汇入山脚下的小河；最后，整座山都清晰起来，阳光透过枝叶的缝隙洒下来，落在地上，形成斑驳的光影。</p>
+                    <img src="https://picsum.photos/id/15/800/400" alt="晨雾散去后的山间溪流">
+                    <h2>午后的慵懒与惬意</h2>
+                    <p>午后的山野最是慵懒。阳光正好，不燥不烈，透过树叶洒在石桌上，暖洋洋的。搬一把竹椅坐在院里，泡上一壶粗茶，茶叶在热水里舒展，茶香慢慢散开，混着院里金银花的香气，让人忍不住眯起眼睛。</p>
+                    <p>偶尔会有蝴蝶从眼前飞过，色彩斑斓的翅膀在阳光下格外显眼；蜜蜂在花丛中忙碌，嗡嗡的声响像是一首轻快的小调。远处的田埂上，老农牵着老牛慢慢走过，脚步悠闲，老牛甩着尾巴，时不时低头啃一口路边的青草，时光仿佛在这一刻静止。</p>
+                    <h2>暮色里的归期</h2>
+                    <p>夕阳西下时，山野便换了一身模样。余晖把天空染成橘红色，云朵被镶上金边，远处的山峰也披上了霞光，从浅橙到深紫，层次分明。归巢的鸟儿成群结队，掠过天际，留下一串清脆的鸣叫。</p>
+                    <p>院落里的炊烟慢慢升起，带着饭菜的香气，在暮色里晕开。忙碌了一天的人们陆续归家，脚步声、谈笑声、犬吠声，混在一起，成了山野间最温暖的烟火气。等到夜色完全降临，星星便一颗颗冒出来，密密麻麻地挂在天上，比城市里看到的要亮得多，银河清晰可见，像是一条银色的丝带横跨天际。</p>
+                    <img src="https://picsum.photos/id/197/800/400" alt="山野暮色与漫天星光">
+                    <p>如今再想起那些日子，依旧觉得满心欢喜。山野间的时光，没有追赶时间的焦虑，没有人情世故的纷扰，只有简单的三餐，安稳的睡眠，和自然相伴的纯粹。原来最治愈人心的，从来不是繁华的盛景，而是这些藏在山野里的，平凡又温暖的日常。愿我们都能在忙碌的生活里，寻得一处安宁，慢下来，感受时光的温柔。</p>
+                </div>
             </div>
-            <button class="chapter-btn">下一章</button>
         </div>
-        <div class="func-btns">
-            <button class="func-btn" id="catalogBtn">
-                <span class="func-icon">☰</span>
-                <span>目录</span>
-            </button>
-            <button class="func-btn" id="nightModeBtn">
-                <span class="func-icon">🌙</span>
-                <span>夜间</span>
-            </button>
-            <button class="func-btn" id="settingBtn">
-                <span class="func-icon">⚙️</span>
-                <span>设置</span>
-            </button>
+
+        <!-- 第二页：加密文（双击解密+配图，图片不加密） -->
+        <div class="reader-page" id="page2">
+            <div class="reader-container">
+                <div class="article-header">
+                    <h1 class="article-title">古城旧巷里的烟火</h1>
+                    <div class="article-meta">
+                        <span>作者：巷陌人</span>
+                        <span>发布时间：2026-01-02</span>
+                        <span>阅读时长：10分钟</span>
+                    </div>
+                </div>
+                <div class="article-content" id="page2Content">
+                    <!-- 加密文容器 -->
+                    <div id="cipherContainer">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
+                    <span class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读 | 通用</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 解密弹窗（独立层级，确保输入） -->
+    <!-- 控制栏（含页面切换、字体调节、模式切换） -->
+    <div class="reader-controls">
+        <div class="control-group">
+            <button class="control-btn" id="fontSmallBtn">小字体</button>
+            <button class="control-btn active" id="fontMediumBtn">中字体</button>
+            <button class="control-btn" id="fontLargeBtn">大字体</button>
+            <button class="control-btn" id="fontXLBtn">特大字体</button>
+        </div>
+        <div class="control-group">
+            <button class="control-btn" id="toPage1Btn">第一页（明文）</button>
+            <button class="control-btn" id="toPage2Btn">第二页（加密）</button>
+            <button class="control-btn" id="modeToggleBtn">切换暗黑模式</button>
+            <button class="control-btn" id="backTopBtn">回到顶部</button>
+        </div>
+    </div>
+
+    <!-- 解密弹窗 -->
     <div class="decrypt-modal" id="decryptModal">
         <div class="modal-box">
             <h3 class="modal-title">输入密钥解锁内容</h3>
-            <input type="password" class="modal-input" id="secretKey" placeholder="请输入专属解密密钥" autocomplete="off">
+           
             <p class="error-tip" id="errorTip">密钥错误或密文无效，请重试</p>
             <div class="modal-btns">
                 <button class="modal-btn unlock-btn" id="unlockBtn">解锁</button>
@@ -399,171 +426,141 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
     <script>
-        // 核心变量（确保DOM元素正确获取）
-        const root = document.documentElement;
-        const novelTextWrap = document.getElementById('novelTextWrap');
-        const novelText = document.getElementById('novelText');
+        // 核心变量
+        const progressBar = document.getElementById('progressBar');
+        const body = document.body;
+        const readerWrapper = document.getElementById('readerWrapper');
+        const page2Content = document.getElementById('page2Content');
+        const cipherContainer = document.getElementById('cipherContainer');
         const decryptModal = document.getElementById('decryptModal');
         const secretKey = document.getElementById('secretKey');
         const errorTip = document.getElementById('errorTip');
         const decryptHint = document.getElementById('decryptHint');
         const unlockBtn = document.getElementById('unlockBtn');
         const cancelBtn = document.getElementById('cancelBtn');
-        const nightModeBtn = document.getElementById('nightModeBtn');
-        const settingBtn = document.getElementById('settingBtn');
-        const progressFill = document.getElementById('progressFill');
-        let isUnlocked = false;
-        let fontSize = parseFloat(getComputedStyle(root).getPropertyValue('--font-size'));
-        let brightness = 100;
+        let isUnlocked = false; // 第二页解密状态标记
 
-        // AES-ECB 核心配置（加密/解密需一致）
-        const AES_CONFIG = {
-            mode: CryptoJS.mode.ECB,
-            padding: CryptoJS.pad.Pkcs7
-        };
+        // 第二页解密后明文（带配图，图片不加密，直接渲染）
+        const page2PlainText = `
+            <p>总偏爱那些藏在时光里的古城旧巷，青石板路被岁月磨得发亮，斑驳的墙面刻满了故事，每一步踏下去，都像是在与旧时光对话。这里没有快节奏的匆忙，只有慢悠悠的烟火，藏着最本真的生活模样。</p>
+            <p>清晨的古城是安静的，薄雾还未散去，笼罩着错落的灰瓦白墙。巷口的早点铺最先亮起灯光，蒸笼掀开时，白汽袅袅升起，混着豆浆的醇香、油条的焦香，飘满整条小巷。早起的老人搬着小马扎坐在门口，慢悠悠地喝着茶，眼神里满是从容。</p>
+            <img src="https://picsum.photos/id/1076/800/400" alt="清晨薄雾中的古城旧巷">
+            <h2>巷陌里的老故事</h2>
+            <p>古城的巷子大多弯弯曲曲，纵横交错，像一张细密的网，网住了岁月，也网住了人心。巷子里的老房子大多是砖木结构，雕花的窗棂虽已褪色，却依旧能看出当年的精致；木门推开时，吱呀作响，像是在诉说着经年的往事。</p>
+            <blockquote>一座古城，半城故事，每一块砖，每一片瓦，都藏着光阴的痕迹，每一个人，每一段过往，都写满了温柔的回忆。</blockquote>
+            <p>偶有老人坐在巷口，摇着蒲扇，讲起古城的旧事，那些泛黄的时光，那些远去的故人，在话语间慢慢鲜活起来。或许是某个商贾的传奇，或许是某段青涩的爱恋，或许是邻里间的温暖日常，都在这旧巷里，代代相传。</p>
+            <img src="https://picsum.photos/id/164/800/400" alt="古城里的雕花窗棂与老木门">
+            <h2>烟火里的慢时光</h2>
+            <p>午后的古城渐渐热闹起来，游客三三两两，沿着青石板路缓步前行，或是驻足拍照，或是走进街边的小店。手作的饰品店、飘香的糕点铺、安静的书店，每一家小店都有自己的特色，藏着不期而遇的惊喜。</p>
+            <p>傍晚时分，古城的烟火气最浓。家家户户升起炊烟，饭菜的香气弥漫在空气里；街边的小吃摊依次摆开，烤串的滋滋声、摊主的吆喝声、游客的谈笑声，交织在一起，格外热闹。夕阳西下，余晖洒在灰瓦上，给古城镀上一层金边，美得让人心醉。</p>
+            <p>夜色降临，古城换上了另一副模样。红灯笼次第亮起，暖黄的灯光映着青石板路，别有一番韵味。人们沿着巷子慢慢散步，褪去了白天的燥热，只剩下满心的惬意。这一刻，时光很慢，日子很暖，所有的疲惫都烟消云散。</p>
+            <img src="https://picsum.photos/id/177/800/400" alt="夜色里挂着红灯笼的古城">
+            <p>离开古城时，总有些不舍。那些青石板路，那些旧房子，那些烟火气，都让人念念不忘。原来我们眷恋的，从来不是古城的模样，而是藏在古城里的慢时光，是那份不慌不忙的从容，是那些藏在烟火里的温暖与安宁。</p>
+        `;
 
-        // 1. 修复双击触发：绑定外层容器，确保弹窗弹出
-        novelTextWrap.addEventListener('dblclick', () => {
-            if (isUnlocked) return;
-            decryptModal.classList.add('show'); // 显示弹窗
-            secretKey.value = ''; // 清空输入框
-            errorTip.style.display = 'none'; // 隐藏错误提示
-            setTimeout(() => {
-                secretKey.focus(); // 强制聚焦输入框
-            }, 100);
+        // 1. 页面切换功能
+        document.getElementById('toPage1Btn').addEventListener('click', () => {
+            readerWrapper.style.transform = 'translateX(0)';
+            backToTop(); // 切换页自动回顶
+        });
+        document.getElementById('toPage2Btn').addEventListener('click', () => {
+            readerWrapper.style.transform = 'translateX(-100vw)';
+            backToTop();
         });
 
-        // 2. 关闭弹窗
+        // 2. 回到顶部功能
+        function backToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        document.getElementById('backTopBtn').addEventListener('click', backToTop);
+
+        // 3. 阅读进度条功能
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+            const progress = (scrollTop / (scrollHeight - clientHeight)) * 100;
+            progressBar.style.width = `${progress}%`;
+        });
+
+        // 4. 字体大小调节功能
+        const fontBtns = [
+            document.getElementById('fontSmallBtn'),
+            document.getElementById('fontMediumBtn'),
+            document.getElementById('fontLargeBtn'),
+            document.getElementById('fontXLBtn')
+        ];
+        const fontClasses = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+
+        function removeFontActive() {
+            fontBtns.forEach(btn => btn.classList.remove('active'));
+        }
+
+        fontBtns.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                removeFontActive();
+                btn.classList.add('active');
+                body.className = body.className.replace(/font-\w+/, '');
+                body.classList.add(fontClasses[index]);
+            });
+        });
+
+        // 5. 明暗模式切换功能
+        const modeToggleBtn = document.getElementById('modeToggleBtn');
+        let isDarkMode = false;
+        modeToggleBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            body.classList.toggle('dark-mode', isDarkMode);
+            modeToggleBtn.textContent = isDarkMode ? '切换明亮模式' : '切换暗黑模式';
+        });
+
+        // 6. 第二页：双击弹出解密弹窗
+        page2Content.addEventListener('dblclick', () => {
+            if (isUnlocked) return; // 已解密则不触发弹窗
+            decryptModal.classList.add('show');
+            secretKey.value = '';
+            errorTip.style.display = 'none';
+            secretKey.focus();
+        });
+
+        // 7. 关闭解密弹窗
         cancelBtn.addEventListener('click', () => {
             decryptModal.classList.remove('show');
-            errorTip.style.display = 'none';
-            secretKey.value = '';
         });
 
-        // 3. 核心解密逻辑（修复解密失败问题）
-        unlockBtn.addEventListener('click', doDecrypt);
-        // 回车快捷解密（确保触发）
-        secretKey.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                doDecrypt();
-            }
-        });
-
+        // 8. AES-ECB 核心解密逻辑（测试密钥123456）
         function doDecrypt() {
-            const keyVal = secretKey.value.trim();
-            const cipherText = novelText.textContent.trim();
+            const password = secretKey.value.trim();
+            const encryptedContent = cipherContainer.textContent.trim();
             
-            if (!keyVal) {
-                errorTip.textContent = '请输入解密密钥';
-                errorTip.style.display = 'block';
-                return;
-            }
-
             try {
-                // 密钥处理：补全为16/24/32位（AES要求）
-                const key = CryptoJS.enc.Utf8.parse(padKey(keyVal));
-                const decrypted = CryptoJS.AES.decrypt(cipherText, key, AES_CONFIG);
-                const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+                const decryptedContent = CryptoJS.AES.decrypt(encryptedContent, password, {
+                    mode: CryptoJS.mode.ECB,
+                    padding: CryptoJS.pad.Pkcs7
+                }).toString(CryptoJS.enc.Utf8);
 
-                if (!plainText || plainText.length === 0) throw new Error('解密失败');
-                
-                // 解密成功：替换内容
-                novelText.textContent = plainText;
-                isUnlocked = true;
+                if (!decryptedContent) {
+                    errorTip.style.display = 'block';
+                    return;
+                }
+                // 渲染明文（配图直接加载，不加密）
+                cipherContainer.innerHTML = page2PlainText;
                 decryptHint.style.display = 'none';
+                isUnlocked = true;
                 decryptModal.classList.remove('show');
-                progressFill.style.width = '100%'; // 更新阅读进度
-            } catch (err) {
-                console.error('解密错误：', err);
-                errorTip.textContent = '密钥错误或密文无效，请重试';
+            } catch (e) {
                 errorTip.style.display = 'block';
+                console.error(e);
             }
         }
-
-        // 辅助：密钥补全（AES要求密钥为16/24/32位）
-        function padKey(key) {
-            while (key.length < 16) key += key;
-            return key.substring(0, 16); // 取16位（AES-128，也可改为32位AES-256）
-        }
-
-        // 4. 夜间/日间模式切换（匹配示例图标）
-        nightModeBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const icon = nightModeBtn.querySelector('.func-icon');
-            icon.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
-            nightModeBtn.querySelector('span:last-child').textContent = document.body.classList.contains('dark-mode') ? '日间' : '夜间';
-        });
-
-        // 5. 设置功能（字体+亮度调节）
-        settingBtn.addEventListener('click', () => {
-            const settingPanel = document.createElement('div');
-            settingPanel.style.cssText = `
-                position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--modal-content-bg);padding:1.5rem;border-radius:10px;z-index:1000;width:80%;max-width:300px;border:1px solid var(--border-color);
-            `;
-            settingPanel.innerHTML = `
-                <h4 style="text-align:center;color:var(--title-color);margin-bottom:1rem;">阅读设置</h4>
-                <div style="margin-bottom:1rem;">
-                    <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">字体大小</p>
-                    <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center;">
-                        <button id="fontMinus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">缩小</button>
-                        <button id="fontPlus" style="padding:0.5rem 1rem;border:none;background:var(--progress-color);color:#fff;border-radius:4px;">放大</button>
-                    </div>
-                </div>
-                <div style="margin-bottom:1rem;">
-                    <p style="font-size:0.9rem;color:var(--text-color);margin-bottom:0.5rem;">亮度调节</p>
-                    <input type="range" id="brightnessSlider" min="50" max="150" value="${brightness}" style="width:100%;height:4px;accent-color:var(--progress-active);">
-                </div>
-                <button id="closeSetting" style="width:100%;padding:0.7rem;border:none;background:var(--progress-active);color:#fff;border-radius:4px;margin-top:0.5rem;">确定</button>
-            `;
-            const mask = document.createElement('div');
-            mask.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;';
-            document.body.appendChild(mask);
-            document.body.appendChild(settingPanel);
-
-            // 字体大小调节
-            document.getElementById('fontMinus').addEventListener('click', () => {
-                if (fontSize > 0.9) {
-                    fontSize -= 0.05;
-                    root.style.setProperty('--font-size', `${fontSize}rem`);
-                }
-            });
-            document.getElementById('fontPlus').addEventListener('click', () => {
-                if (fontSize < 1.5) {
-                    fontSize += 0.05;
-                    root.style.setProperty('--font-size', `${fontSize}rem`);
-                }
-            });
-
-            // 亮度调节
-            document.getElementById('brightnessSlider').addEventListener('input', (e) => {
-                brightness = e.target.value;
-                root.style.setProperty('--brightness', `${brightness}%`);
-            });
-
-            // 关闭设置面板
-            document.getElementById('closeSetting').addEventListener('click', () => {
-                document.body.removeChild(settingPanel);
-                document.body.removeChild(mask);
-            });
-            mask.addEventListener('click', () => {
-                document.body.removeChild(settingPanel);
-                document.body.removeChild(mask);
-            });
-        });
-
-        // 6. 模拟章节切换
-        document.querySelectorAll('.chapter-btn')[0].addEventListener('click', () => {
-            isUnlocked ? alert('已是第一章') : alert('请先解锁内容');
-        });
-        document.querySelectorAll('.chapter-btn')[1].addEventListener('click', () => {
-            isUnlocked ? alert('暂无下一章') : alert('请先解锁内容');
-        });
-
-        // 7. 目录按钮
-        document.getElementById('catalogBtn').addEventListener('click', () => {
-            isUnlocked ? alert('目录：\n1. 车队第一铁律\n2. 待更新') : alert('请先解锁内容');
+        unlockBtn.addEventListener('click', doDecrypt);
+        secretKey.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doDecrypt();
         });
     </script>
 </body>
