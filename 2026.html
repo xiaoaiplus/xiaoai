@@ -87,7 +87,6 @@
             margin: 30px 0;
             object-fit: cover;
             height: auto;
-            /* 图片不加密，全程正常加载适配 */
         }
         .article-content blockquote {
             border-left: 4px solid #666;
@@ -98,7 +97,16 @@
             color: #555;
         }
 
-        /* 解密提示专属样式 */
+        /* 密文容器核心适配样式：自动换行、不超出容器、适配屏幕 */
+        #cipherContainer {
+            word-break: break-all;
+            word-wrap: break-word;
+            white-space: normal;
+            width: 100%;
+            overflow-wrap: break-word;
+        }
+
+        /* 解密提示（无密钥信息） */
         .decrypt-hint {
             text-align: center;
             color: #888;
@@ -107,7 +115,7 @@
             display: block;
         }
 
-        /* 控制栏样式（固定底部，新增页面切换按钮） */
+        /* 控制栏样式 */
         .reader-controls {
             position: fixed;
             bottom: 0;
@@ -377,7 +385,7 @@
             </div>
         </div>
 
-        <!-- 第二页：加密文（双击解密+配图，图片不加密） -->
+        <!-- 第二页：加密文（完整保留你提供的密文+布局适配，图片不加密） -->
         <div class="reader-page" id="page2">
             <div class="reader-container">
                 <div class="article-header">
@@ -389,9 +397,9 @@
                     </div>
                 </div>
                 <div class="article-content" id="page2Content">
-                    <!-- 加密文容器 -->
+                    <!-- 完整保留你提供的密文，已做布局适配 -->
                     <div id="cipherContainer">U2FsdGVkX1++MdfgDZ7pEqGPjhRZcQ+dlpY/Vw5j0yKBrSjrsN+r5HwIXxC16NVTj+dA9ejfbHsa+G3RoXmtWNrM+yKMiZmg45IaQ+MRyxiiOVQ/w6xEphKkJb2MiPiqEUgblaXV6puMeje/ZcWOozm2/XyzFHeRD7W4uVMKJnDUUXTuWmC+uzH2suVdz4TPQHw6LWkWpHoLWDqbUjspHd61+DDSpSG6PxusFrgxDxs4JVh2S4QF64av9y7q+lzgT8Xqmc0KJrG5UPDXReAyKErYGAzKm/gK5muBUzj4eLJJbgIqwEELgJygs4cg9Ta/R/g9VKMEkc4LH4svTx4ofsbq11kXsFP16g0aRAQybmnDEbdj5ETwFx2jZG3hT/xtBIs6Mbu5AqyyS7TTzO37Wd7g27hkuj40R6k+Hxb3WJ+FbnmjM3SP9ZdDMmDB4OzfaEnxX72QS7T97BLs8LXCP19nRl8Kz0hCTDdkn3OodMjI8d3K3xhDgcSxIW8Ph5Dgj7sYusy+PoKBP4ONRTQ12z0IbQH47c3fRvPgLtX4lMPGWOy7LpVMl7jzB7d7/HQmkeZxcEkpd8DOzC/HjC/J8Y3VWgkb7WtqhDvQ21jevO8Bu4FhzZ3GgjLT8xHp6+3vaoxBLeZvzodUffW6/2v1/kmTmCHAeDdeEVy9Wprbk7Qcl4PKe4E35QQe3vatrqk4BvnQtejBVtKprlMYJkeasmvMJaRKhc4oSj50PlJwKXEMznRFBrB7Iq3smtFyeJ55l6+HjITqj66+dgh1WpY0Z+D2izLOWFfcEBwpN0/X+KI=</div>
-                    <span class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读 | 通用</span>
+                    <span class="decrypt-hint" id="decryptHint">双击正文区域 输入密钥解锁阅读</span>
                 </div>
             </div>
         </div>
@@ -417,7 +425,7 @@
     <div class="decrypt-modal" id="decryptModal">
         <div class="modal-box">
             <h3 class="modal-title">输入密钥解锁内容</h3>
-           
+            <input type="password" class="modal-input" id="secretKey" placeholder="请输入解密密钥" autocomplete="off">
             <p class="error-tip" id="errorTip">密钥错误或密文无效，请重试</p>
             <div class="modal-btns">
                 <button class="modal-btn unlock-btn" id="unlockBtn">解锁</button>
@@ -533,7 +541,7 @@
             decryptModal.classList.remove('show');
         });
 
-        // 8. AES-ECB 核心解密逻辑（测试密钥123456）
+        // 8. AES-ECB 核心解密逻辑（密钥仅你知晓，输入正确即可解密）
         function doDecrypt() {
             const password = secretKey.value.trim();
             const encryptedContent = cipherContainer.textContent.trim();
