@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resonance — Grand Piano Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #0a0a0c;
+    --bg-mid: #121215;
+    --bg-surface: #1a1a1f;
+    --bg-card: #1e1e24;
+    --gold: #c9a84c;
+    --gold-light: #e8d18c;
+    --gold-dim: #8a7333;
+    --ivory: #f5f0e8;
+    --ivory-pressed: #e8e0d0;
+    --ebony: #1a1a1a;
+    --ebony-pressed: #2a2a2a;
+    --text-primary: #f0ece4;
+    --text-secondary: #8a8678;
+    --text-muted: #5a5850;
+    --glow-gold: rgba(201, 168, 76, 0.15);
+    --glow-gold-strong: rgba(201, 168, 76, 0.3);
+    --shadow-soft: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-deep: 0 12px 48px rgba(0,0,0,0.6);
+    --shadow-key: 0 4px 6px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-key-hover: 0 6px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* --- Atmospheric Background --- */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 20% 80%, rgba(100,80,30,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(100,80,30,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Noise texture overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- Header --- */
+  header {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1400px;
+    padding: 40px 48px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    animation: fadeDown 0.8s ease-out;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-group {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-bottom: 2px;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-md);
+    background: rgba(201,168,76,0.05);
+    color: var(--gold-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+
+  .btn:hover {
+    background: rgba(201,168,76,0.12);
+    border-color: rgba(201,168,76,0.4);
+    box-shadow: 0 0 20px rgba(201,168,76,0.1);
+  }
+
+  .btn.active {
+    background: rgba(201,168,76,0.18);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  /* --- Main Piano Container --- */
+  main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1400px;
+    padding: 32px 48px 48px;
+    animation: fadeIn 1s ease-out 0.3s both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- Info Bar --- */
+  .info-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 4px;
+  }
+
+  .info-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .info-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .info-value.gold {
+    color: var(--gold);
+  }
+
+  .note-display {
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .octave-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* --- Volume Slider --- */
+  .volume-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(to right, var(--gold-dim), var(--gold));
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(201,168,76,0.4);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  /* --- Piano Frame --- */
+  .piano-frame {
+    background: linear-gradient(180deg, #1c1c20 0%, #141416 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(201,168,76,0.1);
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255,255,255,0.03);
+    padding: 32px 32px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .piano-frame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+  }
+
+  /* Gold trim inside the frame */
+  .piano-frame::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 13px;
+    border: 1px solid rgba(201,168,76,0.04);
+    pointer-events: none;
+  }
+
+  /* --- Piano Body --- */
+  .piano-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* --- Visualization Bar --- */
+  .visualizer {
+    height: 80px;
+    background: var(--bg-deep);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .visualizer canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .visualizer-label {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  /* --- Piano Keys Container --- */
+  .keys-container {
+    position: relative;
+    height: 240px;
+    display: flex;
+    user-select: none;
+    -webkit-user-select: none;
+    padding-top: 4px;
+  }
+
+  /* --- White Keys --- */
+  .white-key {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    background: linear-gradient(180deg, #f8f4ec 0%, #f0ebe0 60%, #e8e2d6 100%);
+    border: 1px solid #d8d2c6;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    cursor: pointer;
+    transition: all 0.06s ease;
+    box-shadow:
+      0 4px 3px rgba(0,0,0,0.15),
+      inset 0 -2px 4px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+    z-index: 1;
+  }
+
+  .white-key + .white-key {
+    margin-left: -1px;
+  }
+
+  .white-key::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+    border-radius: 0 0 2px 2px;
+    pointer-events: none;
+  }
+
+  .white-key:hover {
+    background: linear-gradient(180deg, #fffdf8 0%, #f5f0e6 60%, #ede8dc 100%);
+    box-shadow:
+      0 6px 6px rgba(0,0,0,0.18),
+      inset 0 -2px 4px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+
+  .white-key.pressed {
+    background: linear-gradient(180deg, #e8e2d6 0%, #e0dac8 60%, #d8d0c0 100%);
+    box-shadow:
+      0 2px 1px rgba(0,0,0,0.15),
+      inset 0 2px 4px rgba(0,0,0,0.08),
+      inset 0 -1px 0 rgba(255,255,255,0.2);
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+  }
+
+  .white-key.pressed::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background: var(--gold);
+    border-radius: 2px;
+    opacity: 0.6;
+    box-shadow: 0 0 8px rgba(201,168,76,0.4);
+  }
+
+  /* Key color indicators (bottom strip) */
+  .key-color-strip {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 0 0 5px 5px;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .key-color-strip.red {
+    background: linear-gradient(180deg, #e74c3c, #c0392b);
+    box-shadow: 0 1px 6px rgba(231,76,60,0.4);
+  }
+
+  .key-color-strip.green {
+    background: linear-gradient(180deg, #2ecc71, #27ae60);
+    box-shadow: 0 1px 6px rgba(46,204,113,0.4);
+  }
+
+  .key-color-strip.red-bright {
+    background: linear-gradient(180deg, #ff4757, #ff3838);
+    box-shadow: 0 1px 6px rgba(255,71,87,0.5);
+  }
+
+  .key-color-strip.green-bright {
+    background: linear-gradient(180deg, #2ed573, #7bed9f);
+    box-shadow: 0 1px 6px rgba(46,213,115,0.5);
+  }
+
+  /* Indented badge on key face */
+  .key-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0;
+    pointer-events: none;
+    z-index: 4;
+    padding: 2px 5px 3px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    box-shadow:
+      inset 0 1px 2px rgba(0,0,0,0.12),
+      inset 0 -0.5px 1px rgba(255,255,255,0.15),
+      0 0.5px 1px rgba(0,0,0,0.08);
+  }
+
+  .key-badge.red {
+    background: rgba(231, 76, 60, 0.08);
+    color: #c0392b;
+    box-shadow:
+      inset 0 1px 2px rgba(0,0,0,0.1),
+      inset 0 -0.5px 1px rgba(255,255,255,0.12),
+      0 0.5px 1px rgba(0,0,0,0.06);
+  }
+
+  .key-badge.green {
+    background: rgba(46, 204, 113, 0.08);
+    color: #27ae60;
+    box-shadow:
+      inset 0 1px 2px rgba(0,0,0,0.1),
+      inset 0 -0.5px 1px rgba(255,255,255,0.12),
+      0 0.5px 1px rgba(0,0,0,0.06);
+  }
+
+  .key-badge-num {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .key-badge-sup {
+    font-size: 9px;
+    line-height: 1;
+    position: relative;
+    top: -2px;
+    margin-left: 0.5px;
+    opacity: 0.85;
+  }
+
+  /* Key labels */
+  .key-label {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 500;
+    color: #b0a898;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .white-key .key-label {
+    color: #a09888;
+  }
+
+  .show-labels .key-label {
+    opacity: 1;
+  }
+
+  .key-shortcut {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .show-shortcuts .key-shortcut {
+    opacity: 1;
+  }
+
+  /* --- Black Keys --- */
+  .black-key-wrapper {
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .black-key {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
+    border-radius: 0 0 5px 5px;
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.06s ease;
+    box-shadow:
+      0 4px 6px rgba(0,0,0,0.6),
+      0 1px 2px rgba(0,0,0,0.4),
+      inset 0 -1px 2px rgba(255,255,255,0.05),
+      -1px 0 1px rgba(0,0,0,0.3),
+      1px 0 1px rgba(0,0,0,0.3);
+  }
+
+  .black-key::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 2px;
+    right: 2px;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+    border-radius: 0 0 1px 1px;
+    pointer-events: none;
+  }
+
+  .black-key::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 4px;
+    right: 4px;
+    height: 6px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+    border-radius: 0 0 3px 3px;
+    pointer-events: none;
+  }
+
+  .black-key:hover {
+    background: linear-gradient(180deg, #333 0%, #222 40%, #161616 100%);
+    box-shadow:
+      0 6px 10px rgba(0,0,0,0.7),
+      0 2px 3px rgba(0,0,0,0.5),
+      inset 0 -1px 2px rgba(255,255,255,0.06),
+      -1px 0 1px rgba(0,0,0,0.3),
+      1px 0 1px rgba(0,0,0,0.3);
+  }
+
+  .black-key.pressed {
+    background: linear-gradient(180deg, #222 0%, #161616 40%, #0e0e0e 100%);
+    box-shadow:
+      0 2px 3px rgba(0,0,0,0.5),
+      0 1px 1px rgba(0,0,0,0.3),
+      inset 0 1px 3px rgba(0,0,0,0.3);
+    transform: translateY(3px);
+    height: 147px;
+  }
+
+  .black-key.pressed::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 2px;
+    opacity: 0.8;
+    box-shadow: 0 0 8px rgba(201,168,76,0.5);
+  }
+
+  .black-key .key-label {
+    color: #666;
+    bottom: 8px;
+    font-size: 8px;
+  }
+
+  .black-key .key-shortcut {
+    bottom: 24px;
+    background: rgba(255,255,255,0.06);
+    color: #555;
+  }
+
+  /* --- Sustain Glow on pressed keys --- */
+  .white-key.pressed, .black-key.pressed {
+    animation: keyGlow 0.5s ease-out;
+  }
+
+  @keyframes keyGlow {
+    0% { filter: brightness(1.1); }
+    100% { filter: brightness(1); }
+  }
+
+  /* --- Octave Shifter --- */
+  .octave-shifter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .octave-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.2);
+    background: rgba(201,168,76,0.05);
+    color: var(--gold);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .octave-btn:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(201,168,76,0.15);
+  }
+
+  .octave-indicator {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--text-secondary);
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .octave-indicator span {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* --- Footer Controls --- */
+  .footer-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* --- Particles overlay --- */
+  .particles-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 900px) {
+    header { padding: 24px 20px 0; }
+    main { padding: 20px 16px 32px; }
+    .piano-frame { padding: 20px 12px 16px; }
+    .keys-container { height: 200px; }
+    .black-key { height: 120px; }
+    .black-key.pressed { height: 117px; }
+    .logo { font-size: 22px; }
+    .visualizer { height: 60px; }
+  }
+
+  @media (max-width: 600px) {
+    header { flex-direction: column; gap: 16px; align-items: flex-start; }
+    .info-bar { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .keys-container { height: 160px; }
+    .black-key { height: 100px; }
+    .black-key.pressed { height: 97px; }
+  }
+
+  /* Sustain pedal indicator */
+  .sustain-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: var(--radius-md);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+
+  .sustain-indicator.visible {
+    opacity: 1;
+  }
+
+  /* Recording indicator */
+  .rec-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #e74c3c;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .rec-indicator.active {
+    opacity: 1;
+  }
+
+  .rec-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e74c3c;
+    animation: recBlink 1s ease-in-out infinite;
+  }
+
+  @keyframes recBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Annotation panel */
+  .annotation-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(30,30,36,0.97) 0%, rgba(24,24,28,0.97) 100%);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02);
+    backdrop-filter: blur(12px);
+    max-width: 340px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  .annotation-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .annotation-panel::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: rgba(30,30,36,0.97);
+    border-left: 1px solid rgba(201,168,76,0.12);
+    border-top: 1px solid rgba(201,168,76,0.12);
+    transform: rotate(45deg);
+  }
+
+  .annotation-title {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .annotation-text {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .annotation-text .hl-red {
+    color: #e74c3c;
+    font-weight: 600;
+  }
+
+  .annotation-text .hl-green {
+    color: #2ecc71;
+    font-weight: 600;
+  }
+
+  .annotation-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+    margin: 10px 0;
+  }
+
+  .annotation-hint {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    color: var(--text-secondary);
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<canvas class="particles-canvas" id="particlesCanvas"></canvas>
+
+<header>
+  <div class="logo-group">
+    <span class="logo">Resonance</span>
+    <span class="logo-sub">Grand Piano Simulator</span>
+  </div>
+  <div class="header-controls">
+    <div class="rec-indicator" id="recIndicator">
+      <span class="rec-dot"></span>
+      <span>REC</span>
+    </div>
+    <button class="btn" id="btnLabels" onclick="toggleLabels()">
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm4 6h10v2H7V9zm-2 6h14v2H5v-2z"/></svg>
+      音符
+    </button>
+    <button class="btn" id="btnShortcuts" onclick="toggleShortcuts()">
+      <svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
+      快捷键
+    </button>
+    <button class="btn" id="btnRecord" onclick="toggleRecord()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+      录制
+    </button>
+    <button class="btn" id="btnAnnotation" onclick="toggleAnnotation()">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v7h7v9H6z"/></svg>
+      备注
+    </button>
+    <div class="annotation-panel" id="annotationPanel" onclick="toggleAnnotation()">
+      <div class="annotation-title">演奏规则</div>
+      <div class="annotation-text">
+        <span class="hl-green">绿增绿</span>，<span class="hl-red">红增红</span>
+      </div>
+      <div class="annotation-divider"></div>
+      <div class="annotation-text">
+        多款买最多
+      </div>
+      <div class="annotation-divider"></div>
+      <div class="annotation-hint">点击此面板或备注按钮关闭</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="info-bar">
+    <div class="info-left">
+      <div class="note-display">
+        <div class="info-label">当前音符</div>
+        <div class="info-value gold" id="noteDisplay">—</div>
+      </div>
+      <div>
+        <div class="info-label">频率</div>
+        <div class="info-value" id="freqDisplay">— Hz</div>
+      </div>
+    </div>
+    <div class="volume-group">
+      <div class="info-label">音量</div>
+      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70" oninput="setVolume(this.value)">
+    </div>
+  </div>
+
+  <div class="piano-frame">
+    <div class="piano-body">
+      <div class="visualizer">
+        <canvas id="vizCanvas"></canvas>
+        <div class="visualizer-label">Waveform</div>
+      </div>
+      <div class="keys-container" id="keysContainer">
+        <!-- Keys generated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="octave-shifter">
+    <button class="octave-btn" onclick="shiftOctave(-1)">−</button>
+    <div class="octave-indicator">八度 <span id="octaveDisplay">4</span></div>
+    <button class="octave-btn" onclick="shiftOctave(1)">+</button>
+  </div>
+
+  <div class="footer-controls">
+    <button class="btn" id="btnSustain" onclick="toggleSustain()">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
+      延音 (Space)
+    </button>
+    <button class="btn" onclick="playDemo()">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      示范演奏
+    </button>
+  </div>
+</main>
+
+<div class="sustain-indicator" id="sustainIndicator">延音踏板已按下</div>
+
+<script>
+// =============================================
+// Audio Engine — Web Audio API Piano Synthesizer
+// =============================================
+
+const AudioEngine = (() => {
+  let ctx = null;
+  let masterGain = null;
+  let compressor = null;
+  let analyser = null;
+  let convolver = null;
+  const activeNotes = {};
+
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Master chain: source -> compressor -> gain -> analyser -> destination
+    compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -24;
+    compressor.knee.value = 30;
+    compressor.ratio.value = 12;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.25;
+
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 0.7;
+
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 2048;
+
+    // Create reverb impulse response
+    convolver = ctx.createConvolver();
+    const rate = ctx.sampleRate;
+    const length = rate * 2;
+    const impulse = ctx.createBuffer(2, length, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5);
+      }
+    }
+    convolver.buffer = impulse;
+
+    const reverbGain = ctx.createGain();
+    reverbGain.gain.value = 0.15;
+
+    // Dry path
+    compressor.connect(masterGain);
+    masterGain.connect(analyser);
+
+    // Wet path (reverb)
+    compressor.connect(convolver);
+    convolver.connect(reverbGain);
+    reverbGain.connect(masterGain);
+
+    analyser.connect(ctx.destination);
+  }
+
+  // Calculate frequency from note name and octave
+  function noteToFreq(note, octave) {
+    const noteMap = { C: -9, 'C#': -8, D: -7, 'D#': -6, E: -5, F: -4, 'F#': -3, G: -2, 'G#': -1, A: 0, 'A#': 1, B: 2 };
+    const semitone = noteMap[note];
+    return 440 * Math.pow(2, semitone / 12 + (octave - 4));
+  }
+
+  function playNote(noteId, note, octave, velocity = 1) {
+    init();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    // Stop if already playing
+    if (activeNotes[noteId]) {
+      stopNote(noteId, true);
+    }
+
+    const freq = noteToFreq(note, octave);
+    const now = ctx.currentTime;
+
+    // Create piano-like tone with multiple harmonics
+    const noteGain = ctx.createGain();
+    noteGain.gain.setValueAtTime(0, now);
+    noteGain.gain.linearRampToValueAtTime(velocity * 0.35, now + 0.005);
+    noteGain.gain.exponentialRampToValueAtTime(velocity * 0.2, now + 0.1);
+    noteGain.gain.exponentialRampToValueAtTime(velocity * 0.08, now + 1.0);
+    noteGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0);
+
+    const oscGroup = [];
+
+    // Fundamental + harmonics for rich piano timbre
+    const harmonics = [
+      { ratio: 1, gain: 1.0, type: 'triangle' },
+      { ratio: 2, gain: 0.5, type: 'sine' },
+      { ratio: 3, gain: 0.15, type: 'sine' },
+      { ratio: 4, gain: 0.08, type: 'sine' },
+      { ratio: 5, gain: 0.03, type: 'sine' },
+      { ratio: 0.999, gain: 0.3, type: 'sine' }, // slight detune for richness
+    ];
+
+    harmonics.forEach(h => {
+      const osc = ctx.createOscillator();
+      const harmGain = ctx.createGain();
+      osc.type = h.type;
+      osc.frequency.value = freq * h.ratio;
+      harmGain.gain.value = h.gain;
+      osc.connect(harmGain);
+      harmGain.connect(noteGain);
+      osc.start(now);
+      oscGroup.push({ osc, gain: harmGain });
+    });
+
+    noteGain.connect(compressor);
+
+    activeNotes[noteId] = { noteGain, oscGroup, startTime: now };
+  }
+
+  function stopNote(noteId, immediate = false) {
+    const note = activeNotes[noteId];
+    if (!note) return;
+
+    const now = ctx.currentTime;
+    if (immediate) {
+      note.noteGain.gain.cancelScheduledValues(now);
+      note.noteGain.gain.setValueAtTime(note.noteGain.gain.value, now);
+      note.noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    } else {
+      note.noteGain.gain.cancelScheduledValues(now);
+      note.noteGain.gain.setValueAtTime(note.noteGain.gain.value, now);
+      note.noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    }
+
+    // Clean up oscillators after release
+    setTimeout(() => {
+      note.oscGroup.forEach(({ osc }) => {
+        try { osc.stop(); } catch(e) {}
+      });
+    }, immediate ? 100 : 500);
+
+    delete activeNotes[noteId];
+  }
+
+  function setVolume(val) {
+    init();
+    masterGain.gain.setValueAtTime(val, ctx.currentTime);
+  }
+
+  function getAnalyserData() {
+    if (!analyser) return null;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteTimeDomainData(data);
+    return data;
+  }
+
+  return { playNote, stopNote, setVolume, getAnalyserData, noteToFreq, init };
+})();
+
+
+// =============================================
+// Piano Layout & Key Configuration
+// =============================================
+
+const NOTE_PATTERN = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const WHITE_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const BLACK_NOTES = ['C#', 'D#', null, 'F#', 'G#', 'A#', null]; // null = no black key after E/B
+
+// Keyboard mapping (QWERTY row = white keys, number row = black keys)
+const KEYBOARD_MAP = {
+  // Lower octave (C3-B3)
+  'z': { note: 'C', octaveOffset: -1 },
+  'x': { note: 'D', octaveOffset: -1 },
+  'c': { note: 'E', octaveOffset: -1 },
+  'v': { note: 'F', octaveOffset: -1 },
+  'b': { note: 'G', octaveOffset: -1 },
+  'n': { note: 'A', octaveOffset: -1 },
+  'm': { note: 'B', octaveOffset: -1 },
+  's': { note: 'C#', octaveOffset: -1 },
+  'd': { note: 'D#', octaveOffset: -1 },
+  'g': { note: 'F#', octaveOffset: -1 },
+  'h': { note: 'G#', octaveOffset: -1 },
+  'j': { note: 'A#', octaveOffset: -1 },
+  // Main octave (C4-B4)
+  'q': { note: 'C', octaveOffset: 0 },
+  'w': { note: 'D', octaveOffset: 0 },
+  'e': { note: 'E', octaveOffset: 0 },
+  'r': { note: 'F', octaveOffset: 0 },
+  't': { note: 'G', octaveOffset: 0 },
+  'y': { note: 'A', octaveOffset: 0 },
+  'u': { note: 'B', octaveOffset: 0 },
+  '2': { note: 'C#', octaveOffset: 0 },
+  '3': { note: 'D#', octaveOffset: 0 },
+  '5': { note: 'F#', octaveOffset: 0 },
+  '6': { note: 'G#', octaveOffset: 0 },
+  '7': { note: 'A#', octaveOffset: 0 },
+  // Upper octave (C5-B5)
+  'i': { note: 'C', octaveOffset: 1 },
+  'o': { note: 'D', octaveOffset: 1 },
+  'p': { note: 'E', octaveOffset: 1 },
+  '[': { note: 'F', octaveOffset: 1 },
+  ']': { note: 'G', octaveOffset: 1 },
+  '9': { note: 'C#', octaveOffset: 1 },
+  '0': { note: 'D#', octaveOffset: 1 },
+  '=': { note: 'F#', octaveOffset: 1 },
+};
+
+// Reverse map for displaying shortcuts
+const NOTE_TO_KEY = {};
+Object.entries(KEYBOARD_MAP).forEach(([key, val]) => {
+  const id = `${val.note}_${val.octaveOffset}`;
+  NOTE_TO_KEY[id] = key.toUpperCase();
+});
+
+let currentOctave = 4;
+let sustainActive = false;
+let showLabels = false;
+let showShortcuts = true;
+let isRecording = false;
+let recordingData = [];
+let recordingStart = 0;
+
+const keysContainer = document.getElementById('keysContainer');
+const allKeys = {};
+
+// =============================================
+// Build Piano Keys
+// =============================================
+
+function buildPiano() {
+  keysContainer.innerHTML = '';
+  keysContainer.classList.toggle('show-labels', showLabels);
+  keysContainer.classList.toggle('show-shortcuts', showShortcuts);
+
+  // 2 octaves of white keys = 14 white keys
+  const whiteKeyCount = 14;
+
+  // White keys
+  for (let i = 0; i < whiteKeyCount; i++) {
+    const octaveIdx = Math.floor(i / 7);
+    const noteIdx = i % 7;
+    const note = WHITE_NOTES[noteIdx];
+    const octave = currentOctave + octaveIdx;
+    const noteId = `${note}${octave}`;
+
+    const key = document.createElement('div');
+    key.className = 'white-key';
+    key.dataset.note = note;
+    key.dataset.octave = octave;
+    key.dataset.noteId = noteId;
+
+    const label = document.createElement('span');
+    label.className = 'key-label';
+    label.textContent = noteId;
+    key.appendChild(label);
+
+    const shortcut = document.createElement('span');
+    shortcut.className = 'key-shortcut';
+    const shortcutKey = NOTE_TO_KEY[`${note}_${octaveIdx}`] || '';
+    shortcut.textContent = shortcutKey;
+    key.appendChild(shortcut);
+
+    // Color strip for QWERTY keys: Q/W/E/R=red, T/Y/U=green, I/O=red, P=green
+    const colorMap = {
+      'Q': 'red', 'W': 'red', 'E': 'red', 'R': 'red',
+      'T': 'green', 'Y': 'green', 'U': 'green',
+      'I': 'red', 'O': 'red',
+      'P': 'green',
+      'Z': 'red', 'X': 'red',
+      'C': 'red', 'V': 'green', 'B': 'green', 'N': 'green', 'M': 'green',
+    };
+    const colorClass = colorMap[shortcutKey];
+    if (colorClass) {
+      const strip = document.createElement('div');
+      strip.className = `key-color-strip ${colorClass}`;
+      key.appendChild(strip);
+    }
+
+    // Circle badge: T=1ᵇ, Y=2ᵇ, U=3ᵇ (green); I=1ᵇ, O=2ᵇ (red)
+    const badgeMap = { 'T': '1ᵇ', 'Y': '2ᵇ', 'U': '3ᵇ', 'I': '1ᵇ', 'O': '2ᵇ' };
+    const badgeText = badgeMap[shortcutKey];
+    if (badgeText) {
+      const badge = document.createElement('div');
+      badge.className = `key-badge ${colorClass}`;
+      const numSpan = document.createElement('span');
+      numSpan.className = 'key-badge-num';
+      numSpan.textContent = badgeText[0];
+      const supSpan = document.createElement('span');
+      supSpan.className = 'key-badge-sup';
+      supSpan.textContent = 'ᵇ';
+      badge.appendChild(numSpan);
+      badge.appendChild(supSpan);
+      key.appendChild(badge);
+    }
+
+    // Mouse events
+    key.addEventListener('mousedown', (e) => { e.preventDefault(); triggerNoteOn(noteId, note, octave); });
+    key.addEventListener('mouseup', () => triggerNoteOff(noteId));
+    key.addEventListener('mouseleave', () => triggerNoteOff(noteId));
+
+    // Touch events
+    key.addEventListener('touchstart', (e) => { e.preventDefault(); triggerNoteOn(noteId, note, octave); }, { passive: false });
+    key.addEventListener('touchend', (e) => { e.preventDefault(); triggerNoteOff(noteId); });
+
+    keysContainer.appendChild(key);
+    allKeys[noteId] = key;
+  }
+
+  // Black keys
+  for (let oct = 0; oct < 2; oct++) {
+    for (let i = 0; i < 7; i++) {
+      const blackNote = BLACK_NOTES[i];
+      if (!blackNote) continue;
+
+      const octave = currentOctave + oct;
+      const noteId = `${blackNote}${octave}`;
+
+      // Position: after the i-th white key in this octave
+      const whiteKeyIndex = oct * 7 + i;
+      const leftPercent = ((whiteKeyIndex + 1) / whiteKeyCount) * 100;
+      const widthPercent = (1 / whiteKeyCount) * 100 * 0.65;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'black-key-wrapper';
+      wrapper.style.left = `${leftPercent - widthPercent / 2}%`;
+      wrapper.style.width = `${widthPercent}%`;
+
+      const key = document.createElement('div');
+      key.className = 'black-key';
+      key.dataset.note = blackNote;
+      key.dataset.octave = octave;
+      key.dataset.noteId = noteId;
+
+      const label = document.createElement('span');
+      label.className = 'key-label';
+      label.textContent = noteId;
+      key.appendChild(label);
+
+      const shortcut = document.createElement('span');
+      shortcut.className = 'key-shortcut';
+      const shortcutKey = NOTE_TO_KEY[`${blackNote}_${oct}`] || '';
+      shortcut.textContent = shortcutKey;
+      key.appendChild(shortcut);
+
+      key.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); triggerNoteOn(noteId, blackNote, octave); });
+      key.addEventListener('mouseup', (e) => { e.stopPropagation(); triggerNoteOff(noteId); });
+      key.addEventListener('mouseleave', () => triggerNoteOff(noteId));
+
+      key.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); triggerNoteOn(noteId, blackNote, octave); }, { passive: false });
+      key.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); triggerNoteOff(noteId); });
+
+      wrapper.appendChild(key);
+      keysContainer.appendChild(wrapper);
+      allKeys[noteId] = key;
+    }
+  }
+
+  document.getElementById('octaveDisplay').textContent = currentOctave;
+}
+
+// =============================================
+// Note Trigger Logic
+// =============================================
+
+function triggerNoteOn(noteId, note, octave) {
+  const key = allKeys[noteId];
+  if (key) key.classList.add('pressed');
+
+  AudioEngine.playNote(noteId, note, octave);
+
+  // Update display
+  document.getElementById('noteDisplay').textContent = noteId;
+  document.getElementById('freqDisplay').textContent = AudioEngine.noteToFreq(note, octave).toFixed(1) + ' Hz';
+
+  // Spawn particles
+  spawnNoteParticles(noteId);
+
+  // Recording
+  if (isRecording) {
+    recordingData.push({
+      type: 'on',
+      noteId,
+      note,
+      octave,
+      time: Date.now() - recordingStart
+    });
+  }
+}
+
+function triggerNoteOff(noteId) {
+  if (sustainActive) return;
+
+  const key = allKeys[noteId];
+  if (key) key.classList.remove('pressed');
+
+  AudioEngine.stopNote(noteId);
+
+  if (isRecording) {
+    recordingData.push({
+      type: 'off',
+      noteId,
+      time: Date.now() - recordingStart
+    });
+  }
+}
+
+function releaseAllSustainedNotes() {
+  Object.keys(allKeys).forEach(noteId => {
+    const key = allKeys[noteId];
+    if (key && key.classList.contains('pressed')) {
+      key.classList.remove('pressed');
+      AudioEngine.stopNote(noteId);
+    }
+  });
+}
+
+// =============================================
+// Keyboard Input
+// =============================================
+
+const pressedKeys = new Set();
+
+document.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (!sustainActive) toggleSustain();
+    return;
+  }
+
+  const k = e.key.toLowerCase();
+  if (pressedKeys.has(k)) return;
+  pressedKeys.add(k);
+
+  const mapping = KEYBOARD_MAP[k];
+  if (mapping) {
+    e.preventDefault();
+    const octave = currentOctave + mapping.octaveOffset;
+    const noteId = `${mapping.note}${octave}`;
+    triggerNoteOn(noteId, mapping.note, octave);
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  if (e.key === ' ') {
+    if (sustainActive) toggleSustain();
+    return;
+  }
+
+  const k = e.key.toLowerCase();
+  pressedKeys.delete(k);
+
+  const mapping = KEYBOARD_MAP[k];
+  if (mapping) {
+    const octave = currentOctave + mapping.octaveOffset;
+    const noteId = `${mapping.note}${octave}`;
+    triggerNoteOff(noteId);
+  }
+});
+
+// =============================================
+// UI Controls
+// =============================================
+
+function shiftOctave(dir) {
+  const newOctave = Math.max(1, Math.min(7, currentOctave + dir));
+
+  // Release all current notes
+  Object.keys(allKeys).forEach(id => {
+    const key = allKeys[id];
+    if (key.classList.contains('pressed')) {
+      key.classList.remove('pressed');
+      AudioEngine.stopNote(id);
+    }
+  });
+
+  currentOctave = newOctave;
+  buildPiano();
+}
+
+function toggleLabels() {
+  showLabels = !showLabels;
+  document.getElementById('btnLabels').classList.toggle('active', showLabels);
+  keysContainer.classList.toggle('show-labels', showLabels);
+}
+
+function toggleShortcuts() {
+  showShortcuts = !showShortcuts;
+  document.getElementById('btnShortcuts').classList.toggle('active', showShortcuts);
+  keysContainer.classList.toggle('show-shortcuts', showShortcuts);
+}
+
+function toggleSustain() {
+  sustainActive = !sustainActive;
+  document.getElementById('btnSustain').classList.toggle('active', sustainActive);
+  document.getElementById('sustainIndicator').classList.toggle('visible', sustainActive);
+
+  if (!sustainActive) {
+    releaseAllSustainedNotes();
+  }
+}
+
+function toggleRecord() {
+  isRecording = !isRecording;
+  document.getElementById('btnRecord').classList.toggle('active', isRecording);
+  document.getElementById('recIndicator').classList.toggle('active', isRecording);
+
+  if (isRecording) {
+    recordingData = [];
+    recordingStart = Date.now();
+  } else if (recordingData.length > 0) {
+    // Playback recording
+    playbackRecording(recordingData);
+  }
+}
+
+function toggleAnnotation() {
+  const panel = document.getElementById('annotationPanel');
+  const btn = document.getElementById('btnAnnotation');
+  const isVisible = panel.classList.contains('visible');
+  panel.classList.toggle('visible', !isVisible);
+  btn.classList.toggle('active', !isVisible);
+}
+
+function playbackRecording(data) {
+  data.forEach(item => {
+    setTimeout(() => {
+      if (item.type === 'on') {
+        triggerNoteOn(item.noteId, item.note, item.octave);
+        // Auto-release after 300ms if no off event soon
+        const nextOff = data.find(d => d.type === 'off' && d.noteId === item.noteId && d.time > item.time);
+        if (nextOff) {
+          setTimeout(() => triggerNoteOff(item.noteId), nextOff.time - item.time);
+        } else {
+          setTimeout(() => triggerNoteOff(item.noteId), 300);
+        }
+      }
+    }, item.time);
+  });
+}
+
+function setVolume(val) {
+  AudioEngine.setVolume(val / 100);
+}
+
+function playDemo() {
+  // Moonlight Sonata opening (simplified)
+  const demo = [
+    { n: 'G#3', t: 0, d: 600 },
+    { n: 'C#4', t: 400, d: 600 },
+    { n: 'E4', t: 800, d: 600 },
+    { n: 'G#3', t: 1400, d: 600 },
+    { n: 'C#4', t: 1800, d: 600 },
+    { n: 'E4', t: 2200, d: 600 },
+    { n: 'G#3', t: 2800, d: 600 },
+    { n: 'C#4', t: 3200, d: 600 },
+    { n: 'E4', t: 3600, d: 800 },
+  ];
+
+  demo.forEach(({ n, t, d }) => {
+    const note = n.slice(0, -1);
+    let oct = parseInt(n.slice(-1));
+    const octOff = oct - 4;
+    oct = currentOctave + octOff;
+    const noteId = `${note}${oct}`;
+
+    setTimeout(() => {
+      triggerNoteOn(noteId, note, oct);
+      setTimeout(() => triggerNoteOff(noteId), d);
+    }, t);
+  });
+}
+
+// =============================================
+// Visualizer — Waveform Drawing
+// =============================================
+
+const vizCanvas = document.getElementById('vizCanvas');
+const vizCtx = vizCanvas.getContext('2d');
+
+function resizeVizCanvas() {
+  const rect = vizCanvas.parentElement.getBoundingClientRect();
+  vizCanvas.width = rect.width * window.devicePixelRatio;
+  vizCanvas.height = rect.height * window.devicePixelRatio;
+  vizCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+
+function drawVisualization() {
+  const w = vizCanvas.width / window.devicePixelRatio;
+  const h = vizCanvas.height / window.devicePixelRatio;
+
+  vizCtx.clearRect(0, 0, w, h);
+
+  const data = AudioEngine.getAnalyserData();
+  if (!data) {
+    requestAnimationFrame(drawVisualization);
+    return;
+  }
+
+  // Draw waveform
+  vizCtx.beginPath();
+  const sliceWidth = w / data.length;
+  let x = 0;
+
+  for (let i = 0; i < data.length; i++) {
+    const v = data[i] / 128.0;
+    const y = (v * h) / 2;
+
+    if (i === 0) {
+      vizCtx.moveTo(x, y);
+    } else {
+      vizCtx.lineTo(x, y);
+    }
+    x += sliceWidth;
+  }
+
+  vizCtx.strokeStyle = 'rgba(201, 168, 76, 0.6)';
+  vizCtx.lineWidth = 1.5;
+  vizCtx.stroke();
+
+  // Mirror with lower opacity
+  vizCtx.beginPath();
+  x = 0;
+  for (let i = 0; i < data.length; i++) {
+    const v = data[i] / 128.0;
+    const y = h - (v * h) / 2;
+    if (i === 0) vizCtx.moveTo(x, y);
+    else vizCtx.lineTo(x, y);
+    x += sliceWidth;
+  }
+  vizCtx.strokeStyle = 'rgba(201, 168, 76, 0.15)';
+  vizCtx.lineWidth = 1;
+  vizCtx.stroke();
+
+  requestAnimationFrame(drawVisualization);
+}
+
+// =============================================
+// Particle Effects
+// =============================================
+
+const particlesCanvas = document.getElementById('particlesCanvas');
+const pCtx = particlesCanvas.getContext('2d');
+const particles = [];
+
+function resizeParticlesCanvas() {
+  particlesCanvas.width = window.innerWidth;
+  particlesCanvas.height = window.innerHeight;
+}
+
+function spawnNoteParticles(noteId) {
+  const key = allKeys[noteId];
+  if (!key) return;
+
+  const rect = key.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top;
+
+  for (let i = 0; i < 5; i++) {
+    particles.push({
+      x: cx + (Math.random() - 0.5) * 30,
+      y: cy,
+      vx: (Math.random() - 0.5) * 2,
+      vy: -Math.random() * 3 - 1,
+      life: 1,
+      decay: 0.01 + Math.random() * 0.015,
+      size: Math.random() * 3 + 1,
+      color: Math.random() > 0.5 ? '201,168,76' : '232,209,140',
+    });
+  }
+}
+
+function animateParticles() {
+  pCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02; // slight gravity
+    p.life -= p.decay;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(${p.color}, ${p.life * 0.8})`;
+    pCtx.fill();
+
+    // Glow
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size * p.life * 2, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(${p.color}, ${p.life * 0.15})`;
+    pCtx.fill();
+  }
+
+  requestAnimationFrame(animateParticles);
+}
+
+// =============================================
+// Ambient Floating Particles (background)
+// =============================================
+
+const ambientParticles = [];
+
+function initAmbientParticles() {
+  for (let i = 0; i < 30; i++) {
+    ambientParticles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 1.5 + 0.5,
+      speed: Math.random() * 0.3 + 0.1,
+      opacity: Math.random() * 0.3 + 0.1,
+    });
+  }
+}
+
+function drawAmbientParticles() {
+  ambientParticles.forEach(p => {
+    p.y -= p.speed;
+    if (p.y < -10) {
+      p.y = window.innerHeight + 10;
+      p.x = Math.random() * window.innerWidth;
+    }
+
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(201, 168, 76, ${p.opacity})`;
+    pCtx.fill();
+  });
+}
+
+// Override particle animation to include ambient
+const originalAnimate = animateParticles;
+function combinedAnimation() {
+  pCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+  drawAmbientParticles();
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02;
+    p.life -= p.decay;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(${p.color}, ${p.life * 0.8})`;
+    pCtx.fill();
+
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size * p.life * 2, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(${p.color}, ${p.life * 0.15})`;
+    pCtx.fill();
+  }
+
+  requestAnimationFrame(combinedAnimation);
+}
+
+// =============================================
+// Init
+// =============================================
+
+function init() {
+  buildPiano();
+  resizeVizCanvas();
+  resizeParticlesCanvas();
+  initAmbientParticles();
+
+  // Show shortcuts by default
+  keysContainer.classList.add('show-shortcuts');
+  document.getElementById('btnShortcuts').classList.add('active');
+
+  drawVisualization();
+  combinedAnimation();
+
+  // Initialize audio on first interaction
+  document.addEventListener('click', () => AudioEngine.init(), { once: true });
+  document.addEventListener('keydown', () => AudioEngine.init(), { once: true });
+}
+
+window.addEventListener('resize', () => {
+  resizeVizCanvas();
+  resizeParticlesCanvas();
+});
+
+init();
+</script>
+</body>
+</html>
