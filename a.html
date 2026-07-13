@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 适配手机，打包APK显示正常 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网址导航目录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui;
+        }
+        body {
+            background-color: #f5f7fa;
+            padding: 30px 15px;
+        }
+        h1 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        /* 导航按钮容器 */
+        .nav-box {
+            max-width: 600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        /* 跳转按钮样式 */
+        .link-item a {
+            display: block;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 17px;
+            transition: 0.2s;
+        }
+        .link-item a:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <h1>工具网址目录</h1>
+    <div class="nav-box">
+        <!-- 这里新增/删除链接，复制整段 <div class="link-item"> 即可 -->
+        <div class="link-item">
+            <a href="https://top.top-top.top/5858" target="_blank">🈲看封城</a>
+        </div>
+        <div class="link-item">
+            <a href="https://top.top-top.top/zxfp" target="_blank">在线复盘</a>
+        </div>
+        <div class="link-item">
+            <a href="https://top.top-top.top/aes" target="_blank">在线aes</a>
+        </div>
+        <div class="link-item">
+            <a href="https://top.top-top.top/" target="_blank">主页</a>
+        </div>
+        <div class="link-item">
+            <a href="https://weibo.com" target="_blank">微博</a>
+        </div>
+        <div class="link-item">
+            <a href="https://douyin.com" target="_blank">抖音网页版</a>
+        </div>
+    </div>
+</body>
+</html>
