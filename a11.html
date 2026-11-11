@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抽牌翻牌</title>
+<style>
+*{
+  box-sizing:border-box;
+  font-family:system-ui,"Microsoft YaHei",sans-serif;
+  margin:0;
+  padding:0;
+}
+
+body{
+  background:#050505;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 16px;
+  min-height:100vh;
+  position:relative;
+  overflow:hidden;
+}
+
+.tip{
+  font-size:20px;
+  margin-bottom:30px;
+  color:#f0d070;
+  text-shadow:0 0 8px #d4af3788;
+  text-align:center;
+  min-height:28px;
+}
+
+.record-box{
+  width:100%;
+  max-width:420px;
+  background:rgba(20,20,20,0.9);
+  border:2px solid #d4af37;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 0 22px #b8860b44;
+}
+
+.record-title{
+  text-align:center;
+  color:#d4af37;
+  font-size:19px;
+  font-weight:bold;
+  margin-bottom:16px;
+}
+
+.record-list{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.record-item{
+  width:74px;
+  height:94px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  color:#fff;
+  background:#222;
+  border:2px solid #444;
+  opacity:0.38;
+  transition:0.3s;
+  cursor:pointer;
+  user-select:none;
+  position:relative;
+  overflow:hidden;
+}
+.record-item.clickable{
+  opacity:0.85;
+  border-color:#ffaa00;
+  box-shadow:0 0 10px #ffaa0055;
+}
+.record-item.clickable:active{
+  transform:scale(0.94);
+}
+.record-item.active{
+  opacity:1;
+  border-color:#d4af37;
+  box-shadow:0 0 12px #d4af3766;
+  cursor:default;
+}
+
+.record-item.red{
+  background:linear-gradient(145deg,#991111,#cc2222);
+  border-color:#ff4444;
+}
+.record-item.green{
+  background:linear-gradient(145deg,#117711,#22aa22);
+  border-color:#44dd44;
+}
+.record-item.void{
+  background:#111;
+  color:#aaaaaa;
+  border:2px dashed #888;
+}
+
+.record-num{
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:5px;
+}
+
+button{
+  margin-top:32px;
+  padding:14px 32px;
+  font-size:17px;
+  border-radius:12px;
+  border:2px solid #d4af37;
+  background:#111;
+  color:#d4af37;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:active{
+  transform:scale(0.96);
+  background:#222;
+}
+
+/* 神龙出金特效层 */
+.dragon-effect{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:999;
+  display:none;
+  overflow:hidden;
+}
+
+.dragon{
+  position:absolute;
+  width:180px;
+  height:180px;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0) rotate(0deg);
+  font-size:160px;
+  animation:dragonFly 1.4s ease-out forwards;
+}
+
+.dragon-trail{
+  position:absolute;
+  width:100px;
+  height:100px;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  background:radial-gradient(circle,#ffd700,#ff8800,transparent);
+  border-radius:50%;
+  filter:blur(30px);
+  animation:dragonTrail 1.2s ease-out forwards;
+}
+
+.gold-confetti{
+  position:absolute;
+  width:10px;
+  height:16px;
+  background:linear-gradient(120deg,#ffef88,#ffd700,#cc9900);
+  border-radius:2px;
+  opacity:0;
+  animation:confettiFall 1.5s ease-in forwards;
+}
+
+.gold-coin{
+  position:absolute;
+  width:28px;
+  height:28px;
+  background:radial-gradient(circle at 35% 35%,#ffef88,#ffd700,#cc9900);
+  border-radius:50%;
+  box-shadow:0 0 12px #ffd700;
+  opacity:0;
+  animation:coinBounce 1.2s ease-out forwards;
+}
+
+.shake-layer{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  animation:screenShake 0.6s ease-out;
+}
+
+@keyframes dragonFly{
+  0%{
+    transform:translate(-50%,-50%) scale(0) rotate(0deg);
+    opacity:0;
+  }
+  30%{
+    transform:translate(-50%,-50%) scale(1.3) rotate(-10deg);
+    opacity:1;
+  }
+  60%{
+    transform:translate(-50%,-50%) scale(1.6) rotate(10deg);
+  }
+  100%{
+    transform:translate(-50%,-50%) scale(2) rotate(0deg) translateY(-30px);
+    opacity:0;
+  }
+}
+
+@keyframes dragonTrail{
+  0%{
+    transform:translate(-50%,-50%) scale(0);
+    opacity:0;
+  }
+  50%{
+    transform:translate(-50%,-50%) scale(3);
+    opacity:0.9;
+  }
+  100%{
+    transform:translate(-50%,-50%) scale(5);
+    opacity:0;
+  }
+}
+
+@keyframes confettiFall{
+  0%{
+    transform:translateY(-20px) rotate(0deg);
+    opacity:1;
+  }
+  100%{
+    transform:translateY(100vh) rotate(360deg);
+    opacity:0;
+  }
+}
+
+@keyframes coinBounce{
+  0%{
+    transform:translateY(0) scale(0);
+    opacity:1;
+  }
+  50%{
+    transform:translateY(-120px) scale(1.2);
+  }
+  100%{
+    transform:translateY(40px) scale(0.8);
+    opacity:0;
+  }
+}
+
+@keyframes screenShake{
+  0%,100%{
+    transform:translateX(0);
+  }
+  20%{
+    transform:translateX(-4px);
+  }
+  40%{
+    transform:translateX(4px);
+  }
+  60%{
+    transform:translateX(-3px);
+  }
+  80%{
+    transform:translateX(3px);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="tip" id="msg">点击 5 / 4 / 3 开始翻牌</div>
+
+<div class="record-box">
+  <div class="record-title">下方抽牌记录</div>
+  <div class="record-list" id="recordList">
+    <div class="record-item clickable" data-num="5">
+      <div class="record-num">5</div>
+      <div>等待</div>
+    </div>
+    <div class="record-item clickable" data-num="4">
+      <div class="record-num">4</div>
+      <div>等待</div>
+    </div>
+    <div class="record-item clickable" data-num="3">
+      <div class="record-num">3</div>
+      <div>等待</div>
+    </div>
+    <div class="record-item" data-num="2">
+      <div class="record-num">2</div>
+      <div>等待</div>
+    </div>
+    <div class="record-item" data-num="1">
+      <div class="record-num">1</div>
+      <div>等待</div>
+    </div>
+  </div>
+</div>
+
+<button onclick="resetGame()">重置新一轮</button>
+
+<!-- 神龙出金特效层 -->
+<div class="dragon-effect" id="dragonEffect">
+  <div class="shake-layer">
+    <div class="dragon-trail"></div>
+    <div class="dragon">🐉</div>
+  </div>
+</div>
+
+<script>
+let chainMap = {};
+let startNum = null;
+let startColor = null;
+const msgEl = document.getElementById("msg");
+const recordList = document.getElementById("recordList");
+const dragonEffect = document.getElementById("dragonEffect");
+
+// 神龙出金特效
+function createDragonEffect(){
+  dragonEffect.style.display = "block";
+  dragonEffect.innerHTML = `
+    <div class="shake-layer">
+      <div class="dragon-trail"></div>
+      <div class="dragon">🐉</div>
+    </div>
+  `;
+
+  // 金箔碎片
+  for(let i=0;i<40;i++){
+    const c = document.createElement("div");
+    c.className = "gold-confetti";
+    c.style.left = Math.random()*100 + "%";
+    c.style.top = Math.random()*100 + "%";
+    c.style.animationDelay = Math.random()*0.5 + "s";
+    c.style.animationDuration = (1 + Math.random()*0.8) + "s";
+    dragonEffect.appendChild(c);
+  }
+
+  // 金币
+  for(let i=0;i<12;i++){
+    const coin = document.createElement("div");
+    coin.className = "gold-coin";
+    coin.style.left = Math.random()*80 + 10 + "%";
+    coin.style.top = Math.random()*80 + 10 + "%";
+    coin.style.animationDelay = Math.random()*0.3 + "s";
+    dragonEffect.appendChild(coin);
+  }
+
+  setTimeout(()=>{
+    dragonEffect.style.display = "none";
+  }, 1500);
+}
+
+// 链条规则
+function buildChain(num,color){
+  const c = {};
+  if(num === 5){
+    c[5] = color;
+    if(color === "red"){
+      c[4] = "transparent";
+      c[3] = "transparent";
+      c[2] = "transparent";
+      c[1] = "transparent";
+    }else{
+      c[4] = "red";
+      c[3] = "transparent";
+      c[2] = "transparent";
+      c[1] = "transparent";
+    }
+  }else if(num === 4){
+    c[4] = color;
+    if(color === "red"){
+      c[5] = "transparent";
+      c[3] = "transparent";
+      c[2] = "transparent";
+      c[1] = "transparent";
+    }else{
+      c[5] = "transparent";
+      c[3] = "red";
+      c[2] = "transparent";
+      c[1] = "transparent";
+    }
+  }else if(num === 3){
+    c[3] = color;
+    if(color === "red"){
+      c[5] = "transparent";
+      c[4] = "transparent";
+      c[2] = "transparent";
+      c[1] = "transparent";
+    }else{
+      c[5] = "transparent";
+      c[4] = "transparent";
+      c[2] = "red";
+      c[1] = "transparent";
+    }
+  }
+  return c;
+}
+
+recordList.querySelectorAll('.record-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    if(startNum) return;
+    if(!item.classList.contains('clickable')) return;
+    const n = Number(item.dataset.num);
+    if(![5,4,3].includes(n)) return;
+
+    const clr = Math.random()>0.5 ? "red" : "green";
+    startNum = n;
+    startColor = clr;
+    chainMap = buildChain(n,clr);
+
+    const cName = clr==="red"?"红色":"绿色";
+    msgEl.innerText = `${cName}卡牌 ${n}，+10分！`;
+
+    createDragonEffect();
+
+    setTimeout(()=>{
+      renderAllRecord();
+    }, 700);
+  })
+})
+
+function renderAllRecord(){
+  for(let n=5;n>=1;n--){
+    const item = recordList.querySelector(`[data-num="${n}"]`);
+    item.classList.remove("active","red","green","void","clickable");
+    let val = chainMap[n];
+    if(val === null || val === undefined){
+      item.querySelector("div:last-child").innerText = "等待";
+      continue;
+    }
+    item.classList.add("active");
+    if(val === "transparent"){
+      item.classList.add("void");
+      item.querySelector("div:last-child").innerText = "虚无";
+    }else if(val === "red"){
+      item.classList.add("red");
+      item.querySelector("div:last-child").innerText = "红色";
+    }else if(val === "green"){
+      item.classList.add("green");
+      item.querySelector("div:last-child").innerText = "绿色";
+    }
+  }
+}
+
+function resetGame(){
+  startNum = null;
+  startColor = null;
+  chainMap = {};
+  msgEl.innerText = "点击 5 / 4 / 3 开始翻牌";
+  recordList.querySelectorAll(".record-item").forEach(item=>{
+    item.classList.remove("active","red","green","void","clickable");
+    const n = Number(item.dataset.num);
+    if([5,4,3].includes(n)){
+      item.classList.add("clickable");
+    }
+    item.querySelector("div:last-child").innerText = "等待";
+  })
+}
+</script>
+</body>
+</html>
